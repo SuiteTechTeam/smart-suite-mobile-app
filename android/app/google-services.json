@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "180154492305",
+    "project_id": "sweet-solutions",
+    "storage_bucket": "sweet-solutions.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:180154492305:android:1294ff1c8cf24a8834a630",
+        "android_client_info": {
+          "package_name": "com.example.sweetmanager"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAMvXGGWz59_ZcebY9Zzm4Z1_UcmyJVMn0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:180154492305:android:3522d7bc118e3d6e34a630",
+        "android_client_info": {
+          "package_name": "com.sweetsolutions.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAMvXGGWz59_ZcebY9Zzm4Z1_UcmyJVMn0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

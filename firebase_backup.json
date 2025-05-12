@@ -1,0 +1,29 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "sweet-solutions",
+          "appId": "1:180154492305:android:3522d7bc118e3d6e34a630",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "sweet-solutions",
+          "configurations": {
+            "android": "1:180154492305:android:3522d7bc118e3d6e34a630",
+            "web": "1:180154492305:web:b156d317f56c1d4f34a630"
+          }
+        }
+      }
+    }
+  },
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "storage": {
+    "rules": "storage.rules"
+  }
+}
