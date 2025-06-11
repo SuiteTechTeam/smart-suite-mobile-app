@@ -12,9 +12,6 @@ class AppConfig {
   /// Smart Suite Web Service - Used for IAM authentication
   static const String smartSuiteBaseUrl = 'http://smart-suite-web-service.azurewebsites.net';
   
-  /// Sweet Manager API - Used for business logic services
-  static const String sweetManagerBaseUrl = 'https://sweetmanager-api.ryzeon.me';
-  
   /// API version used in all requests
   static const String apiVersion = 'api/v1';
   
@@ -23,47 +20,44 @@ class AppConfig {
   /// Smart Suite API base URL for IAM operations
   static String get smartSuiteApiBaseUrl => '$smartSuiteBaseUrl/$apiVersion';
   
-  /// Sweet Manager API base URL for business operations
-  static String get sweetManagerApiBaseUrl => '$sweetManagerBaseUrl/$apiVersion';
-  
   /// Legacy support - maintains backward compatibility
-  @Deprecated('Use smartSuiteApiBaseUrl or sweetManagerApiBaseUrl instead')
+  @Deprecated('Use smartSuiteApiBaseUrl instead')
   static String get apiBaseUrl => smartSuiteApiBaseUrl;
   
   // === API SPECIFIC ENDPOINTS ===
   
   /// Authentication endpoints
-  static String get authenticationUrl => '$sweetManagerBaseUrl/$apiVersion/authentication';
+  static String get authenticationUrl => '$smartSuiteBaseUrl/$apiVersion/authentication';
   
   /// Hotel management endpoints
-  static String get hotelApiUrl => '$sweetManagerBaseUrl/api/hotel';
+  static String get hotelApiUrl => '$smartSuiteBaseUrl/api/hotel';
   
   /// Room management endpoints
-  static String get roomApiUrl => '$sweetManagerBaseUrl/api/rooms';
+  static String get roomApiUrl => '$smartSuiteBaseUrl/api/rooms';
   
   /// Booking management endpoints
-  static String get bookingApiUrl => '$sweetManagerBaseUrl/api/bookings';
+  static String get bookingApiUrl => '$smartSuiteBaseUrl/api/bookings';
   
   /// User management endpoints
-  static String get userApiUrl => '$sweetManagerBaseUrl/$apiVersion/user';
+  static String get userApiUrl => '$smartSuiteBaseUrl/$apiVersion/user';
   
   /// Provider management endpoints
-  static String get providerApiUrl => '$sweetManagerBaseUrl/api/provider';
+  static String get providerApiUrl => '$smartSuiteBaseUrl/api/provider';
   
   /// Supply management endpoints
-  static String get supplyApiUrl => '$sweetManagerBaseUrl/api/supply';
+  static String get supplyApiUrl => '$smartSuiteBaseUrl/api/supply';
   
   /// Customer management endpoints
-  static String get customerApiUrl => '$sweetManagerBaseUrl/api/customer';
+  static String get customerApiUrl => '$smartSuiteBaseUrl/api/customer';
   
   /// Worker area management endpoints
-  static String get workerAreaApiUrl => '$sweetManagerBaseUrl/$apiVersion/worker-area';
+  static String get workerAreaApiUrl => '$smartSuiteBaseUrl/$apiVersion/worker-area';
   
   /// Assignment worker endpoints
-  static String get assignmentWorkerApiUrl => '$sweetManagerBaseUrl/$apiVersion/assignment-worker';
+  static String get assignmentWorkerApiUrl => '$smartSuiteBaseUrl/$apiVersion/assignment-worker';
   
   /// Reports endpoints
-  static String get reportsApiUrl => '$sweetManagerBaseUrl/api';
+  static String get reportsApiUrl => '$smartSuiteBaseUrl/api';
   
   // === APPLICATION INFO ===
   
