@@ -13,8 +13,7 @@ class HomePage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Smart Suite'),
         backgroundColor: Theme.of(context).primaryColor,
-        foregroundColor: Colors.white,
-        actions: [
+        foregroundColor: Colors.white,        actions: [
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () {
@@ -88,14 +87,16 @@ class HomePage extends StatelessWidget {
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              const SizedBox(height: 12),
-                              Row(
+                              const SizedBox(height: 12),                              Row(
                                 children: [
                                   const Icon(Icons.person, color: Colors.grey),
                                   const SizedBox(width: 8),
-                                  Text(
-                                    'ID: ${state.user.id}',
-                                    style: Theme.of(context).textTheme.bodyMedium,
+                                  Expanded(
+                                    child: Text(
+                                      'ID: ${state.user.id}',
+                                      style: Theme.of(context).textTheme.bodyMedium,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -108,14 +109,17 @@ class HomePage extends StatelessWidget {
                                     child: Text(
                                       'Email: ${state.user.email}',
                                       style: Theme.of(context).textTheme.bodyMedium,
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 2,
                                     ),
                                   ),
                                 ],
                               ),
                             ],
                           ),
-                        ),
-                      ),
+                        ),                      ),
+                      const SizedBox(height: 24),
+                      _buildNavigationSection(context),
                       const SizedBox(height: 32),
                       Text(
                         'JWT Token is stored and ready for API calls!',
@@ -136,6 +140,97 @@ class HomePage extends StatelessWidget {
             );
           },
         ),
+      ),
+    );
+  }
+
+  Widget _buildNavigationSection(BuildContext context) {
+    return Card(
+      elevation: 4,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            Text(
+              'Quick Access',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),            const SizedBox(height: 16),            Row(
+              children: [
+                Expanded(
+                  child: _buildNavigationButton(
+                    context,
+                    'Reservations',
+                    Icons.calendar_today,
+                    () => Navigator.pushNamed(context, '/reservations'),
+                  ),
+                ),                const SizedBox(width: 12),                Expanded(
+                  child: _buildNavigationButton(
+                    context,
+                    'Add Reservation',
+                    Icons.add_circle,
+                    () => Navigator.pushNamed(context, '/add-reservation'),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildNavigationButton(
+                    context,
+                    'Hotel Management',
+                    Icons.hotel,
+                    () => Navigator.pushNamed(context, '/hotels'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildNavigationButton(
+                    context,
+                    'API Test',
+                    Icons.network_check,
+                    () => Navigator.pushNamed(context, '/api-test'),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNavigationButton(
+    BuildContext context,
+    String label,
+    IconData icon,
+    VoidCallback onPressed,
+  ) {
+    return ElevatedButton(
+      onPressed: onPressed,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Theme.of(context).primaryColor,
+        foregroundColor: Colors.white,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 24),
+          const SizedBox(height: 4),          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 11),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
       ),
     );
   }

@@ -34,10 +34,16 @@ dependencies:
   
   # HTTP requests
   http: ^1.1.0
-  
-  # Local storage for JWT
+    # Local storage for JWT
   shared_preferences: ^2.2.2
-    # JSON serialization
+  
+  # Secure storage for tokens
+  flutter_secure_storage: ^9.0.0
+  
+  # JWT decoding
+  jwt_decoder: ^2.0.1
+  
+  # JSON serialization
   json_annotation: ^4.8.1
   
   # Equatable for state management

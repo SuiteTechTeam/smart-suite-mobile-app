@@ -8,6 +8,10 @@ import 'iam/viewmodels/auth_event.dart';
 import 'iam/views/login_page.dart';
 import 'iam/views/home_page.dart';
 import 'iam/views/auth_wrapper.dart';
+import 'reservations/views/reservation_management_screen.dart';
+import 'reservations/views/add_reservation_screen.dart';
+import 'reservations/views/hotel_management_screen.dart';
+import 'reservations/views/api_test_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -43,11 +47,25 @@ class SmartSuiteApp extends StatelessWidget {
             centerTitle: true,
             elevation: 0,
           ),
-        ),
-        home: const AuthWrapper(),
-        routes: {
+        ),        home: const AuthWrapper(),        routes: {
           '/login': (context) => const LoginPage(),
           '/home': (context) => const HomePage(),
+          '/reservations': (context) => const ReservationManagementScreen(),
+          '/add-reservation': (context) => const AddReservationScreen(),
+          '/reservations/add': (context) => const AddReservationScreen(), // Add alternative route
+          '/hotels': (context) => const HotelManagementScreen(),
+          '/api-test': (context) => const ApiTestScreen(),
+        },
+        onGenerateRoute: (settings) {
+          // Handle any unknown routes
+          if (settings.name == '/reservations/add') {
+            return MaterialPageRoute(builder: (context) => const AddReservationScreen());
+          }
+          return null;
+        },
+        onUnknownRoute: (settings) {
+          // Fallback for unknown routes
+          return MaterialPageRoute(builder: (context) => const HomePage());
         },
         debugShowCheckedModeBanner: false,
       ),
