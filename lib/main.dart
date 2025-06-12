@@ -32,9 +32,8 @@ class SmartSuiteApp extends StatelessWidget {
     );
 
     return BlocProvider(
-      create: (context) => AuthBloc(
-        authRepository: authRepository,
-      )..add(AuthStatusChecked()),
+      create: (context) =>
+          AuthBloc(authRepository: authRepository)..add(AuthStatusChecked()),
       child: MaterialApp(
         title: 'Smart Suite',
         theme: ThemeData(
@@ -43,23 +42,25 @@ class SmartSuiteApp extends StatelessWidget {
             brightness: Brightness.light,
           ),
           useMaterial3: true,
-          appBarTheme: const AppBarTheme(
-            centerTitle: true,
-            elevation: 0,
-          ),
-        ),        home: const AuthWrapper(),        routes: {
+          appBarTheme: const AppBarTheme(centerTitle: true, elevation: 0),
+        ),
+        home: const AuthWrapper(),
+        routes: {
           '/login': (context) => const LoginPage(),
           '/home': (context) => const HomePage(),
           '/reservations': (context) => const ReservationManagementScreen(),
           '/add-reservation': (context) => const AddReservationScreen(),
-          '/reservations/add': (context) => const AddReservationScreen(), // Add alternative route
+          '/reservations/add': (context) =>
+              const AddReservationScreen(), // Add alternative route
           '/hotels': (context) => const HotelManagementScreen(),
           '/api-test': (context) => const ApiTestScreen(),
         },
         onGenerateRoute: (settings) {
           // Handle any unknown routes
           if (settings.name == '/reservations/add') {
-            return MaterialPageRoute(builder: (context) => const AddReservationScreen());
+            return MaterialPageRoute(
+              builder: (context) => const AddReservationScreen(),
+            );
           }
           return null;
         },
