@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/reservation.dart';
-import '../models/reservation_resource.dart';
 import '../../core/services/base_service.dart';
 
 class ReservationService extends BaseService {
@@ -41,7 +40,6 @@ class ReservationService extends BaseService {
       rethrow;
     }
   }
-
   // Get reservations (bookings) by customer
   Future<List<Reservation>> getReservationsByCustomerId(int customerId) async {
     try {
@@ -75,29 +73,15 @@ class ReservationService extends BaseService {
       rethrow;
     }
   }
-
-  // Get reservations by resource type
-  Future<List<Reservation>> getReservationsByResourceType(String resourceType, int hotelId) async {
-    try {
-      final response = await authenticatedGet('reservations/resource-type/$resourceType?hotelId=$hotelId');
-
-      if (response.statusCode == 200) {
-        final List<dynamic> jsonData = json.decode(response.body);
-        return jsonData.map((json) => Reservation.fromJson(json)).toList();
-      } else {
-        throw Exception('Failed to load reservations by resource type: ${response.statusCode} - ${response.body}');
-      }
-    } catch (e) {
-      rethrow;
-    }
-  }
-
   // Update reservation status
-  Future<bool> updateReservationStatus(int reservationId, String status) async {
+  Future<bool> updateReservationStatus(int reservationId, String state) async {
     try {
       final response = await authenticatedPut(
-        'reservations/$reservationId/status',
-        body: {'status': status},
+        'booking/update-booking-state',
+        body: {
+          'id': reservationId,
+          'state': state
+        },
       );
 
       if (response.statusCode == 200) {
@@ -109,7 +93,6 @@ class ReservationService extends BaseService {
       rethrow;
     }
   }
-
   // Cancel reservation
   Future<bool> cancelReservation(int reservationId) async {
     try {
@@ -128,50 +111,37 @@ class ReservationService extends BaseService {
     }
   }
 
-  // Get available resources by type and date
-  Future<List<ReservationResource>> getAvailableResources(
-    String resourceType, 
-    int hotelId, 
-    DateTime date,
-    DateTime startTime,
-    DateTime endTime
-  ) async {
+  // Update reservation end date
+  Future<bool> updateReservationEndDate(int reservationId, DateTime endDate) async {
     try {
-      final queryParams = {
-        'type': resourceType,
-        'hotelId': hotelId.toString(),
-        'date': date.toIso8601String(),
-        'startTime': startTime.toIso8601String(),
-        'endTime': endTime.toIso8601String(),
-      };
-      
-      final queryString = queryParams.entries
-          .map((e) => '${e.key}=${Uri.encodeComponent(e.value)}')
-          .join('&');
-      
-      final response = await authenticatedGet('reservation-resources/available?$queryString');
+      final response = await authenticatedPut(
+        'booking/update-booking-end-date',
+        body: {
+          'id': reservationId,
+          'endDate': endDate.toIso8601String()
+        },
+      );
 
       if (response.statusCode == 200) {
-        final List<dynamic> jsonData = json.decode(response.body);
-        return jsonData.map((json) => ReservationResource.fromJson(json)).toList();
+        return true;
       } else {
-        throw Exception('Failed to load available resources: ${response.statusCode} - ${response.body}');
+        throw Exception('Failed to update reservation end date: ${response.statusCode} - ${response.body}');
       }
     } catch (e) {
       rethrow;
     }
   }
 
-  // Get all resources by hotel
-  Future<List<ReservationResource>> getResourcesByHotelId(int hotelId) async {
+  // Get reservations by hotel ID and state
+  Future<List<Reservation>> getReservationsByHotelIdAndState(int hotelId, String state) async {
     try {
-      final response = await authenticatedGet('reservation-resources/hotel/$hotelId');
+      final response = await authenticatedGet('booking/get-booking-by-hotel-id-and-state?hotelId=$hotelId&state=$state');
 
       if (response.statusCode == 200) {
         final List<dynamic> jsonData = json.decode(response.body);
-        return jsonData.map((json) => ReservationResource.fromJson(json)).toList();
+        return jsonData.map((json) => Reservation.fromJson(json)).toList();
       } else {
-        throw Exception('Failed to load resources: ${response.statusCode} - ${response.body}');
+        throw Exception('Failed to load reservations by hotel and state: ${response.statusCode} - ${response.body}');
       }
     } catch (e) {
       rethrow;

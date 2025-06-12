@@ -93,12 +93,11 @@ class _ReservationManagementScreenState extends State<ReservationManagementScree
       }
     }
   }
-
   List<Reservation> get filteredReservations {
     if (selectedFilter == 'all') {
       return reservations;
     }
-    return reservations.where((reservation) => reservation.status == selectedFilter).toList();
+    return reservations.where((reservation) => reservation.state == selectedFilter).toList();
   }
 
   Future<void> _addReservation() async {
@@ -321,7 +320,6 @@ class _ReservationManagementScreenState extends State<ReservationManagementScree
       _showHotelIdInputDialog(); // Fallback to manual input
     }
   }
-
   // Utility methods for formatting
   String _formatDate(DateTime date) {
     final now = DateTime.now();
@@ -338,10 +336,6 @@ class _ReservationManagementScreenState extends State<ReservationManagementScree
                      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
       return '${months[date.month - 1]} ${date.day}';
     }
-  }
-
-  String _formatTime(DateTime time) {
-    return '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
   }
 
   @override
@@ -511,7 +505,7 @@ class _ReservationManagementScreenState extends State<ReservationManagementScree
     Color statusColor;
     IconData statusIcon;
 
-    switch (reservation.status) {
+    switch (reservation.state) {
       case 'confirmed':
         statusColor = Colors.green;
         statusIcon = Icons.check_circle;
@@ -537,9 +531,8 @@ class _ReservationManagementScreenState extends State<ReservationManagementScree
           statusIcon,
           color: statusColor,
           size: 32,
-        ),
-        title: Text(
-          reservation.title,
+        ),        title: Text(
+          'Room Booking #${reservation.id ?? 'N/A'}',
           style: const TextStyle(fontWeight: FontWeight.bold),
           overflow: TextOverflow.ellipsis,
         ),
@@ -547,19 +540,14 @@ class _ReservationManagementScreenState extends State<ReservationManagementScree
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '${reservation.resourceType.toUpperCase()} • ${_formatDate(reservation.reservationDate)}',
+              'Room ${reservation.roomId} • ${_formatDate(reservation.startDate)} - ${_formatDate(reservation.finalDate)}',
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(fontSize: 12),
             ),
             Text(
-              '${_formatTime(reservation.startTime)} - ${_formatTime(reservation.endTime)}',
+              'Nights: ${reservation.nightCount} • \$${reservation.amount.toStringAsFixed(2)}',
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 12),
-            ),
-            Text(
-              'Guests: ${reservation.guestCount} • \$${reservation.totalAmount.toStringAsFixed(2)}',
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 12),
+              style: const TextStyle(fontSize: 12, color: Colors.green),
             ),
           ],
         ),
@@ -567,10 +555,9 @@ class _ReservationManagementScreenState extends State<ReservationManagementScree
           width: 80,
           child: Row(
             mainAxisSize: MainAxisSize.min,
-            children: [
-              Flexible(
+            children: [              Flexible(
                 child: Text(
-                  reservation.status.toUpperCase(),
+                  reservation.state.toUpperCase(),
                   style: TextStyle(
                     color: statusColor,
                     fontWeight: FontWeight.bold,
@@ -600,13 +587,12 @@ class _ReservationManagementScreenState extends State<ReservationManagementScree
   Widget _buildReservationStats() {
     if (reservations.isEmpty) return const SizedBox.shrink();
 
-    final totalReservations = reservations.length;
-    final confirmedCount = reservations.where((r) => r.status == 'confirmed').length;
-    final pendingCount = reservations.where((r) => r.status == 'pending').length;
-    final cancelledCount = reservations.where((r) => r.status == 'cancelled').length;
+    final totalReservations = reservations.length;    final confirmedCount = reservations.where((r) => r.state == 'confirmed').length;
+    final pendingCount = reservations.where((r) => r.state == 'pending').length;
+    final cancelledCount = reservations.where((r) => r.state == 'cancelled').length;
     final totalRevenue = reservations
-        .where((r) => r.status == 'confirmed')
-        .fold(0.0, (sum, r) => sum + r.totalAmount);
+        .where((r) => r.state == 'confirmed')
+        .fold(0.0, (sum, r) => sum + r.amount);
 
     return Card(
       margin: const EdgeInsets.all(16.0),

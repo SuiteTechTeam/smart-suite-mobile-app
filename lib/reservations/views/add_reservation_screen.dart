@@ -203,7 +203,6 @@ class _AddReservationScreenState extends State<AddReservationScreen> {
     
     _showSnackBar('Hotel ID set to $newHotelId');
   }
-
   Future<void> _loadAvailableResources() async {
     if (hotelId == null || selectedDate == null || startTime == null || endTime == null) {
       return;
@@ -214,32 +213,43 @@ class _AddReservationScreenState extends State<AddReservationScreen> {
     });
 
     try {
-      final startDateTime = DateTime(
-        selectedDate!.year,
-        selectedDate!.month,
-        selectedDate!.day,
-        startTime!.hour,
-        startTime!.minute,
-      );
-
-      final endDateTime = DateTime(
-        selectedDate!.year,
-        selectedDate!.month,
-        selectedDate!.day,
-        endTime!.hour,
-        endTime!.minute,
-      );
-
-      final resources = await _reservationService.getAvailableResources(
-        selectedResourceType,
-        hotelId!,
-        selectedDate!,
-        startDateTime,
-        endDateTime,
-      );
-
+      // Since getAvailableResources doesn't exist in the API, we'll create mock resources
+      // In a real implementation, you would call an API to get available rooms
+      await Future.delayed(const Duration(seconds: 1)); // Simulate API call
+      
       setState(() {
-        availableResources = resources;
+        availableResources = [
+          ReservationResource(
+            id: 1,
+            name: 'Standard Room',
+            type: 'room',
+            description: 'Standard hotel room',
+            capacity: 2,
+            pricePerHour: 50.0,
+            status: 'available',
+            hotelId: hotelId!,
+          ),
+          ReservationResource(
+            id: 2,
+            name: 'Deluxe Room',
+            type: 'room',
+            description: 'Deluxe hotel room',
+            capacity: 3,
+            pricePerHour: 80.0,
+            status: 'available',
+            hotelId: hotelId!,
+          ),
+          ReservationResource(
+            id: 3,
+            name: 'Suite',
+            type: 'room',
+            description: 'Luxury suite',
+            capacity: 4,
+            pricePerHour: 120.0,
+            status: 'available',
+            hotelId: hotelId!,
+          ),
+        ];
         selectedResourceId = null; // Reset selection
         isLoadingResources = false;
       });
@@ -314,24 +324,17 @@ class _AddReservationScreenState extends State<AddReservationScreen> {
       // Calculate total amount (simplified calculation)
       final duration = endDateTime.difference(startDateTime).inHours;
       final selectedResource = availableResources.firstWhere((r) => r.id == selectedResourceId);
-      final totalAmount = duration * selectedResource.pricePerHour;
-
-      final reservation = Reservation(
-        id: 0,
-        customerId: int.parse(_customerIdController.text),
-        resourceId: selectedResourceId!,
-        resourceType: selectedResourceType,
-        title: _titleController.text,
+      final totalAmount = duration * selectedResource.pricePerHour;      final reservation = Reservation(
+        paymentCustomerId: int.parse(_customerIdController.text),
+        roomId: selectedResourceId!,
         description: _descriptionController.text,
-        reservationDate: selectedDate!,
-        startTime: startDateTime,
-        endTime: endDateTime,
-        status: 'pending',
-        guestCount: int.parse(_guestCountController.text),
-        totalAmount: totalAmount,
-        specialRequests: _specialRequestsController.text.isNotEmpty ? _specialRequestsController.text : null,
-        hotelId: hotelId!,
-        createdAt: DateTime.now(),
+        startDate: selectedDate!,
+        finalDate: endDateTime,
+        priceRoom: selectedResource.pricePerHour, // Using this as room price for now
+        nightCount: duration > 0 ? duration : 1,
+        amount: totalAmount,
+        state: 'pending',
+        preferenceId: 0, // Default preference ID
       );
 
       await _reservationService.createReservation(reservation);
