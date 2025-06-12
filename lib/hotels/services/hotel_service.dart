@@ -95,8 +95,8 @@ class HotelService extends BaseService {
     required String address,
     required String phone,
     required String email,
-    String? description,
-    int? ownerId,
+    required String description,
+    required int ownerId,
   }) async {
     try {
       final body = {
@@ -128,8 +128,8 @@ class HotelService extends BaseService {
     required String address,
     required String phone,
     required String email,
-    String? description,
-    int? ownerId,
+    required String description,
+    required int ownerId,
   }) async {
     try {
       final hotel = await createHotel(

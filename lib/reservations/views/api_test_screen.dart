@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
+import 'package:smart_suite/hotels/utils/hotel_utils.dart';
 import '../../hotels/services/hotel_service.dart';
 import '../services/reservation_service.dart';
 import '../utils/error_handler.dart';
@@ -50,8 +51,7 @@ class _ApiTestScreenState extends State<ApiTestScreen> {
                     const Text(
                       'This tool tests connectivity to the Smart Suite API endpoints to ensure they are working properly.',
                     ),
-                    const SizedBox(height: 16),
-                    SizedBox(
+                    const SizedBox(height: 16),                    SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
                         onPressed: isRunningTests ? null : _runAllTests,
@@ -69,6 +69,17 @@ class _ApiTestScreenState extends State<ApiTestScreen> {
                                 ],
                               )
                             : const Text('Run Connectivity Tests'),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.amber,
+                        ),
+                        onPressed: isRunningTests ? null : _testHotelCreationOnly,
+                        child: const Text('Test Hotel Creation Only'),
                       ),
                     ),
                   ],
@@ -266,17 +277,25 @@ class _ApiTestScreenState extends State<ApiTestScreen> {
       _addTestResult('Reservation Service', false, 'Failed to get reservations: \\${_getDetailedErrorMessage(e)}');
     }
   }
-
   Future<void> _testHotelCreation() async {
     try {
-      // This is a test that will likely fail due to permissions, but tests the endpoint
-      await _hotelService.createHotel(
-        name: 'Test Hotel',
-        address: 'Test Address',
-        phone: '+1234567890',
-        email: 'test@test.com',
+      
+      // This is the exact JSON format required by the API
+      final hotelData = HotelUtils.generateTestHotelData(); // Owner ID 2 is used for testing
+
+      // Direct API call with exact JSON format
+      final response = await _hotelService.authenticatedPost(
+        'hotels', 
+        body: hotelData,
       ).timeout(const Duration(seconds: 30));
-      _addTestResult('Hotel Creation', true, 'Hotel creation endpoint is accessible');
+      
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        _addTestResult('Hotel Creation', true, 
+          'Hotel created successfully with status code ${response.statusCode}');
+      } else {
+        _addTestResult('Hotel Creation', false, 
+          'API responded with status code: ${response.statusCode}, body: ${response.body}');
+      }
     } catch (e) {
       String errorString = e.toString().toLowerCase();
       if (errorString.contains('403') || 
@@ -433,5 +452,25 @@ class _ApiTestScreenState extends State<ApiTestScreen> {
         );
       },
     );
+  }
+
+  Future<void> _testHotelCreationOnly() async {
+    setState(() {
+      isRunningTests = true;
+      testResults.clear();
+    });
+
+    // Add test for internet connectivity first
+    await _testInternetConnectivity();
+
+    // Add test for API reachability
+    await _testAPIReachability();
+
+    // Run only the hotel creation test
+    await _testHotelCreation();
+
+    setState(() {
+      isRunningTests = false;
+    });
   }
 }

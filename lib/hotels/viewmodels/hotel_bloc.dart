@@ -73,13 +73,21 @@ class HotelBloc extends Bloc<HotelEvent, hotel_state.HotelState> {
 
         emit(hotel_state.HotelLoading());
 
-        await hotelService.createHotel(
+        if (event.hotelData['name'] == null || event.hotelData['name'].isEmpty) {
+          emit(hotel_state.HotelError('Hotel name cannot be empty.'));
+          return;
+        }
+
+        if (currentState.userId == null) {
+          emit(hotel_state.HotelError('User ID is not available.'));
+          throw Exception('User ID is not available.');
+        }        await hotelService.createHotel(
           name: event.hotelData['name'],
           address: event.hotelData['address'],
           phone: event.hotelData['phone'],
           email: event.hotelData['email'],
           description: event.hotelData['description'],
-          ownerId: currentState.userId,
+          ownerId: event.hotelData['ownerId'] != null ? event.hotelData['ownerId'] : currentState.userId,
         );
 
         // Reload hotels to get the updated list
@@ -116,7 +124,7 @@ class HotelBloc extends Bloc<HotelEvent, hotel_state.HotelState> {
           phone: event.hotelData['phone'],
           email: event.hotelData['email'],
           description: event.hotelData['description'],
-          ownerId: currentState.userId,
+          ownerId: currentState.userId!,
         );
 
         // Reload hotels to get the updated list
