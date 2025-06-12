@@ -1,11 +1,10 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
 import '../models/reservation.dart';
 import '../../core/services/base_service.dart';
 
 class ReservationService extends BaseService {
 
-  ReservationService({http.Client? httpClient}) : super(httpClient: httpClient);
+  ReservationService({super.httpClient});
 
   // Create a new reservation (booking)
   Future<bool> createReservation(Reservation reservation) async {

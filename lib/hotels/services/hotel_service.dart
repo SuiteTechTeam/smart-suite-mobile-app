@@ -1,11 +1,10 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
 import '../models/hotel.dart';
 import '../../core/services/base_service.dart';
 
 class HotelService extends BaseService {
 
-  HotelService({http.Client? httpClient}) : super(httpClient: httpClient);
+  HotelService({super.httpClient});
 
   // Get hotel information by ID
   Future<Hotel?> getHotelById(int hotelId) async {
