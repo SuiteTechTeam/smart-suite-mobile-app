@@ -24,29 +24,25 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
 
   Future<void> _updateReservationStatus(String newStatus) async {
     try {
-      await _reservationService.updateReservationStatus(reservation.id, newStatus);
+      await _reservationService.updateReservationStatus(reservation.id!, newStatus);
       setState(() {
-        // Create a new reservation with updated status
         reservation = Reservation(
           id: reservation.id,
-          customerId: reservation.customerId,
-          resourceId: reservation.resourceId,
-          resourceType: reservation.resourceType,
-          title: reservation.title,
+          paymentCustomerId: reservation.paymentCustomerId,
+          roomId: reservation.roomId,
           description: reservation.description,
-          reservationDate: reservation.reservationDate,
-          startTime: reservation.startTime,
-          endTime: reservation.endTime,
-          status: newStatus,
-          guestCount: reservation.guestCount,
-          totalAmount: reservation.totalAmount,
-          specialRequests: reservation.specialRequests,
-          hotelId: reservation.hotelId,
+          startDate: reservation.startDate,
+          finalDate: reservation.finalDate,
+          priceRoom: reservation.priceRoom,
+          nightCount: reservation.nightCount,
+          amount: reservation.amount,
+          state: newStatus,
+          preferenceId: reservation.preferenceId,
           createdAt: reservation.createdAt,
           updatedAt: DateTime.now(),
         );
       });
-      _showSnackBar('Reservation status updated successfully');
+      _showSnackBar('Booking status updated successfully');
     } catch (e) {
       _showSnackBar('Failed to update status: $e');
     }
@@ -107,7 +103,7 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
     Color statusColor;
     IconData statusIcon;
 
-    switch (reservation.status) {
+    switch (reservation.state) {
       case 'confirmed':
         statusColor = Colors.green;
         statusIcon = Icons.check_circle;
@@ -131,11 +127,11 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Reservation Details'),
+        title: const Text('Booking Details'),
         backgroundColor: const Color(0xFF474C74),
         foregroundColor: Colors.white,
         actions: [
-          if (reservation.status != 'completed' && reservation.status != 'cancelled')
+          if (reservation.state != 'completed' && reservation.state != 'cancelled')
             IconButton(
               icon: const Icon(Icons.edit),
               onPressed: _showStatusUpdateDialog,
@@ -153,8 +149,6 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
             const SizedBox(height: 16),
             _buildDateTimeCard(),
             const SizedBox(height: 16),
-            _buildDetailsCard(),
-            const SizedBox(height: 16),
             _buildPaymentCard(),
           ],
         ),
@@ -167,10 +161,11 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
       elevation: 4,
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.all(20),        decoration: BoxDecoration(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
           gradient: LinearGradient(
-            colors: [statusColor.withValues(alpha: 0.1), statusColor.withValues(alpha: 0.05)],
+            colors: [statusColor.withOpacity(0.1), statusColor.withOpacity(0.05)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -180,7 +175,7 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
             Icon(statusIcon, size: 48, color: statusColor),
             const SizedBox(height: 8),
             Text(
-              reservation.status.toUpperCase(),
+              reservation.state.toUpperCase(),
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -201,23 +196,24 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              reservation.title,
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
+            const Text(
+              'Booking Information',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
+            const SizedBox(height: 12),
+            _buildInfoRow('Booking ID:', '${reservation.id ?? 'N/A'}'),
+            _buildInfoRow('Room ID:', '${reservation.roomId}'),
+            _buildInfoRow('Customer ID:', '${reservation.paymentCustomerId}'),
             const SizedBox(height: 8),
-            Text(
-              reservation.description,
-              style: const TextStyle(fontSize: 16, color: Colors.grey),
+            const Text(
+              'Description:',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
             ),
-            const SizedBox(height: 16),
-            _buildInfoRow('Resource Type', reservation.resourceType.replaceAll('_', ' ').toUpperCase()),
-            _buildInfoRow('Customer ID', reservation.customerId.toString()),
-            _buildInfoRow('Resource ID', reservation.resourceId.toString()),
-            _buildInfoRow('Guests', reservation.guestCount.toString()),
+            const SizedBox(height: 4),
+            Text(
+              reservation.description.isNotEmpty ? reservation.description : 'No description provided',
+              style: const TextStyle(fontSize: 14, color: Colors.grey),
+            ),
           ],
         ),
       ),
@@ -233,72 +229,16 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'Date & Time',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              'Stay Details',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                const Icon(Icons.calendar_today, color: Color(0xFF474C74)),
-                const SizedBox(width: 8),
-                Text(
-                  '${reservation.reservationDate.day}/${reservation.reservationDate.month}/${reservation.reservationDate.year}',
-                  style: const TextStyle(fontSize: 16),
-                ),
-              ],
-            ),
+            const SizedBox(height: 12),
+            _buildInfoRow('Check-in:', _formatDate(reservation.startDate)),
+            _buildInfoRow('Check-out:', _formatDate(reservation.finalDate)),
+            _buildInfoRow('Number of Nights:', '${reservation.nightCount}'),
             const SizedBox(height: 8),
-            Row(
-              children: [
-                const Icon(Icons.access_time, color: Color(0xFF474C74)),
-                const SizedBox(width: 8),
-                Text(
-                  '${reservation.startTime.hour}:${reservation.startTime.minute.toString().padLeft(2, '0')} - ${reservation.endTime.hour}:${reservation.endTime.minute.toString().padLeft(2, '0')}',
-                  style: const TextStyle(fontSize: 16),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                const Icon(Icons.schedule, color: Color(0xFF474C74)),
-                const SizedBox(width: 8),
-                Text(
-                  'Duration: ${reservation.endTime.difference(reservation.startTime).inHours} hour(s)',
-                  style: const TextStyle(fontSize: 16),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDetailsCard() {
-    return Card(
-      elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Additional Details',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16),
-            if (reservation.specialRequests != null)
-              _buildInfoRow('Special Requests', reservation.specialRequests!),
-            _buildInfoRow('Created', '${reservation.createdAt.day}/${reservation.createdAt.month}/${reservation.createdAt.year}'),
-            if (reservation.updatedAt != null)
-              _buildInfoRow('Last Updated', '${reservation.updatedAt!.day}/${reservation.updatedAt!.month}/${reservation.updatedAt!.year}'),
+            if (reservation.createdAt != null)
+              _buildInfoRow('Booked on:', _formatDateTime(reservation.createdAt!)),
           ],
         ),
       ),
@@ -315,53 +255,55 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
           children: [
             const Text(
               'Payment Information',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Total Amount:',
-                  style: TextStyle(fontSize: 16),
-                ),
-                Text(
-                  '\$${reservation.totalAmount.toStringAsFixed(2)}',
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF474C74),
-                  ),
-                ),
-              ],
+            const SizedBox(height: 12),
+            _buildInfoRow('Room Price per Night:', '\$${reservation.priceRoom.toStringAsFixed(2)}'),
+            _buildInfoRow('Number of Nights:', '${reservation.nightCount}'),
+            const Divider(),
+            _buildInfoRow(
+              'Total Amount:',
+              '\$${reservation.amount.toStringAsFixed(2)}',
+              isTotal: true,
             ),
+            _buildInfoRow('Preference ID:', '${reservation.preferenceId}'),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildInfoRow(String label, String value) {
+  Widget _buildInfoRow(String label, String value, {bool isTotal = false}) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          SizedBox(
-            width: 120,
-            child: Text(
-              '$label:',
-              style: const TextStyle(fontWeight: FontWeight.w500),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: isTotal ? 16 : 14,
+              fontWeight: isTotal ? FontWeight.bold : FontWeight.w500,
             ),
           ),
-          Expanded(
-            child: Text(value),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: isTotal ? 16 : 14,
+              fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
+              color: isTotal ? Colors.green : Colors.black87,
+            ),
           ),
         ],
       ),
     );
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.day}/${date.month}/${date.year}';
+  }
+
+  String _formatDateTime(DateTime dateTime) {
+    return '${_formatDate(dateTime)} at ${dateTime.hour}:${dateTime.minute.toString().padLeft(2, '0')}';
   }
 }

@@ -172,22 +172,6 @@ class HotelSelectionView extends StatelessWidget {
                     ),
                   ),
                 ],
-                if (hotel.totalRooms != null) ...[
-                  const SizedBox(width: 12),
-                  Icon(
-                    Icons.bed,
-                    size: 14,
-                    color: Colors.grey[600],
-                  ),
-                  const SizedBox(width: 2),
-                  Text(
-                    '${hotel.totalRooms} rooms',
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
               ],
             ),
           ],

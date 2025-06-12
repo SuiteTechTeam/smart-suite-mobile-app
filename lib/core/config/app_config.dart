@@ -10,7 +10,7 @@ class AppConfig {
   // === API ENDPOINTS ===
   
   /// Smart Suite Web Service - Used for IAM authentication
-  static const String smartSuiteBaseUrl = 'http://smart-suite-web-service.azurewebsites.net';
+  static const String smartSuiteBaseUrl = 'https://smart-suite-web-service.azurewebsites.net';
   
   /// API version used in all requests
   static const String apiVersion = 'api/v1';
@@ -30,25 +30,25 @@ class AppConfig {
   static String get authenticationUrl => '$smartSuiteBaseUrl/$apiVersion/authentication';
   
   /// Hotel management endpoints
-  static String get hotelApiUrl => '$smartSuiteBaseUrl/api/hotel';
+  static String get hotelApiUrl => '$smartSuiteBaseUrl/$apiVersion/hotel';
   
   /// Room management endpoints
-  static String get roomApiUrl => '$smartSuiteBaseUrl/api/rooms';
+  static String get roomApiUrl => '$smartSuiteBaseUrl/$apiVersion/rooms';
   
   /// Booking management endpoints
-  static String get bookingApiUrl => '$smartSuiteBaseUrl/api/bookings';
+  static String get bookingApiUrl => '$smartSuiteBaseUrl/$apiVersion/bookings';
   
   /// User management endpoints
   static String get userApiUrl => '$smartSuiteBaseUrl/$apiVersion/user';
   
   /// Provider management endpoints
-  static String get providerApiUrl => '$smartSuiteBaseUrl/api/provider';
+  static String get providerApiUrl => '$smartSuiteBaseUrl/$apiVersion/provider';
   
   /// Supply management endpoints
-  static String get supplyApiUrl => '$smartSuiteBaseUrl/api/supply';
+  static String get supplyApiUrl => '$smartSuiteBaseUrl/$apiVersion/supply';
   
   /// Customer management endpoints
-  static String get customerApiUrl => '$smartSuiteBaseUrl/api/customer';
+  static String get customerApiUrl => '$smartSuiteBaseUrl/$apiVersion/customer';
   
   /// Worker area management endpoints
   static String get workerAreaApiUrl => '$smartSuiteBaseUrl/$apiVersion/worker-area';
@@ -57,8 +57,8 @@ class AppConfig {
   static String get assignmentWorkerApiUrl => '$smartSuiteBaseUrl/$apiVersion/assignment-worker';
   
   /// Reports endpoints
-  static String get reportsApiUrl => '$smartSuiteBaseUrl/api';
-  
+  static String get reportsApiUrl => '$smartSuiteBaseUrl/$apiVersion/reports';
+
   // === APPLICATION INFO ===
   
   /// Application name
