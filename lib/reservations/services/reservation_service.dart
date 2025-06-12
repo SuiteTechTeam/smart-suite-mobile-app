@@ -63,28 +63,6 @@ class ReservationService {
     }
   }
 
-  // Helper function for HTTP PUT with timeout and better error handling
-  Future<http.Response> _putWithTimeout(String url, Map<String, String> headers, String body) async {
-    try {
-      final response = await http.put(
-        Uri.parse(url),
-        headers: headers,
-        body: body,
-      ).timeout(_defaultTimeout);
-      return response;
-    } on SocketException catch (e) {
-      throw Exception('Network error: Unable to connect to server. Please check your internet connection. Details: $e');
-    } on HttpException catch (e) {
-      throw Exception('HTTP error: $e');
-    } on FormatException catch (e) {
-      throw Exception('Invalid response format: $e');
-    } catch (e) {
-      if (e.toString().contains('TimeoutException')) {
-        throw Exception('Request timeout: Server took too long to respond. Please try again.');
-      }
-      rethrow;
-    }
-  }
   // Create a new reservation
   Future<bool> createReservation(Reservation reservation) async {
     try {
