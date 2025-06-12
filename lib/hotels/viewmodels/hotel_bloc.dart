@@ -58,7 +58,6 @@ class HotelBloc extends Bloc<HotelEvent, hotel_state.HotelState> {
       emit(hotel_state.HotelError('Failed to load hotels: ${e.toString()}'));
     }
   }
-
   Future<void> _onHotelCreateRequested(
     HotelCreateRequested event,
     Emitter<hotel_state.HotelState> emit,
@@ -66,6 +65,12 @@ class HotelBloc extends Bloc<HotelEvent, hotel_state.HotelState> {
     try {
       final currentState = state;
       if (currentState is hotel_state.HotelLoaded) {
+        // Check if user has owner role before allowing hotel creation
+        if (currentState.userRole?.toLowerCase() != 'owner') {
+          emit(hotel_state.HotelError('Access denied. Only owners can create hotels.'));
+          return;
+        }
+
         emit(hotel_state.HotelLoading());
 
         await hotelService.createHotel(
@@ -90,7 +95,6 @@ class HotelBloc extends Bloc<HotelEvent, hotel_state.HotelState> {
       emit(hotel_state.HotelError('Failed to create hotel: ${e.toString()}'));
     }
   }
-
   Future<void> _onHotelUpdateRequested(
     HotelUpdateRequested event,
     Emitter<hotel_state.HotelState> emit,
@@ -98,6 +102,12 @@ class HotelBloc extends Bloc<HotelEvent, hotel_state.HotelState> {
     try {
       final currentState = state;
       if (currentState is hotel_state.HotelLoaded) {
+        // Check if user has owner role before allowing hotel update
+        if (currentState.userRole?.toLowerCase() != 'owner') {
+          emit(hotel_state.HotelError('Access denied. Only owners can update hotels.'));
+          return;
+        }
+
         emit(hotel_state.HotelLoading());
 
         await hotelService.updateHotel(
@@ -123,7 +133,6 @@ class HotelBloc extends Bloc<HotelEvent, hotel_state.HotelState> {
       emit(hotel_state.HotelError('Failed to update hotel: ${e.toString()}'));
     }
   }
-
   Future<void> _onHotelDeleteRequested(
     HotelDeleteRequested event,
     Emitter<hotel_state.HotelState> emit,
@@ -131,6 +140,12 @@ class HotelBloc extends Bloc<HotelEvent, hotel_state.HotelState> {
     try {
       final currentState = state;
       if (currentState is hotel_state.HotelLoaded) {
+        // Check if user has owner role before allowing hotel deletion
+        if (currentState.userRole?.toLowerCase() != 'owner') {
+          emit(hotel_state.HotelError('Access denied. Only owners can delete hotels.'));
+          return;
+        }
+
         emit(hotel_state.HotelLoading());
 
         await hotelService.deleteHotel(event.hotelId);
@@ -146,7 +161,7 @@ class HotelBloc extends Bloc<HotelEvent, hotel_state.HotelState> {
     } catch (e) {
       emit(hotel_state.HotelError('Failed to delete hotel: ${e.toString()}'));
     }
-  }  Future<void> _onHotelSelected(
+  }Future<void> _onHotelSelected(
     HotelSelected event,
     Emitter<hotel_state.HotelState> emit,
   ) async {

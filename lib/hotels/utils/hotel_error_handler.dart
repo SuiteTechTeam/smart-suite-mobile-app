@@ -24,10 +24,15 @@ class HotelErrorHandler {
       ),
     );
   }
-
   static String _getErrorMessage(String error) {
     if (error.contains('Network error')) {
       return 'Network connection problem. Please check your internet connection.';
+    } else if (error.contains('Access denied. Only owners can create hotels')) {
+      return 'Permission denied. Only hotel owners can create hotels.';
+    } else if (error.contains('Access denied. Only owners can update hotels')) {
+      return 'Permission denied. Only hotel owners can update hotels.';
+    } else if (error.contains('Access denied. Only owners can delete hotels')) {
+      return 'Permission denied. Only hotel owners can delete hotels.';
     } else if (error.contains('Failed to load hotels')) {
       return 'Unable to load hotels. Please try again.';
     } else if (error.contains('Failed to create hotel')) {
