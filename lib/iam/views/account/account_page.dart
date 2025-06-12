@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../services/user_service.dart';
 import '../../utils/auth_utils.dart';
-import '../../viewmodels/auth_bloc.dart';
-import '../../viewmodels/auth_event.dart';
 
 class AccountPage extends StatefulWidget {
   const AccountPage({Key? key}) : super(key: key);
