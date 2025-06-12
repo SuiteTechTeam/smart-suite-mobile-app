@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
+import '../../core/config/app_config.dart';
 
 class AppInfoScreen extends StatefulWidget {
   const AppInfoScreen({super.key});
@@ -151,9 +152,8 @@ class _AppInfoScreenState extends State<AppInfoScreen> {
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ],
-            ),
-            const SizedBox(height: 12),
-            _buildInfoRow('API Base URL', 'https://sweetmanager-api.ryzeon.me'),
+            ),            const SizedBox(height: 12),
+            _buildInfoRow('API Base URL', AppConfig.smartSuiteBaseUrl),
             _buildInfoRow('Current Hotel ID', hotelId ?? 'Not set'),
             _buildInfoRow('Token Status', userInfo != null ? 'Valid' : 'Invalid'),
           ],

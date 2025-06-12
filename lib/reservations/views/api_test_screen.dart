@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import '../services/hotel_service.dart';
+import '../../hotels/services/hotel_service.dart';
 import '../services/reservation_service.dart';
 import '../utils/error_handler.dart';
 

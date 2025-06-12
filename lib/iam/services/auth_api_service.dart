@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import '../models/sign_up_request.dart';
 import '../models/sign_in_request.dart';
 import '../models/authenticated_user.dart';
+import '../../core/config/app_config.dart';
 
 class ApiException implements Exception {
   final String message;
@@ -15,8 +16,9 @@ class ApiException implements Exception {
 }
 
 class AuthApiService {
-  static const String baseUrl = 'http://smart-suite-web-service.azurewebsites.net';
-  static const String apiVersion = 'api/v1';
+  // Use centralized configuration instead of hardcoded URL
+  static String get baseUrl => AppConfig.smartSuiteBaseUrl;
+  static String get apiVersion => AppConfig.apiVersion;
 
   final http.Client _httpClient;
 

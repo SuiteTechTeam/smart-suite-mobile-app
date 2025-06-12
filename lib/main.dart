@@ -10,7 +10,7 @@ import 'iam/views/home_page.dart';
 import 'iam/views/auth_wrapper.dart';
 import 'reservations/views/reservation_management_screen.dart';
 import 'reservations/views/add_reservation_screen.dart';
-import 'reservations/views/hotel_management_screen.dart';
+import 'hotels/views/hotel_management_screen.dart';
 import 'reservations/views/api_test_screen.dart';
 
 void main() async {

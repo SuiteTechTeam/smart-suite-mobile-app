@@ -1,26 +1,18 @@
 import 'dart:convert';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
-import 'package:jwt_decoder/jwt_decoder.dart';
 import '../models/reservation.dart';
 import '../models/reservation_resource.dart';
+import '../../iam/services/storage_service.dart';
+import '../../core/config/app_config.dart';
 
 class ReservationService {
-  final String baseUrl = 'https://sweetmanager-api.ryzeon.me';
-  final FlutterSecureStorage storage = const FlutterSecureStorage();
+  final String baseUrl = AppConfig.smartSuiteBaseUrl;
+  final StorageService _storageService = StorageService();
 
   ReservationService();
-
   // Helper function to get headers with the token
   Future<Map<String, String>> _getHeaders() async {
-    final token = await storage.read(key: 'token');
-    if (token == null || JwtDecoder.isExpired(token)) {
-      throw Exception('Token is missing or expired. Please log in again.');
-    }
-    return {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer $token',
-    };
+    return await _storageService.getAuthHeaders();
   }
 
   // Create a new reservation
