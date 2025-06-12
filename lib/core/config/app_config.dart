@@ -10,7 +10,7 @@ class AppConfig {
   // === API ENDPOINTS ===
   
   /// Smart Suite Web Service - Used for IAM authentication
-  static const String smartSuiteBaseUrl = 'http://smart-suite-web-service.azurewebsites.net';
+  static const String smartSuiteBaseUrl = 'https://smart-suite-web-service.azurewebsites.net';
   
   /// API version used in all requests
   static const String apiVersion = 'api/v1';
