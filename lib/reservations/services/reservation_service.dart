@@ -1,40 +1,82 @@
 import 'dart:convert';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
-import 'package:jwt_decoder/jwt_decoder.dart';
 import '../models/reservation.dart';
 import '../models/reservation_resource.dart';
+import '../../iam/services/storage_service.dart';
+import '../../core/config/app_config.dart';
+import 'dart:io';
 
 class ReservationService {
-  final String baseUrl = 'https://sweetmanager-api.ryzeon.me';
-  final FlutterSecureStorage storage = const FlutterSecureStorage();
+  final String baseUrl = AppConfig.smartSuiteBaseUrl;
+  final StorageService _storageService = StorageService();
+  
+  // HTTP client with timeout configuration
+  static const Duration _defaultTimeout = Duration(seconds: 30);
 
-  ReservationService();
-
-  // Helper function to get headers with the token
+  ReservationService();  // Helper function to get headers with the token
   Future<Map<String, String>> _getHeaders() async {
-    final token = await storage.read(key: 'token');
-    if (token == null || JwtDecoder.isExpired(token)) {
-      throw Exception('Token is missing or expired. Please log in again.');
+    return await _storageService.getAuthHeaders();
+  }
+
+  // Helper function for HTTP GET with timeout and better error handling
+  Future<http.Response> _getWithTimeout(String url, Map<String, String> headers) async {
+    try {
+      final response = await http.get(
+        Uri.parse(url),
+        headers: headers,
+      ).timeout(_defaultTimeout);
+      return response;
+    } on SocketException catch (e) {
+      throw Exception('Network error: Unable to connect to server. Please check your internet connection. Details: $e');
+    } on HttpException catch (e) {
+      throw Exception('HTTP error: $e');
+    } on FormatException catch (e) {
+      throw Exception('Invalid response format: $e');
+    } catch (e) {
+      if (e.toString().contains('TimeoutException')) {
+        throw Exception('Request timeout: Server took too long to respond. Please try again.');
+      }
+      rethrow;
     }
-    return {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer $token',
-    };
+  }
+
+  // Helper function for HTTP POST with timeout and better error handling
+  Future<http.Response> _postWithTimeout(String url, Map<String, String> headers, String body) async {
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: headers,
+        body: body,
+      ).timeout(_defaultTimeout);
+      return response;
+    } on SocketException catch (e) {
+      throw Exception('Network error: Unable to connect to server. Please check your internet connection. Details: $e');
+    } on HttpException catch (e) {
+      throw Exception('HTTP error: $e');
+    } on FormatException catch (e) {
+      throw Exception('Invalid response format: $e');
+    } catch (e) {
+      if (e.toString().contains('TimeoutException')) {
+        throw Exception('Request timeout: Server took too long to respond. Please try again.');
+      }
+      rethrow;
+    }
   }
 
   // Create a new reservation
   Future<bool> createReservation(Reservation reservation) async {
     try {
       final headers = await _getHeaders();
-      final response = await http.post(
-        Uri.parse('$baseUrl/api/reservations/create'),
-        headers: headers,
-        body: json.encode(reservation.toJson()),
+      final response = await _postWithTimeout(
+        '$baseUrl/api/v1/reservations/create',
+        headers,
+        json.encode(reservation.toJson()),
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         return true;
+      } else if (response.statusCode == 401) {
+        throw Exception('Unauthorized: Please login again');
       } else {
         throw Exception('Failed to create reservation: ${response.statusCode} - ${response.body}');
       }
@@ -42,19 +84,17 @@ class ReservationService {
       rethrow;
     }
   }
-
   // Get all reservations for a hotel
   Future<List<Reservation>> getReservationsByHotelId(int hotelId) async {
     try {
       final headers = await _getHeaders();
-      final response = await http.get(
-        Uri.parse('$baseUrl/api/reservations/hotel/$hotelId'),
-        headers: headers,
-      );
+      final response = await _getWithTimeout('$baseUrl/api/v1/reservations/hotel/$hotelId', headers);
 
       if (response.statusCode == 200) {
         final List<dynamic> jsonData = json.decode(response.body);
         return jsonData.map((json) => Reservation.fromJson(json)).toList();
+      } else if (response.statusCode == 401) {
+        throw Exception('Unauthorized: Please login again');
       } else {
         throw Exception('Failed to load reservations: ${response.statusCode} - ${response.body}');
       }
@@ -62,19 +102,17 @@ class ReservationService {
       rethrow;
     }
   }
-
   // Get reservations by customer
   Future<List<Reservation>> getReservationsByCustomerId(int customerId) async {
     try {
       final headers = await _getHeaders();
-      final response = await http.get(
-        Uri.parse('$baseUrl/api/reservations/customer/$customerId'),
-        headers: headers,
-      );
+      final response = await _getWithTimeout('$baseUrl/api/v1/reservations/customer/$customerId', headers);
 
       if (response.statusCode == 200) {
         final List<dynamic> jsonData = json.decode(response.body);
         return jsonData.map((json) => Reservation.fromJson(json)).toList();
+      } else if (response.statusCode == 401) {
+        throw Exception('Unauthorized: Please login again');
       } else {
         throw Exception('Failed to load customer reservations: ${response.statusCode} - ${response.body}');
       }

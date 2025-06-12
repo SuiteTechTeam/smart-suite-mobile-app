@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import '../services/hotel_service.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
+import '../../hotels/services/hotel_service.dart';
 import '../services/reservation_service.dart';
 import '../utils/error_handler.dart';
+import '../../iam/services/storage_service.dart';
+import 'dart:io';
 
 class ApiTestScreen extends StatefulWidget {
   const ApiTestScreen({super.key});
@@ -64,7 +67,7 @@ class _ApiTestScreenState extends State<ApiTestScreen> {
                                   Text('Running Tests...'),
                                 ],
                               )
-                            : const Text('Run API Tests'),
+                            : const Text('Run Connectivity Tests'),
                       ),
                     ),
                   ],
@@ -78,35 +81,34 @@ class _ApiTestScreenState extends State<ApiTestScreen> {
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: testResults.length,
-                  itemBuilder: (context, index) {
-                    final result = testResults[index];
-                    final isSuccess = result['success'] as bool;
-                    
-                    return Card(
-                      margin: const EdgeInsets.only(bottom: 8),
-                      child: ListTile(
-                        leading: Icon(
-                          isSuccess ? Icons.check_circle : Icons.error,
-                          color: isSuccess ? Colors.green : Colors.red,
-                        ),
-                        title: Text(result['test'] as String),
-                        subtitle: Text(result['message'] as String),
-                        trailing: Text(
-                          isSuccess ? 'PASS' : 'FAIL',
-                          style: TextStyle(
-                            color: isSuccess ? Colors.green : Colors.red,
-                            fontWeight: FontWeight.bold,
-                          ),
+            ],
+            Expanded(
+              child: ListView.builder(
+                itemCount: testResults.length,
+                itemBuilder: (context, index) {
+                  final result = testResults[index];
+                  return Card(
+                    margin: const EdgeInsets.only(bottom: 8),
+                    child: ListTile(
+                      leading: Icon(
+                        result['success'] as bool ? Icons.check_circle : Icons.error,
+                        color: result['success'] as bool ? Colors.green : Colors.red,
+                      ),
+                      title: Text(result['test'] as String),
+                      subtitle: Text(
+                        result['message'] as String,
+                        style: TextStyle(
+                          color: result['success'] as bool 
+                              ? Colors.green[700] 
+                              : Colors.red[700],
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                    );
-                  },
-                ),
+                    ),
+                  );
+                },
               ),
-            ],
+            ),
           ],
         ),
       ),
@@ -119,19 +121,28 @@ class _ApiTestScreenState extends State<ApiTestScreen> {
       testResults.clear();
     });
 
+    // Test 0: Check internet connectivity
+    await _testInternetConnectivity();
+
     // Test 1: Check if we have a valid token
     await _testTokenAvailability();
 
-    // Test 2: Test hotel service - get all hotels
+    // Test 1.5: Test StorageService vs Direct Storage comparison  
+    await _testStorageServiceVsDirectStorage();
+
+    // Test 2: Test basic API endpoint reachability
+    await _testAPIReachability();
+
+    // Test 3: Test hotel service - get all hotels
     await _testGetAllHotels();
 
-    // Test 3: Test hotel validation with a known hotel ID
+    // Test 4: Test hotel validation with a known hotel ID
     await _testHotelValidation();
 
-    // Test 4: Test reservation service
+    // Test 5: Test reservation service
     await _testReservationService();
 
-    // Test 5: Test hotel creation (if user is owner)
+    // Test 6: Test hotel creation (if user is owner)
     await _testHotelCreation();
 
     setState(() {
@@ -141,13 +152,66 @@ class _ApiTestScreenState extends State<ApiTestScreen> {
     _showTestSummary();
   }
 
+  Future<void> _testInternetConnectivity() async {
+    try {
+      final result = await InternetAddress.lookup('google.com').timeout(
+        const Duration(seconds: 10),
+      );
+      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+        _addTestResult('Internet Connectivity', true, 'Internet connection available');
+      } else {
+        _addTestResult('Internet Connectivity', false, 'No internet connection');
+      }
+    } catch (e) {
+      _addTestResult('Internet Connectivity', false, 'Failed to check internet: $e');
+    }
+  }
+
+  Future<void> _testAPIReachability() async {
+    try {
+      final result = await InternetAddress.lookup('smart-suite-web-service.azurewebsites.net').timeout(
+        const Duration(seconds: 15),
+      );
+      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+        _addTestResult('API Server Reachability', true, 'API server is reachable');
+      } else {
+        _addTestResult('API Server Reachability', false, 'API server not reachable');
+      }
+    } catch (e) {
+      _addTestResult('API Server Reachability', false, 'Cannot reach API server: $e');
+    }
+  }
+
   Future<void> _testTokenAvailability() async {
     try {
       String? token = await storage.read(key: 'token');
       if (token != null && token.isNotEmpty) {
-        _addTestResult('Token Availability', true, 'Authentication token found');
+        // Check if token is expired
+        bool isExpired = false;
+        String tokenDetails = '';
+        
+        try {
+          isExpired = JwtDecoder.isExpired(token);
+          Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
+          
+          // Get some basic info from token
+          String? role = decodedToken['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+          String? email = decodedToken['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'];
+          String? userId = decodedToken['sub'];
+          
+          tokenDetails = 'Role: $role, Email: $email, UserID: $userId';
+        } catch (e) {
+          tokenDetails = 'Token parsing failed: $e';
+          isExpired = true;
+        }
+        
+        if (isExpired) {
+          _addTestResult('Token Availability', false, 'Token found but EXPIRED - please login again. $tokenDetails');
+        } else {
+          _addTestResult('Token Availability', true, 'Valid authentication token found. $tokenDetails');
+        }
       } else {
-        _addTestResult('Token Availability', false, 'No authentication token found');
+        _addTestResult('Token Availability', false, 'No authentication token found - please login first');
       }
     } catch (e) {
       _addTestResult('Token Availability', false, 'Error checking token: $e');
@@ -156,54 +220,51 @@ class _ApiTestScreenState extends State<ApiTestScreen> {
 
   Future<void> _testGetAllHotels() async {
     try {
-      final hotels = await _hotelService.getAllHotels();
+      final hotels = await _hotelService.getAllHotels().timeout(
+        const Duration(seconds: 30),
+      );
       _addTestResult(
         'Get All Hotels', 
         true, 
         'Successfully retrieved ${hotels.length} hotels'
       );
     } catch (e) {
-      _addTestResult(
-        'Get All Hotels', 
-        false, 
-        'Failed to get hotels: ${ErrorHandler.getErrorMessage(e)}'
-      );
+      String errorMsg = 'Failed to get hotels: ${_getDetailedErrorMessage(e)}';
+      _addTestResult('Get All Hotels', false, errorMsg);
     }
   }
 
   Future<void> _testHotelValidation() async {
     try {
       // Test with hotel ID 1 (common test ID)
-      final isValid = await _hotelService.validateHotelId(1);
+      final isValid = await _hotelService.validateHotelId(1).timeout(
+        const Duration(seconds: 30),
+      );
       if (isValid) {
         _addTestResult('Hotel Validation', true, 'Hotel ID 1 is valid');
       } else {
         _addTestResult('Hotel Validation', false, 'Hotel ID 1 is not valid or not found');
       }
     } catch (e) {
-      _addTestResult(
-        'Hotel Validation', 
-        false, 
-        'Error validating hotel: ${ErrorHandler.getErrorMessage(e)}'
-      );
+      String errorMsg = 'Error validating hotel: ${_getDetailedErrorMessage(e)}';
+      _addTestResult('Hotel Validation', false, errorMsg);
     }
   }
 
   Future<void> _testReservationService() async {
     try {
       // Try to get reservations for hotel ID 1
-      final reservations = await _reservationService.getReservationsByHotelId(1);
+      final reservations = await _reservationService.getReservationsByHotelId(1).timeout(
+        const Duration(seconds: 30),
+      );
       _addTestResult(
         'Reservation Service', 
         true, 
         'Successfully retrieved ${reservations.length} reservations for hotel ID 1'
       );
     } catch (e) {
-      _addTestResult(
-        'Reservation Service', 
-        false, 
-        'Failed to get reservations: ${ErrorHandler.getErrorMessage(e)}'
-      );
+      String errorMsg = 'Failed to get reservations: ${_getDetailedErrorMessage(e)}';
+      _addTestResult('Reservation Service', false, errorMsg);
     }
   }
 
@@ -215,23 +276,99 @@ class _ApiTestScreenState extends State<ApiTestScreen> {
         address: 'Test Address',
         phone: '+1234567890',
         email: 'test@test.com',
-      );
+      ).timeout(const Duration(seconds: 30));
       _addTestResult('Hotel Creation', true, 'Hotel creation endpoint is accessible');
     } catch (e) {
-      String errorMessage = e.toString();
-      if (errorMessage.contains('403') || errorMessage.contains('forbidden')) {
+      String errorString = e.toString().toLowerCase();
+      if (errorString.contains('403') || 
+          errorString.contains('forbidden') || 
+          errorString.contains('access denied') ||
+          errorString.contains('only owners can create')) {
         _addTestResult(
           'Hotel Creation', 
           true, 
           'Endpoint accessible (no creation permission - expected)'
         );
       } else {
-        _addTestResult(
-          'Hotel Creation', 
-          false, 
-          'Error testing hotel creation: ${ErrorHandler.getErrorMessage(e)}'
-        );
+        String errorMsg = 'Error testing hotel creation: ${_getDetailedErrorMessage(e)}';
+        _addTestResult('Hotel Creation', false, errorMsg);
       }
+    }
+  }
+  Future<void> _testStorageServiceVsDirectStorage() async {
+    try {
+      // Import the StorageService
+      final storageService = StorageService();
+      
+      // Direct storage access
+      String? directToken = await storage.read(key: 'token').timeout(const Duration(seconds: 10));
+      bool directTokenExists = directToken != null && directToken.isNotEmpty;
+      bool directTokenValid = false;
+        if (directTokenExists) {
+        try {
+          directTokenValid = !JwtDecoder.isExpired(directToken);
+        } catch (e) {
+          directTokenValid = false;
+        }
+      }
+        // StorageService access
+      String? serviceToken = await storageService.getToken().timeout(const Duration(seconds: 10));
+      
+      // Get headers from StorageService to see if it includes Authorization
+      Map<String, String> headers = await storageService.getAuthHeaders().timeout(const Duration(seconds: 10));
+      bool serviceIncludesAuth = headers.containsKey('Authorization');
+      
+      String resultMessage = '';
+      bool testPassed = true;
+      
+      if (directToken != serviceToken) {
+        resultMessage = 'MISMATCH: Direct token != Service token';
+        testPassed = false;
+      } else if (directTokenExists && !serviceIncludesAuth) {
+        resultMessage = 'ISSUE: Token exists but StorageService excludes Authorization header. Token might be expired.';
+        testPassed = false;
+      } else if (!directTokenExists) {
+        resultMessage = 'No token found in either method';
+        testPassed = false;
+      } else if (directTokenValid && serviceIncludesAuth) {
+        resultMessage = 'Both methods work correctly - token is valid and headers include auth';
+        testPassed = true;
+      } else {
+        resultMessage = 'Direct token valid: $directTokenValid, Service includes auth: $serviceIncludesAuth';
+        testPassed = directTokenValid == serviceIncludesAuth;
+      }
+      
+      _addTestResult('Storage Service vs Direct Storage', testPassed, resultMessage);
+    } catch (e) {
+      _addTestResult('Storage Service vs Direct Storage', false, 'Error comparing storage methods: $e');
+    }
+  }
+
+  String _getDetailedErrorMessage(dynamic error) {
+    String errorString = error.toString().toLowerCase();
+    
+    if (errorString.contains('timeoutexception') || errorString.contains('timeout')) {
+      return 'Request timed out - check internet connection and server status';
+    } else if (errorString.contains('socketexception')) {
+      return 'Network error - unable to connect to server';
+    } else if (errorString.contains('handshakeexception')) {
+      return 'SSL/TLS handshake failed - certificate or security issue';
+    } else if (errorString.contains('httpexception')) {
+      return 'HTTP error - server returned an error response';
+    } else if (errorString.contains('formatexception')) {
+      return 'Invalid response format - server may be returning unexpected data';
+    } else if (errorString.contains('401') || errorString.contains('unauthorized')) {
+      return 'Unauthorized - token may be expired, please login again';
+    } else if (errorString.contains('403') || errorString.contains('forbidden') || errorString.contains('access denied')) {
+      return 'Access denied - insufficient permissions for this operation';
+    } else if (errorString.contains('404') || errorString.contains('not found')) {
+      return 'Endpoint not found - API may have changed';
+    } else if (errorString.contains('500') || errorString.contains('server error')) {
+      return 'Server error - API server is experiencing issues';
+    } else if (errorString.contains('session expired')) {
+      return 'Session expired - please login again';
+    } else {
+      return ErrorHandler.getErrorMessage(error);
     }
   }
 
@@ -249,32 +386,43 @@ class _ApiTestScreenState extends State<ApiTestScreen> {
     final passedTests = testResults.where((result) => result['success'] as bool).length;
     final totalTests = testResults.length;
     
+    String summaryTitle;
+    String summaryMessage;
+    
+    if (passedTests == totalTests) {
+      summaryTitle = '✅ All Tests Passed!';
+      summaryMessage = 'API connectivity is working properly ($passedTests/$totalTests tests passed).';
+    } else if (passedTests > 0) {
+      summaryTitle = '⚠️ Some Tests Failed';
+      summaryMessage = 'Some issues were detected ($passedTests/$totalTests tests passed). Check the failed tests for details.';
+    } else {
+      summaryTitle = '❌ All Tests Failed';
+      summaryMessage = 'No tests passed. Check your internet connection and authentication status.';
+    }
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Test Summary'),
+          title: Text(summaryTitle),
           content: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Passed: $passedTests/$totalTests tests'),
-              const SizedBox(height: 8),
-              if (passedTests == totalTests)
-                const Row(
-                  children: [
-                    Icon(Icons.check_circle, color: Colors.green),
-                    SizedBox(width: 8),
-                    Text('All tests passed!'),
-                  ],
-                )
-              else
-                const Row(
-                  children: [
-                    Icon(Icons.warning, color: Colors.orange),
-                    SizedBox(width: 8),
-                    Text('Some tests failed.'),
-                  ],
+              Text(summaryMessage),
+              const SizedBox(height: 16),
+              if (passedTests < totalTests) ...[
+                const Text(
+                  'Common Solutions:',
+                  style: TextStyle(fontWeight: FontWeight.bold),
                 ),
+                const SizedBox(height: 8),
+                const Text('• Check your internet connection'),
+                const Text('• Verify you are logged in'),
+                const Text('• Try logging out and back in'),
+                const Text('• Check if the API server is accessible'),
+                const Text('• Contact support if issues persist'),
+              ],
             ],
           ),
           actions: [

@@ -1,25 +1,24 @@
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 import '../models/authenticated_user.dart';
 import 'dart:convert';
 
 class StorageService {
-  static const String _tokenKey = 'jwt_token';
+  static const String _tokenKey = 'token';
   static const String _userKey = 'authenticated_user';
+  static const FlutterSecureStorage _storage = FlutterSecureStorage();
 
   Future<void> saveAuthenticatedUser(AuthenticatedUser user) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_tokenKey, user.token);
-    await prefs.setString(_userKey, jsonEncode(user.toJson()));
+    await _storage.write(key: _tokenKey, value: user.token);
+    await _storage.write(key: _userKey, value: jsonEncode(user.toJson()));
   }
 
   Future<String?> getToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_tokenKey);
+    return await _storage.read(key: _tokenKey);
   }
 
   Future<AuthenticatedUser?> getAuthenticatedUser() async {
-    final prefs = await SharedPreferences.getInstance();
-    final userJson = prefs.getString(_userKey);
+    final userJson = await _storage.read(key: _userKey);
     
     if (userJson != null) {
       try {
@@ -36,25 +35,54 @@ class StorageService {
 
   Future<bool> isAuthenticated() async {
     final token = await getToken();
-    return token != null && token.isNotEmpty;
+    if (token != null && token.isNotEmpty) {
+      try {
+        return !JwtDecoder.isExpired(token);
+      } catch (e) {
+        return false;
+      }
+    }
+    return false;
   }
 
   Future<void> clearAuthenticatedUser() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_tokenKey);
-    await prefs.remove(_userKey);
-  }
-
-  Future<Map<String, String>> getAuthHeaders() async {
+    await _storage.delete(key: _tokenKey);
+    await _storage.delete(key: _userKey);
+    await _storage.delete(key: 'selected_hotel_id');
+  }  Future<Map<String, String>> getAuthHeaders() async {
     final token = await getToken();
-    if (token != null) {
-      return {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      };
+    
+    if (token != null && token.isNotEmpty) {
+      try {
+        // Check if token is not expired
+        if (!JwtDecoder.isExpired(token)) {
+          return {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $token',
+          };
+        }
+      } catch (e) {
+        // Token is invalid, return headers without authorization
+      }
     }
+    
     return {
       'Content-Type': 'application/json',
     };
+  }
+
+  // Generic write method for additional storage needs
+  Future<void> write({required String key, required String value}) async {
+    await _storage.write(key: key, value: value);
+  }
+
+  // Generic read method for additional storage needs
+  Future<String?> read({required String key}) async {
+    return await _storage.read(key: key);
+  }
+
+  // Generic delete method for additional storage needs
+  Future<void> delete({required String key}) async {
+    await _storage.delete(key: key);
   }
 }
