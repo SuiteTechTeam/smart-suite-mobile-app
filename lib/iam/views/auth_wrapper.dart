@@ -180,13 +180,13 @@ class _HotelLoadingScreenState extends State<HotelLoadingScreen>
                             shape: BoxShape.circle,
                             gradient: RadialGradient(
                               colors: [
-                                Colors.amber.withOpacity(0.3),
-                                Colors.orange.withOpacity(0.2),
+                                Colors.amber.withValues(alpha: 0.3),
+                                Colors.orange.withValues(alpha: 0.2),
                                 Colors.transparent,
                               ],
                             ),
                             border: Border.all(
-                              color: Colors.amber.withOpacity(0.5),
+                              color: Colors.amber.withValues(alpha: 0.5),
                               width: 2,
                             ),
                           ),
@@ -207,7 +207,7 @@ class _HotelLoadingScreenState extends State<HotelLoadingScreen>
                                     size: const Size(120, 120),
                                     painter: IoTWavesPainter(
                                       animationValue: _waveAnimation.value,
-                                      color: Colors.amber.withOpacity(0.6),
+                                      color: Colors.amber.withValues(alpha: 0.6),
                                     ),
                                   );
                                 },
@@ -232,7 +232,7 @@ class _HotelLoadingScreenState extends State<HotelLoadingScreen>
                         Shadow(
                           offset: const Offset(0, 2),
                           blurRadius: 4,
-                          color: Colors.black.withOpacity(0.3),
+                          color: Colors.black.withValues(alpha: 0.3),
                         ),
                       ],
                     ),
@@ -243,7 +243,7 @@ class _HotelLoadingScreenState extends State<HotelLoadingScreen>
                   Text(
                     'IoT Management System',
                     style: theme.textTheme.bodyLarge?.copyWith(
-                      color: Colors.amber.withOpacity(0.9),
+                      color: Colors.amber.withValues(alpha: 0.9),
                       fontWeight: FontWeight.w500,
                       letterSpacing: 0.5,
                     ),
@@ -292,9 +292,11 @@ class _HotelLoadingScreenState extends State<HotelLoadingScreen>
                     width: double.infinity,
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.1),
+                      color: Colors.white.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.white.withOpacity(0.2)),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.2),
+                      ),
                     ),
                     child: Column(
                       children: [
@@ -306,7 +308,7 @@ class _HotelLoadingScreenState extends State<HotelLoadingScreen>
                             key: ValueKey(_currentMessageIndex),
                             textAlign: TextAlign.center,
                             style: theme.textTheme.bodyMedium?.copyWith(
-                              color: Colors.white.withOpacity(0.9),
+                              color: Colors.white.withValues(alpha: 0.9),
                               fontWeight: FontWeight.w400,
                             ),
                           ),
@@ -319,14 +321,14 @@ class _HotelLoadingScreenState extends State<HotelLoadingScreen>
                           height: 6,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(3),
-                            color: Colors.white.withOpacity(0.2),
+                            color: Colors.white.withValues(alpha: 0.2),
                           ),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(3),
                             child: LinearProgressIndicator(
                               backgroundColor: Colors.transparent,
                               valueColor: AlwaysStoppedAnimation<Color>(
-                                Colors.amber.withOpacity(0.8),
+                                Colors.amber.withValues(alpha: 0.8),
                               ),
                             ),
                           ),
@@ -341,7 +343,7 @@ class _HotelLoadingScreenState extends State<HotelLoadingScreen>
                   Text(
                     'Conectando a la Suite IoT v2.1',
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: Colors.white.withOpacity(0.6),
+                      color: Colors.white.withValues(alpha: 0.6),
                       fontWeight: FontWeight.w300,
                     ),
                   ),
@@ -388,8 +390,11 @@ class _IoTDeviceIndicator extends StatelessWidget {
                 height: 50,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: color.withOpacity(0.2),
-                  border: Border.all(color: color.withOpacity(0.5), width: 2),
+                  color: color.withValues(alpha: 0.2),
+                  border: Border.all(
+                    color: color.withValues(alpha: 0.5), 
+                    width: 2
+                  ),
                 ),
                 child: Icon(icon, color: Colors.white, size: 24),
               ),
@@ -397,7 +402,7 @@ class _IoTDeviceIndicator extends StatelessWidget {
               Text(
                 label,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.white.withOpacity(0.8),
+                  color: Colors.white.withValues(alpha: 0.8),
                   fontSize: 10,
                 ),
               ),
@@ -429,7 +434,7 @@ class IoTWavesPainter extends CustomPainter {
       final radius = (20 + i * 15) * (1 + animationValue * 0.5);
       final opacity = 1.0 - (animationValue + i * 0.3) % 1.0;
 
-      paint.color = color.withOpacity(opacity * 0.7);
+      paint.color = color.withValues(alpha: opacity * 0.7);
       canvas.drawCircle(center, radius, paint);
     }
   }
@@ -476,9 +481,9 @@ class HotelErrorScreen extends StatelessWidget {
                   height: 120,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.white.withValues(alpha: 0.2),
                     border: Border.all(
-                      color: Colors.white.withOpacity(0.3),
+                      color: Colors.white.withValues(alpha: 0.3),
                       width: 2,
                     ),
                   ),
@@ -521,7 +526,7 @@ class HotelErrorScreen extends StatelessWidget {
                 Text(
                   'Sistema IoT Hotelero',
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color: Colors.white.withOpacity(0.8),
+                    color: Colors.white.withValues(alpha: 0.8),
                   ),
                 ),
 
@@ -530,15 +535,17 @@ class HotelErrorScreen extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.1),
+                    color: Colors.white.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.white.withOpacity(0.2)),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.2),
+                    ),
                   ),
                   child: Text(
                     message,
                     textAlign: TextAlign.center,
                     style: theme.textTheme.bodyLarge?.copyWith(
-                      color: Colors.white.withOpacity(0.9),
+                      color: Colors.white.withValues(alpha: 0.9),
                     ),
                   ),
                 ),
@@ -576,7 +583,7 @@ class HotelErrorScreen extends StatelessWidget {
                   child: Text(
                     'Contactar Soporte Técnico',
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: Colors.white.withOpacity(0.8),
+                      color: Colors.white.withValues(alpha: 0.8),
                       decoration: TextDecoration.underline,
                     ),
                   ),

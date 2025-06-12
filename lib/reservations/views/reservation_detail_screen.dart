@@ -165,7 +165,20 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
           gradient: LinearGradient(
-            colors: [statusColor.withOpacity(0.1), statusColor.withOpacity(0.05)],
+            colors: [
+              Color.fromARGB(
+                (statusColor.a * 0.1 * 255.0).round(),
+                (statusColor.r * 255.0).round(),
+                (statusColor.g * 255.0).round(),
+                (statusColor.b * 255.0).round(),
+              ),
+              Color.fromARGB(
+                (statusColor.a * 0.05 * 255.0).round(),
+                (statusColor.r * 255.0).round(),
+                (statusColor.g * 255.0).round(),
+                (statusColor.b * 255.0).round(),
+              ),
+            ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),

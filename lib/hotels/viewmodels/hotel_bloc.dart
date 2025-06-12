@@ -87,7 +87,7 @@ class HotelBloc extends Bloc<HotelEvent, hotel_state.HotelState> {
           phone: event.hotelData['phone'],
           email: event.hotelData['email'],
           description: event.hotelData['description'],
-          ownerId: event.hotelData['ownerId'] != null ? event.hotelData['ownerId'] : currentState.userId,
+          ownerId: event.hotelData['ownerId'] ?? currentState.userId,
         );
 
         // Reload hotels to get the updated list
