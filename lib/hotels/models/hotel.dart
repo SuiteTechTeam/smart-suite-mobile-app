@@ -5,12 +5,8 @@ class Hotel {
   final String phone;
   final String email;
   final String? description;
-  final String? website;
   final int? ownerId;
   final double? rating;
-  final int? totalRooms;
-  final List<String>? amenities;
-  final String? imageUrl;
   final DateTime createdAt;
   final DateTime? updatedAt;
 
@@ -21,12 +17,8 @@ class Hotel {
     required this.phone,
     required this.email,
     this.description,
-    this.website,
     this.ownerId,
     this.rating,
-    this.totalRooms,
-    this.amenities,
-    this.imageUrl,
     required this.createdAt,
     this.updatedAt,
   });
@@ -39,14 +31,8 @@ class Hotel {
       phone: json['phone'] ?? '',
       email: json['email'] ?? '',
       description: json['description'],
-      website: json['website'],
       ownerId: json['ownerId'],
       rating: json['rating']?.toDouble(),
-      totalRooms: json['totalRooms'],
-      amenities: json['amenities'] != null 
-          ? List<String>.from(json['amenities']) 
-          : null,
-      imageUrl: json['imageUrl'],
       createdAt: json['createdAt'] != null 
           ? DateTime.parse(json['createdAt']) 
           : DateTime.now(),
@@ -64,12 +50,8 @@ class Hotel {
       'phone': phone,
       'email': email,
       'description': description,
-      'website': website,
       'ownerId': ownerId,
       'rating': rating,
-      'totalRooms': totalRooms,
-      'amenities': amenities,
-      'imageUrl': imageUrl,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),
     };
@@ -82,11 +64,7 @@ class Hotel {
       'phone': phone,
       'email': email,
       'description': description,
-      'website': website,
       'ownerId': ownerId,
-      'totalRooms': totalRooms,
-      'amenities': amenities,
-      'imageUrl': imageUrl,
     };
   }
 
@@ -97,12 +75,8 @@ class Hotel {
     String? phone,
     String? email,
     String? description,
-    String? website,
     int? ownerId,
     double? rating,
-    int? totalRooms,
-    List<String>? amenities,
-    String? imageUrl,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -113,12 +87,8 @@ class Hotel {
       phone: phone ?? this.phone,
       email: email ?? this.email,
       description: description ?? this.description,
-      website: website ?? this.website,
       ownerId: ownerId ?? this.ownerId,
       rating: rating ?? this.rating,
-      totalRooms: totalRooms ?? this.totalRooms,
-      amenities: amenities ?? this.amenities,
-      imageUrl: imageUrl ?? this.imageUrl,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

@@ -6,6 +6,7 @@ import '../services/reservation_service.dart';
 import '../utils/error_handler.dart';
 import '../../iam/services/storage_service.dart';
 import 'dart:io';
+import '../models/reservation.dart';
 
 class ApiTestScreen extends StatefulWidget {
   const ApiTestScreen({super.key});
@@ -237,10 +238,11 @@ class _ApiTestScreenState extends State<ApiTestScreen> {
   Future<void> _testHotelValidation() async {
     try {
       // Test with hotel ID 1 (common test ID)
-      final isValid = await _hotelService.validateHotelId(1).timeout(
+      // The validateHotelId method is not available anymore, so just try to get the hotel by ID
+      final hotel = await _hotelService.getHotelById(1).timeout(
         const Duration(seconds: 30),
       );
-      if (isValid) {
+      if (hotel != null) {
         _addTestResult('Hotel Validation', true, 'Hotel ID 1 is valid');
       } else {
         _addTestResult('Hotel Validation', false, 'Hotel ID 1 is not valid or not found');
@@ -254,17 +256,14 @@ class _ApiTestScreenState extends State<ApiTestScreen> {
   Future<void> _testReservationService() async {
     try {
       // Try to get reservations for hotel ID 1
-      final reservations = await _reservationService.getReservationsByHotelId(1).timeout(
-        const Duration(seconds: 30),
-      );
+      final List<Reservation> fetchedReservations = await _reservationService.getReservationsByHotelId(1);
       _addTestResult(
-        'Reservation Service', 
-        true, 
-        'Successfully retrieved ${reservations.length} reservations for hotel ID 1'
+        'Reservation Service',
+        true,
+        'Successfully retrieved \\${fetchedReservations.length} reservations for hotel ID 1',
       );
     } catch (e) {
-      String errorMsg = 'Failed to get reservations: ${_getDetailedErrorMessage(e)}';
-      _addTestResult('Reservation Service', false, errorMsg);
+      _addTestResult('Reservation Service', false, 'Failed to get reservations: \\${_getDetailedErrorMessage(e)}');
     }
   }
 

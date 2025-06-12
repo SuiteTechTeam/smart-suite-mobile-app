@@ -74,12 +74,11 @@ class _ReservationManagementScreenState extends State<ReservationManagementScree
 
   Future<void> _fetchReservations() async {
     if (hotelId == null) return;
-
     try {
       setState(() {
         isLoading = true;
       });
-      
+      // Use the updated ReservationService method (now uses /api/booking/get-all-bookings)
       List<Reservation> fetchedReservations = await _reservationService.getReservationsByHotelId(hotelId!);
       setState(() {
         reservations = fetchedReservations;

@@ -86,28 +86,6 @@ class HotelService {
       rethrow;
     }
   }
-  // Helper function for HTTP DELETE with timeout and better error handling
-  Future<http.Response> _deleteWithTimeout(String url, Map<String, String> headers) async {
-    try {
-      final response = await http.delete(
-        Uri.parse(url),
-        headers: headers,
-      ).timeout(_defaultTimeout);
-      return response;
-    } on SocketException catch (e) {
-      throw Exception('Network error: Unable to connect to server. Please check your internet connection. Details: $e');
-    } on HttpException catch (e) {
-      throw Exception('HTTP error: $e');
-    } on FormatException catch (e) {
-      throw Exception('Invalid response format: $e');
-    } catch (e) {
-      if (e.toString().contains('TimeoutException')) {
-        throw Exception('Request timeout: Server took too long to respond. Please try again.');
-      }
-      // Don't wrap all exceptions as network errors - preserve original exceptions
-      rethrow;
-    }
-  }
 
   // Get hotel information by ID
   Future<Hotel?> getHotelById(int hotelId) async {
@@ -200,11 +178,7 @@ class HotelService {
     required String phone,
     required String email,
     String? description,
-    String? website,
     int? ownerId,
-    int? totalRooms,
-    List<String>? amenities,
-    String? imageUrl,
   }) async {
     try {
       final headers = await _getHeaders();
@@ -214,12 +188,9 @@ class HotelService {
         'phone': phone,
         'email': email,
         'description': description,
-        'website': website,
-        'ownersId': ownerId, // <-- changed from 'ownerId' to 'ownersId' to match backend
-        'totalRooms': totalRooms,
-        'amenities': amenities,
-        'imageUrl': imageUrl,
-      });      final response = await _postWithTimeout(
+        'ownerId': ownerId,
+      });
+      final response = await _postWithTimeout(
         '$baseUrl/api/v1/hotels',
         headers,
         body,
@@ -233,7 +204,7 @@ class HotelService {
       } else if (response.statusCode == 403) {
         throw Exception('Access denied. Only owners can create hotels.');
       } else {
-        throw Exception('Failed to create hotel: ${response.statusCode} - ${response.body}');
+        throw Exception('Failed to create hotel: {response.statusCode} - ${response.body}');
       }
     } catch (e) {
       rethrow; // Re-throw with improved error message from helper methods
@@ -246,11 +217,7 @@ class HotelService {
     required String phone,
     required String email,
     String? description,
-    String? website,
     int? ownerId,
-    int? totalRooms,
-    List<String>? amenities,
-    String? imageUrl,
   }) async {
     try {
       final hotel = await createHotel(
@@ -259,11 +226,7 @@ class HotelService {
         phone: phone,
         email: email,
         description: description,
-        website: website,
         ownerId: ownerId,
-        totalRooms: totalRooms,
-        amenities: amenities,
-        imageUrl: imageUrl,
       );
       return hotel.toJson();
     } catch (e) {
@@ -278,10 +241,7 @@ class HotelService {
     required String phone,
     required String email,
     String? description,
-    String? website,
-    int? totalRooms,
-    List<String>? amenities,
-    String? imageUrl,
+    int? ownerId,
   }) async {
     try {
       final headers = await _getHeaders();
@@ -291,10 +251,7 @@ class HotelService {
         'phone': phone,
         'email': email,
         'description': description,
-        'website': website,
-        'totalRooms': totalRooms,
-        'amenities': amenities,
-        'imageUrl': imageUrl,
+        'ownerId': ownerId,
       });
 
       final response = await _putWithTimeout(
@@ -317,7 +274,6 @@ class HotelService {
       rethrow; // Re-throw with improved error message from helper methods
     }
   }
-
   // Update hotel returning Map (for backwards compatibility)
   Future<Map<String, dynamic>> updateHotelAsMap({
     required int hotelId,
@@ -326,10 +282,7 @@ class HotelService {
     required String phone,
     required String email,
     String? description,
-    String? website,
-    int? totalRooms,
-    List<String>? amenities,
-    String? imageUrl,
+    int? ownerId,
   }) async {
     try {
       final hotel = await updateHotel(
@@ -338,100 +291,10 @@ class HotelService {
         address: address,
         phone: phone,
         email: email,
-        description: description,        website: website,
-        totalRooms: totalRooms,
-        amenities: amenities,
-        imageUrl: imageUrl,
+        description: description,
+        ownerId: ownerId,
       );
       return hotel.toJson();
-    } catch (e) {
-      rethrow; // Re-throw with improved error message from helper methods
-    }
-  }
-  // Delete hotel
-  Future<bool> deleteHotel(int hotelId) async {
-    try {
-      final headers = await _getHeaders();
-      final response = await _deleteWithTimeout(
-        '$baseUrl/api/v1/hotels/$hotelId',
-        headers,
-      );
-
-      if (response.statusCode == 200 || response.statusCode == 204) {
-        return true;
-      } else if (response.statusCode == 401) {
-        throw Exception('Unauthorized: Please login again');
-      } else if (response.statusCode == 403) {
-        throw Exception('Access denied. Only owners can delete hotels.');
-      } else {
-        throw Exception('Failed to delete hotel: ${response.statusCode} - ${response.body}');
-      }
-    } catch (e) {
-      rethrow; // Re-throw with improved error message from helper methods
-    }
-  }
-
-  // Validate if a hotel ID exists
-  Future<bool> validateHotelId(int hotelId) async {
-    try {
-      final hotel = await getHotelById(hotelId);
-      return hotel != null;
-    } catch (e) {
-      return false;
-    }
-  }
-  // Get hotel statistics
-  Future<Map<String, dynamic>> getHotelStats(int hotelId) async {
-    try {
-      final headers = await _getHeaders();
-      final response = await _getWithTimeout(
-        '$baseUrl/api/v1/hotels/$hotelId/stats',
-        headers,
-      );      if (response.statusCode == 200) {
-        return jsonDecode(response.body);
-      } else if (response.statusCode == 401) {
-        throw Exception('Unauthorized: Please login again');
-      } else {
-        throw Exception('Failed to load hotel stats: ${response.statusCode} - ${response.body}');
-      }
-    } catch (e) {
-      rethrow; // Re-throw with improved error message from helper methods
-    }
-  }
-
-  // Search hotels
-  Future<List<Hotel>> searchHotels({
-    String? query,
-    String? city,
-    double? minRating,
-    double? maxRating,
-    List<String>? amenities,
-  }) async {
-    try {
-      final headers = await _getHeaders();
-      
-      // Build query parameters
-      final queryParams = <String, String>{};
-      if (query != null && query.isNotEmpty) queryParams['query'] = query;
-      if (city != null && city.isNotEmpty) queryParams['city'] = city;
-      if (minRating != null) queryParams['minRating'] = minRating.toString();
-      if (maxRating != null) queryParams['maxRating'] = maxRating.toString();
-      if (amenities != null && amenities.isNotEmpty) {
-        queryParams['amenities'] = amenities.join(',');
-      }
-
-      final uri = Uri.parse('$baseUrl/api/v1/hotels/search').replace(
-        queryParameters: queryParams.isNotEmpty ? queryParams : null,
-      );      final response = await _getWithTimeout(uri.toString(), headers);
-
-      if (response.statusCode == 200) {
-        final List<dynamic> data = jsonDecode(response.body);
-        return data.map((json) => Hotel.fromJson(json)).toList();
-      } else if (response.statusCode == 401) {
-        throw Exception('Unauthorized: Please login again');
-      } else {
-        throw Exception('Failed to search hotels: ${response.statusCode} - ${response.body}');
-      }
     } catch (e) {
       rethrow; // Re-throw with improved error message from helper methods
     }

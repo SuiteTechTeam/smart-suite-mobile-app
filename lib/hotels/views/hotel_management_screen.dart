@@ -199,10 +199,6 @@ class HotelManagementView extends StatelessWidget {
                 ],
               ),
             ],
-            if (hotel.totalRooms != null) ...[
-              const SizedBox(height: 8),
-              _buildInfoRow(Icons.bed, '${hotel.totalRooms} rooms'),
-            ],
             const SizedBox(height: 16),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -270,10 +266,6 @@ class HotelManagementView extends StatelessWidget {
     final phoneController = TextEditingController(text: existingHotel?.phone ?? '');
     final emailController = TextEditingController(text: existingHotel?.email ?? '');
     final descriptionController = TextEditingController(text: existingHotel?.description ?? '');
-    final websiteController = TextEditingController(text: existingHotel?.website ?? '');
-    final totalRoomsController = TextEditingController(
-      text: existingHotel?.totalRooms?.toString() ?? ''
-    );
     final formKey = GlobalKey<FormState>();
 
     showDialog(
@@ -356,32 +348,6 @@ class HotelManagementView extends StatelessWidget {
                         border: OutlineInputBorder(),
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: websiteController,
-                      decoration: const InputDecoration(
-                        labelText: 'Website',
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: totalRoomsController,
-                      keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        labelText: 'Total Rooms',
-                        border: OutlineInputBorder(),
-                      ),
-                      validator: (value) {
-                        if (value != null && value.isNotEmpty) {
-                          final rooms = int.tryParse(value);
-                          if (rooms == null || rooms <= 0) {
-                            return 'Please enter a valid number of rooms';
-                          }
-                        }
-                        return null;
-                      },
-                    ),
                   ],
                 ),
               ),
@@ -404,10 +370,6 @@ class HotelManagementView extends StatelessWidget {
                     'email': emailController.text.trim(),
                     'description': descriptionController.text.trim().isEmpty 
                         ? null : descriptionController.text.trim(),
-                    'website': websiteController.text.trim().isEmpty 
-                        ? null : websiteController.text.trim(),
-                    'totalRooms': totalRoomsController.text.trim().isEmpty 
-                        ? null : int.tryParse(totalRoomsController.text.trim()),
                   };
 
                   if (existingHotel != null) {

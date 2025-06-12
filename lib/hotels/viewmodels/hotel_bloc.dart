@@ -79,8 +79,7 @@ class HotelBloc extends Bloc<HotelEvent, hotel_state.HotelState> {
           phone: event.hotelData['phone'],
           email: event.hotelData['email'],
           description: event.hotelData['description'],
-          website: event.hotelData['website'],
-          totalRooms: event.hotelData['totalRooms'],
+          ownerId: currentState.userId,
         );
 
         // Reload hotels to get the updated list
@@ -117,8 +116,7 @@ class HotelBloc extends Bloc<HotelEvent, hotel_state.HotelState> {
           phone: event.hotelData['phone'],
           email: event.hotelData['email'],
           description: event.hotelData['description'],
-          website: event.hotelData['website'],
-          totalRooms: event.hotelData['totalRooms'],
+          ownerId: currentState.userId,
         );
 
         // Reload hotels to get the updated list
@@ -137,30 +135,7 @@ class HotelBloc extends Bloc<HotelEvent, hotel_state.HotelState> {
     HotelDeleteRequested event,
     Emitter<hotel_state.HotelState> emit,
   ) async {
-    try {
-      final currentState = state;
-      if (currentState is hotel_state.HotelLoaded) {
-        // Check if user has owner role before allowing hotel deletion
-        if (currentState.userRole?.toLowerCase() != 'owner') {
-          emit(hotel_state.HotelError('Access denied. Only owners can delete hotels.'));
-          return;
-        }
-
-        emit(hotel_state.HotelLoading());
-
-        await hotelService.deleteHotel(event.hotelId);
-
-        // Reload hotels to get the updated list
-        add(HotelLoadRequested());
-
-        emit(hotel_state.HotelOperationSuccess(
-          message: 'Hotel deleted successfully',
-          hotels: currentState.hotels,
-        ));
-      }
-    } catch (e) {
-      emit(hotel_state.HotelError('Failed to delete hotel: ${e.toString()}'));
-    }
+    emit(hotel_state.HotelError('Delete hotel is not supported by the backend.'));
   }Future<void> _onHotelSelected(
     HotelSelected event,
     Emitter<hotel_state.HotelState> emit,

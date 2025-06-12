@@ -24,9 +24,9 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
 
   Future<void> _updateReservationStatus(String newStatus) async {
     try {
+      // Use the updated ReservationService method (uses /api/booking/update-booking-state)
       await _reservationService.updateReservationStatus(reservation.id, newStatus);
       setState(() {
-        // Create a new reservation with updated status
         reservation = Reservation(
           id: reservation.id,
           customerId: reservation.customerId,

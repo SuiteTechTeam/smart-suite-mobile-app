@@ -63,12 +63,12 @@ class ReservationService {
     }
   }
 
-  // Create a new reservation
+  // Create a new reservation (booking)
   Future<bool> createReservation(Reservation reservation) async {
     try {
       final headers = await _getHeaders();
       final response = await _postWithTimeout(
-        '$baseUrl/api/v1/reservations/create',
+        '$baseUrl/api/v1/booking/create-booking',
         headers,
         json.encode(reservation.toJson()),
       );
@@ -78,17 +78,18 @@ class ReservationService {
       } else if (response.statusCode == 401) {
         throw Exception('Unauthorized: Please login again');
       } else {
-        throw Exception('Failed to create reservation: ${response.statusCode} - ${response.body}');
+        throw Exception('Failed to create reservation: \\${response.statusCode} - \\${response.body}');
       }
     } catch (e) {
       rethrow;
     }
   }
-  // Get all reservations for a hotel
+
+  // Get all reservations (bookings) for a hotel
   Future<List<Reservation>> getReservationsByHotelId(int hotelId) async {
     try {
       final headers = await _getHeaders();
-      final response = await _getWithTimeout('$baseUrl/api/v1/reservations/hotel/$hotelId', headers);
+      final response = await _getWithTimeout('$baseUrl/api/v1/booking/get-all-bookings?hotelId=$hotelId', headers);
 
       if (response.statusCode == 200) {
         final List<dynamic> jsonData = json.decode(response.body);
@@ -96,17 +97,18 @@ class ReservationService {
       } else if (response.statusCode == 401) {
         throw Exception('Unauthorized: Please login again');
       } else {
-        throw Exception('Failed to load reservations: ${response.statusCode} - ${response.body}');
+        throw Exception('Failed to load reservations: \\${response.statusCode} - \\${response.body}');
       }
     } catch (e) {
       rethrow;
     }
   }
-  // Get reservations by customer
+
+  // Get reservations (bookings) by customer
   Future<List<Reservation>> getReservationsByCustomerId(int customerId) async {
     try {
       final headers = await _getHeaders();
-      final response = await _getWithTimeout('$baseUrl/api/v1/reservations/customer/$customerId', headers);
+      final response = await _getWithTimeout('$baseUrl/api/v1/booking/get-booking-by-customer-id?customerId=$customerId', headers);
 
       if (response.statusCode == 200) {
         final List<dynamic> jsonData = json.decode(response.body);
@@ -114,7 +116,26 @@ class ReservationService {
       } else if (response.statusCode == 401) {
         throw Exception('Unauthorized: Please login again');
       } else {
-        throw Exception('Failed to load customer reservations: ${response.statusCode} - ${response.body}');
+        throw Exception('Failed to load customer reservations: \\${response.statusCode} - \\${response.body}');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // Get reservation (booking) by ID
+  Future<Reservation?> getReservationById(int reservationId) async {
+    try {
+      final headers = await _getHeaders();
+      final response = await _getWithTimeout('$baseUrl/api/booking/get-booking-by-id?id=$reservationId', headers);
+
+      if (response.statusCode == 200) {
+        final jsonData = json.decode(response.body);
+        return Reservation.fromJson(jsonData);
+      } else if (response.statusCode == 404) {
+        return null;
+      } else {
+        throw Exception('Failed to load reservation: \\${response.statusCode} - \\${response.body}');
       }
     } catch (e) {
       rethrow;
@@ -126,7 +147,7 @@ class ReservationService {
     try {
       final headers = await _getHeaders();
       final response = await http.get(
-        Uri.parse('$baseUrl/api/reservations/resource-type/$resourceType?hotelId=$hotelId'),
+        Uri.parse('$baseUrl/api/v1/reservations/resource-type/$resourceType?hotelId=$hotelId'),
         headers: headers,
       );
 
@@ -146,7 +167,7 @@ class ReservationService {
     try {
       final headers = await _getHeaders();
       final response = await http.put(
-        Uri.parse('$baseUrl/api/reservations/$reservationId/status'),
+        Uri.parse('$baseUrl/api/v1/reservations/$reservationId/status'),
         headers: headers,
         body: json.encode({'status': status}),
       );
@@ -179,28 +200,6 @@ class ReservationService {
     }
   }
 
-  // Get reservation by ID
-  Future<Reservation?> getReservationById(int reservationId) async {
-    try {
-      final headers = await _getHeaders();
-      final response = await http.get(
-        Uri.parse('$baseUrl/api/reservations/$reservationId'),
-        headers: headers,
-      );
-
-      if (response.statusCode == 200) {
-        final jsonData = json.decode(response.body);
-        return Reservation.fromJson(jsonData);
-      } else if (response.statusCode == 404) {
-        return null;
-      } else {
-        throw Exception('Failed to load reservation: ${response.statusCode} - ${response.body}');
-      }
-    } catch (e) {
-      rethrow;
-    }
-  }
-
   // Get available resources by type and date
   Future<List<ReservationResource>> getAvailableResources(
     String resourceType, 
@@ -212,7 +211,7 @@ class ReservationService {
     try {
       final headers = await _getHeaders();
       final response = await http.get(
-        Uri.parse('$baseUrl/api/reservation-resources/available?'
+        Uri.parse('$baseUrl/api/v1/reservation-resources/available?'
           'type=$resourceType&hotelId=$hotelId&date=${date.toIso8601String()}'
           '&startTime=${startTime.toIso8601String()}&endTime=${endTime.toIso8601String()}'),
         headers: headers,
@@ -234,7 +233,7 @@ class ReservationService {
     try {
       final headers = await _getHeaders();
       final response = await http.get(
-        Uri.parse('$baseUrl/api/reservation-resources/hotel/$hotelId'),
+        Uri.parse('$baseUrl/api/v1/reservation-resources/hotel/$hotelId'),
         headers: headers,
       );
 

@@ -190,10 +190,6 @@ class HotelDetailScreen extends StatelessWidget {
                         _buildInfoRow(Icons.phone, 'Phone', hotel.phone),
                         const SizedBox(height: 8),
                         _buildInfoRow(Icons.email, 'Email', hotel.email),
-                        if (hotel.website != null && hotel.website!.isNotEmpty) ...[
-                          const SizedBox(height: 8),
-                          _buildInfoRow(Icons.web, 'Website', hotel.website!),
-                        ],
                       ],
                     ),
                   ),
@@ -248,13 +244,10 @@ class HotelDetailScreen extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 12),
-                        if (hotel.totalRooms != null)
-                          _buildInfoRow(Icons.bed, 'Total Rooms', '${hotel.totalRooms}'),
                         if (hotel.ownerId != null) ...[
-                          const SizedBox(height: 8),
                           _buildInfoRow(Icons.person, 'Owner ID', '${hotel.ownerId}'),
+                          const SizedBox(height: 8),
                         ],
-                        const SizedBox(height: 8),
                         _buildInfoRow(
                           Icons.access_time,
                           'Created',
@@ -272,44 +265,6 @@ class HotelDetailScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-
-                // Amenities
-                if (hotel.amenities != null && hotel.amenities!.isNotEmpty) ...[
-                  const SizedBox(height: 16),
-                  Card(
-                    elevation: 2,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Amenities',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Theme.of(context).primaryColor,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          Wrap(
-                            spacing: 8,
-                            runSpacing: 8,
-                            children: hotel.amenities!.map((amenity) {
-                              return Chip(
-                                label: Text(amenity),
-                                backgroundColor: Theme.of(context).primaryColor.withValues(alpha: 0.1),
-                                labelStyle: TextStyle(
-                                  color: Theme.of(context).primaryColor,
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
 
                 const SizedBox(height: 24),
               ],
