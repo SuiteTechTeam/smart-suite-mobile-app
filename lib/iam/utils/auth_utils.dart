@@ -5,6 +5,7 @@ import '../viewmodels/auth_state.dart';
 import '../viewmodels/auth_event.dart';
 import '../models/authenticated_user.dart';
 import '../services/storage_service.dart';
+import '../services/auth_service.dart';
 
 /// Utility class for easy access to authentication features
 class AuthUtils {
@@ -42,5 +43,10 @@ class AuthUtils {
   /// Get headers with authentication token for API requests
   static Future<Map<String, String>> getAuthHeaders() async {
     return await StorageService().getAuthHeaders();
+  }
+  
+  /// Get all user information from JWT token
+  static Future<Map<String, dynamic>?> getUserInfoFromToken() async {
+    return await AuthService().getUserInfo();
   }
 }

@@ -1,8 +1,11 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
+import '../models/authenticated_user.dart';
+import 'storage_service.dart';
 
 class AuthService {
   final FlutterSecureStorage storage = const FlutterSecureStorage();
+  final StorageService _storageService = StorageService();
 
   AuthService();
 
@@ -14,12 +17,8 @@ class AuthService {
   /// Get user ID from JWT token
   Future<int?> getUserId() async {
     try {
-      String? token = await getToken();
-      if (token != null) {
-        Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
-        return int.tryParse(decodedToken['sub'] ?? '');
-      }
-      return null;
+      final user = await _storageService.getAuthenticatedUser();
+      return user?.id;
     } catch (e) {
       return null;
     }
@@ -27,25 +26,28 @@ class AuthService {
 
   /// Get user role from JWT token
   Future<String?> getUserRole() async {
-    try {
-      String? token = await getToken();
-      if (token != null) {
-        Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
-        return decodedToken['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
-      }
-      return null;
-    } catch (e) {
-      return null;
-    }
+    // Si el modelo AuthenticatedUser tiene el rol, aquí deberías retornarlo
+    // Si no, deberías extender AuthenticatedUser para incluir el rol
+    // Por ahora, solo retorna null
+    return null;
   }
 
   /// Get user email from JWT token
   Future<String?> getUserEmail() async {
     try {
-      String? token = await getToken();
-      if (token != null) {
-        Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
-        return decodedToken['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'];
+      final user = await _storageService.getAuthenticatedUser();
+      return user?.email;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Get all user information from storage (respuesta del endpoint sign-in)
+  Future<Map<String, dynamic>?> getUserInfo() async {
+    try {
+      final user = await _storageService.getAuthenticatedUser();
+      if (user != null) {
+        return user.toJson();
       }
       return null;
     } catch (e) {
@@ -55,38 +57,9 @@ class AuthService {
 
   /// Get hotel ID from JWT token (if present)
   Future<int?> getHotelIdFromToken() async {
-    try {
-      String? token = await getToken();
-      if (token != null) {
-        Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
-        String? locality = decodedToken['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/locality'];
-        return locality != null ? int.tryParse(locality) : null;
-      }
-      return null;
-    } catch (e) {
-      return null;
-    }
-  }
-
-  /// Get all user information from JWT token
-  Future<Map<String, dynamic>?> getUserInfo() async {
-    try {
-      String? token = await getToken();
-      if (token != null) {
-        Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
-        return {
-          'id': int.tryParse(decodedToken['sub'] ?? ''),
-          'email': decodedToken['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'],
-          'role': decodedToken['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'],
-          'hotelId': decodedToken['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/locality'] != null
-              ? int.tryParse(decodedToken['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/locality'])
-              : null,
-        };
-      }
-      return null;
-    } catch (e) {
-      return null;
-    }
+    // Si el modelo AuthenticatedUser tiene hotelId, aquí deberías retornarlo
+    // Si no, deberías extender AuthenticatedUser para incluirlo
+    return null;
   }
 
   /// Check if user is authenticated

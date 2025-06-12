@@ -193,10 +193,28 @@ abstract class BaseService {
       final token = await _storageService.getToken();
       if (token != null && !JwtDecoder.isExpired(token)) {
         final decodedToken = JwtDecoder.decode(token);
+        final roleString = decodedToken['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+        int? roleId;
+        if (roleString != null) {
+          switch (roleString.toLowerCase()) {
+            case 'owner':
+              roleId = 1;
+              break;
+            case 'admin':
+              roleId = 2;
+              break;
+            case 'guest':
+              roleId = 3;
+              break;
+            default:
+              roleId = null;
+          }
+        }
         return {
           'id': int.tryParse(decodedToken['sub'] ?? ''),
           'email': decodedToken['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'],
-          'role': decodedToken['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'],
+          'role': roleString,
+          'roleId': roleId,
           'hotelId': decodedToken['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/locality'] != null
               ? int.tryParse(decodedToken['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/locality'])
               : null,
