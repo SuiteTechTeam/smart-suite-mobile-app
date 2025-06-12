@@ -215,7 +215,7 @@ class HotelService {
         'email': email,
         'description': description,
         'website': website,
-        'ownerId': ownerId,
+        'ownersId': ownerId, // <-- changed from 'ownerId' to 'ownersId' to match backend
         'totalRooms': totalRooms,
         'amenities': amenities,
         'imageUrl': imageUrl,
