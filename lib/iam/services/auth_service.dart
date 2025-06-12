@@ -1,6 +1,5 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
-import '../models/authenticated_user.dart';
 import 'storage_service.dart';
 
 class AuthService {
