@@ -14,7 +14,7 @@ class AuthService {
     return await storage.read(key: 'token');
   }
 
-  /// Get user ID from JWT token
+  /// Get user ID from storage
   Future<int?> getUserId() async {
     try {
       final user = await _storageService.getAuthenticatedUser();
@@ -24,15 +24,27 @@ class AuthService {
     }
   }
 
-  /// Get user role from JWT token
+  /// Get user role from storage
   Future<String?> getUserRole() async {
-    // Si el modelo AuthenticatedUser tiene el rol, aquí deberías retornarlo
-    // Si no, deberías extender AuthenticatedUser para incluir el rol
-    // Por ahora, solo retorna null
-    return null;
+    try {
+      final user = await _storageService.getAuthenticatedUser();
+      return user?.role;
+    } catch (e) {
+      return null;
+    }
   }
 
-  /// Get user email from JWT token
+  /// Get user roleId from storage
+  Future<int?> getUserRoleId() async {
+    try {
+      final user = await _storageService.getAuthenticatedUser();
+      return user?.roleId;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Get user email from storage
   Future<String?> getUserEmail() async {
     try {
       final user = await _storageService.getAuthenticatedUser();
@@ -91,6 +103,7 @@ class AuthService {
   /// Clear stored authentication data
   Future<void> clearAuth() async {
     await storage.delete(key: 'token');
+    await storage.delete(key: 'authenticated_user');
     await storage.delete(key: 'selected_hotel_id');
   }
 

@@ -22,9 +22,16 @@ class AuthRepository {
       roleId: role.id,
     );
 
-    final authenticatedUser = await _apiService.signIn(request);
+    final authenticatedUserFromApi = await _apiService.signIn(request);
+    // El backend no retorna roleId ni role, así que los agregamos manualmente
+    final authenticatedUser = AuthenticatedUser(
+      id: authenticatedUserFromApi.id,
+      email: authenticatedUserFromApi.email,
+      token: authenticatedUserFromApi.token,
+      roleId: role.id,
+      role: role.name,
+    );
     await _storageService.saveAuthenticatedUser(authenticatedUser);
-    
     return authenticatedUser;
   }
 
