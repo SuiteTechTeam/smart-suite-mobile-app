@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 import '../../hotels/services/hotel_service.dart';
 import '../services/reservation_service.dart';
 import '../utils/error_handler.dart';
+import '../../iam/services/storage_service.dart';
 import 'dart:io';
 
 class ApiTestScreen extends StatefulWidget {
@@ -125,6 +127,9 @@ class _ApiTestScreenState extends State<ApiTestScreen> {
     // Test 1: Check if we have a valid token
     await _testTokenAvailability();
 
+    // Test 1.5: Test StorageService vs Direct Storage comparison  
+    await _testStorageServiceVsDirectStorage();
+
     // Test 2: Test basic API endpoint reachability
     await _testAPIReachability();
 
@@ -181,7 +186,30 @@ class _ApiTestScreenState extends State<ApiTestScreen> {
     try {
       String? token = await storage.read(key: 'token');
       if (token != null && token.isNotEmpty) {
-        _addTestResult('Token Availability', true, 'Authentication token found');
+        // Check if token is expired
+        bool isExpired = false;
+        String tokenDetails = '';
+        
+        try {
+          isExpired = JwtDecoder.isExpired(token);
+          Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
+          
+          // Get some basic info from token
+          String? role = decodedToken['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+          String? email = decodedToken['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'];
+          String? userId = decodedToken['sub'];
+          
+          tokenDetails = 'Role: $role, Email: $email, UserID: $userId';
+        } catch (e) {
+          tokenDetails = 'Token parsing failed: $e';
+          isExpired = true;
+        }
+        
+        if (isExpired) {
+          _addTestResult('Token Availability', false, 'Token found but EXPIRED - please login again. $tokenDetails');
+        } else {
+          _addTestResult('Token Availability', true, 'Valid authentication token found. $tokenDetails');
+        }
       } else {
         _addTestResult('Token Availability', false, 'No authentication token found - please login first');
       }
@@ -267,6 +295,55 @@ class _ApiTestScreenState extends State<ApiTestScreen> {
       }
     }
   }
+  Future<void> _testStorageServiceVsDirectStorage() async {
+    try {
+      // Import the StorageService
+      final storageService = StorageService();
+      
+      // Direct storage access
+      String? directToken = await storage.read(key: 'token').timeout(const Duration(seconds: 10));
+      bool directTokenExists = directToken != null && directToken.isNotEmpty;
+      bool directTokenValid = false;
+        if (directTokenExists) {
+        try {
+          directTokenValid = !JwtDecoder.isExpired(directToken);
+        } catch (e) {
+          directTokenValid = false;
+        }
+      }
+        // StorageService access
+      String? serviceToken = await storageService.getToken().timeout(const Duration(seconds: 10));
+      
+      // Get headers from StorageService to see if it includes Authorization
+      Map<String, String> headers = await storageService.getAuthHeaders().timeout(const Duration(seconds: 10));
+      bool serviceIncludesAuth = headers.containsKey('Authorization');
+      
+      String resultMessage = '';
+      bool testPassed = true;
+      
+      if (directToken != serviceToken) {
+        resultMessage = 'MISMATCH: Direct token != Service token';
+        testPassed = false;
+      } else if (directTokenExists && !serviceIncludesAuth) {
+        resultMessage = 'ISSUE: Token exists but StorageService excludes Authorization header. Token might be expired.';
+        testPassed = false;
+      } else if (!directTokenExists) {
+        resultMessage = 'No token found in either method';
+        testPassed = false;
+      } else if (directTokenValid && serviceIncludesAuth) {
+        resultMessage = 'Both methods work correctly - token is valid and headers include auth';
+        testPassed = true;
+      } else {
+        resultMessage = 'Direct token valid: $directTokenValid, Service includes auth: $serviceIncludesAuth';
+        testPassed = directTokenValid == serviceIncludesAuth;
+      }
+      
+      _addTestResult('Storage Service vs Direct Storage', testPassed, resultMessage);
+    } catch (e) {
+      _addTestResult('Storage Service vs Direct Storage', false, 'Error comparing storage methods: $e');
+    }
+  }
+
   String _getDetailedErrorMessage(dynamic error) {
     String errorString = error.toString().toLowerCase();
     
