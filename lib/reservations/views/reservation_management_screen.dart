@@ -48,9 +48,11 @@ class _ReservationManagementScreenState extends State<ReservationManagementScree
     // First try to get hotel ID from JWT token
     int? tokenHotelId = await _getHotelId();
     if (tokenHotelId != null) {
-      setState(() {
-        hotelId = tokenHotelId;
-      });
+      if (mounted) {
+        setState(() {
+          hotelId = tokenHotelId;
+        });
+      }
       await _fetchReservations();
       return;
     }
@@ -58,38 +60,45 @@ class _ReservationManagementScreenState extends State<ReservationManagementScree
     // If not in token, try to get from stored preferences
     int? storedHotelId = await _getStoredHotelId();
     if (storedHotelId != null) {
-      setState(() {
-        hotelId = storedHotelId;
-      });
+      if (mounted) {
+        setState(() {
+          hotelId = storedHotelId;
+        });
+      }
       await _fetchReservations();
       return;
     }
     
     // If no hotel ID found anywhere, show dialog
-    setState(() {
-      isLoading = false;
-    });
+    if (mounted) {
+      setState(() {
+        isLoading = false;
+      });
+    }
     _showHotelIdDialog();
   }
 
   Future<void> _fetchReservations() async {
     if (hotelId == null) return;
     try {
-      setState(() {
-        isLoading = true;
-      });
+      if (mounted) {
+        setState(() {
+          isLoading = true;
+        });
+      }
       // Use the updated ReservationService method (now uses /api/booking/get-all-bookings)
       List<Reservation> fetchedReservations = await _reservationService.getReservationsByHotelId(hotelId!);
-      setState(() {
-        reservations = fetchedReservations;
-        isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        isLoading = false;
-      });
       if (mounted) {
-        _showSnackBar('Failed to load reservations: $e');
+        setState(() {
+          reservations = fetchedReservations;
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
       }
     }
   }
@@ -212,33 +221,33 @@ class _ReservationManagementScreenState extends State<ReservationManagementScree
   }
 
   void _setHotelId(int newHotelId) async {
-    setState(() {
-      hotelId = newHotelId;
-      isLoading = true;
-      hotelName = null; // Reset hotel name while loading
-    });
-    
+    if (mounted) {
+      setState(() {
+        hotelId = newHotelId;
+        isLoading = true;
+        hotelName = null;
+      });
+    }
     try {
-      // Validate hotel ID and get hotel information
       final hotelData = await _hotelService.getHotelById(newHotelId);
       if (hotelData != null) {
-        setState(() {
-          hotelName = hotelData.name;
-        });
-        
-        // Store the hotel ID in secure storage for future use
+        if (mounted) {
+          setState(() {
+            hotelName = hotelData.name;
+          });
+        }
         await storage.write(key: 'selected_hotel_id', value: newHotelId.toString());
-        
         if (mounted) {
           _showSnackBar('Connected to hotel: ${hotelName ?? 'ID $newHotelId'}');
         }
         await _fetchReservations();
       } else {
-        // Hotel not found, but allow user to continue with testing
-        setState(() {
-          hotelName = 'Test Hotel (ID: $newHotelId)';
-          isLoading = false;
-        });
+        if (mounted) {
+          setState(() {
+            hotelName = 'Test Hotel (ID: $newHotelId)';
+            isLoading = false;
+          });
+        }
         await storage.write(key: 'selected_hotel_id', value: newHotelId.toString());
         if (mounted) {
           _showSnackBar('Hotel ID $newHotelId not found on server. Using for testing.');
@@ -246,16 +255,13 @@ class _ReservationManagementScreenState extends State<ReservationManagementScree
         await _fetchReservations();
       }
     } catch (e) {
-      // Network error, but allow user to continue
-      setState(() {
-        hotelName = 'Test Hotel (ID: $newHotelId)';
-        isLoading = false;
-      });
-      await storage.write(key: 'selected_hotel_id', value: newHotelId.toString());
       if (mounted) {
-        _showSnackBar('Cannot verify hotel ID. Using for testing.');
+        setState(() {
+          hotelName = 'Error loading hotel';
+          isLoading = false;
+        });
+        _showSnackBar('Error connecting to hotel.');
       }
-      await _fetchReservations();
     }
   }
 

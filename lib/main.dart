@@ -5,6 +5,7 @@ import 'iam/services/storage_service.dart';
 import 'iam/services/auth_repository.dart';
 import 'iam/viewmodels/auth_bloc.dart';
 import 'iam/viewmodels/auth_event.dart';
+import 'iam/viewmodels/auth_state.dart';
 import 'iam/views/login_page.dart';
 import 'iam/views/home_page.dart';
 import 'iam/views/auth_wrapper.dart';
@@ -23,7 +24,6 @@ class SmartSuiteApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Create services directly
     final storageService = StorageService();
     final apiService = AuthApiService();
     final authRepository = AuthRepository(
@@ -32,9 +32,8 @@ class SmartSuiteApp extends StatelessWidget {
     );
 
     return BlocProvider(
-      create: (context) => AuthBloc(
-        authRepository: authRepository,
-      )..add(AuthStatusChecked()),
+      create: (context) =>
+          AuthBloc(authRepository: authRepository)..add(AuthStatusChecked()),
       child: MaterialApp(
         title: 'Smart Suite',
         theme: ThemeData(
@@ -43,29 +42,28 @@ class SmartSuiteApp extends StatelessWidget {
             brightness: Brightness.light,
           ),
           useMaterial3: true,
-          appBarTheme: const AppBarTheme(
-            centerTitle: true,
-            elevation: 0,
-          ),
-        ),        home: const AuthWrapper(),        routes: {
+          appBarTheme: const AppBarTheme(centerTitle: true, elevation: 0),
+        ),
+        home: const AuthWrapper(),
+        routes: {
           '/login': (context) => const LoginPage(),
-          '/home': (context) => const HomePage(),
+          '/home': (context) => const HomeTabNavigation(),
           '/reservations': (context) => const ReservationManagementScreen(),
           '/add-reservation': (context) => const AddReservationScreen(),
-          '/reservations/add': (context) => const AddReservationScreen(), // Add alternative route
+          '/reservations/add': (context) => const AddReservationScreen(),
           '/hotels': (context) => const HotelManagementScreen(),
           '/api-test': (context) => const ApiTestScreen(),
         },
         onGenerateRoute: (settings) {
-          // Handle any unknown routes
           if (settings.name == '/reservations/add') {
-            return MaterialPageRoute(builder: (context) => const AddReservationScreen());
+            return MaterialPageRoute(
+              builder: (context) => const AddReservationScreen(),
+            );
           }
           return null;
         },
         onUnknownRoute: (settings) {
-          // Fallback for unknown routes
-          return MaterialPageRoute(builder: (context) => const HomePage());
+          return MaterialPageRoute(builder: (context) => const HomeTabNavigation());
         },
         debugShowCheckedModeBanner: false,
       ),
@@ -73,88 +71,95 @@ class SmartSuiteApp extends StatelessWidget {
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
+class HomeTabNavigation extends StatefulWidget {
+  const HomeTabNavigation({super.key});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<HomeTabNavigation> createState() => _HomeTabNavigationState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class _HomeTabNavigationState extends State<HomeTabNavigation> {
+  int _selectedIndex = 0;
 
-  void _incrementCounter() {
+  static const List<Widget> _widgetOptions = <Widget>[
+    HomePage(),
+    HotelManagementScreen(),
+    ReservationManagementScreen(),
+    ApiTestScreen(),
+  ];
+
+  static const List<String> _titles = <String>[
+    'Home',
+    'Hotels',
+    'Reservations',
+    'Test API',
+  ];
+
+  void _onItemTapped(int index) {
     setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
+      _selectedIndex = index;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
       appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
+        title: Text(_titles[_selectedIndex]),
+        backgroundColor: Theme.of(context).primaryColor,
+        foregroundColor: Colors.white,
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
-        ),
+      body: _widgetOptions[_selectedIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.hotel),
+            label: 'Hotels',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.book_online),
+            label: 'Reservations',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.api),
+            label: 'Test API',
+          ),
+        ],
+        currentIndex: _selectedIndex,
+        selectedItemColor: Theme.of(context).primaryColor,
+        onTap: _onItemTapped,
+        type: BottomNavigationBarType.fixed,
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+    );
+  }
+}
+
+class AuthWrapper extends StatelessWidget {
+  const AuthWrapper({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<AuthBloc, AuthState>(
+      builder: (context, state) {
+        if (state is AuthLoading || state is AuthInitial) {
+          return const HotelLoadingScreen();
+        } else if (state is AuthAuthenticated) {
+          return const HomeTabNavigation();
+        } else if (state is AuthError) {
+          return HotelErrorScreen(
+            message: state.message,
+            onRetry: () {
+              context.read<AuthBloc>().add(AuthStatusChecked());
+            },
+          );
+        } else {
+          return const LoginPage();
+        }
+      },
     );
   }
 }
