@@ -13,6 +13,7 @@ import 'reservations/views/reservation_management_screen.dart';
 import 'reservations/views/add_reservation_screen.dart';
 import 'hotels/views/hotel_management_screen.dart';
 import 'reservations/views/api_test_screen.dart';
+import 'iam/views/account/account_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -86,6 +87,7 @@ class _HomeTabNavigationState extends State<HomeTabNavigation> {
     HotelManagementScreen(),
     ReservationManagementScreen(),
     ApiTestScreen(),
+    AccountPage(), // Added Account tab
   ];
 
   static const List<String> _titles = <String>[
@@ -93,6 +95,7 @@ class _HomeTabNavigationState extends State<HomeTabNavigation> {
     'Hotels',
     'Reservations',
     'Test API',
+    'Account', // Added Account tab title
   ];
 
   void _onItemTapped(int index) {
@@ -127,6 +130,10 @@ class _HomeTabNavigationState extends State<HomeTabNavigation> {
           BottomNavigationBarItem(
             icon: Icon(Icons.api),
             label: 'Test API',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Account',
           ),
         ],
         currentIndex: _selectedIndex,
