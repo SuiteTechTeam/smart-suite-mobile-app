@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
-import '../lib/hotels/models/hotel.dart';
-import '../lib/hotels/utils/hotel_utils.dart';
-import '../lib/hotels/services/hotel_service.dart';
+import 'package:smart_suite/hotels/models/hotel.dart';
+import 'package:smart_suite/hotels/utils/hotel_utils.dart';
+import 'package:smart_suite/hotels/services/hotel_service.dart';
 
 class MockHttpClient extends http.BaseClient {
   final Map<String, dynamic> responseData;

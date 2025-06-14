@@ -3,7 +3,7 @@ import '../../services/user_service.dart';
 import '../../utils/auth_utils.dart';
 
 class AccountPage extends StatefulWidget {
-  const AccountPage({Key? key}) : super(key: key);
+  const AccountPage({super.key});
 
   @override
   State<AccountPage> createState() => _AccountPageState();
