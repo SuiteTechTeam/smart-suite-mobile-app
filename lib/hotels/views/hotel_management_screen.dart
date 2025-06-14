@@ -34,10 +34,9 @@ class HotelManagementView extends StatelessWidget {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(state.message)),
             );
-          } else if (state is hotel_state.HotelError) {
-            ScaffoldMessenger.of(context).showSnackBar(
+          } else if (state is hotel_state.HotelError) {            ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('Error: ${state.message}'),
+                content: Text('Error: ${state.message}', style: const TextStyle(color: Colors.white)),
                 backgroundColor: Colors.red,
               ),
             );
@@ -59,11 +58,10 @@ class HotelManagementView extends StatelessWidget {
                       size: 64,
                       color: Colors.red[400],
                     ),
-                    const SizedBox(height: 16),
-                    Text(
+                    const SizedBox(height: 16),                    Text(
                       'Error: ${state.message}',
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.red[600]),
+                      style: TextStyle(color: Colors.grey[800]),
                     ),
                     const SizedBox(height: 16),
                     ElevatedButton(

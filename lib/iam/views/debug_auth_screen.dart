@@ -21,8 +21,7 @@ class _DebugAuthScreenState extends State<DebugAuthScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
+    return Scaffold(      appBar: AppBar(
         title: const Text('Debug Auth'),
         backgroundColor: Colors.red,
         foregroundColor: Colors.white,
@@ -142,23 +141,22 @@ class _DebugAuthScreenState extends State<DebugAuthScreen> {
                       final apiService = AuthApiService();
                       final isConnected = await apiService.testConnectivity();
                       
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
+                      if (mounted) {                        ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(
                               isConnected 
                                   ? 'Connectivity test passed!' 
                                   : 'Connectivity test failed!',
+                              style: const TextStyle(color: Colors.white),
                             ),
                             backgroundColor: isConnected ? Colors.green : Colors.red,
                           ),
                         );
                       }
                     } catch (e) {
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
+                      if (mounted) {                        ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text('Connectivity error: $e'),
+                            content: Text('Connectivity error: $e', style: const TextStyle(color: Colors.white)),
                             backgroundColor: Colors.red,
                           ),
                         );

@@ -356,8 +356,7 @@ class _AddReservationScreenState extends State<AddReservationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
+    return Scaffold(      appBar: AppBar(
         title: const Text('New Reservation'),
         backgroundColor: const Color(0xFF474C74),
         foregroundColor: Colors.white,

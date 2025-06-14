@@ -51,12 +51,11 @@ class ErrorHandler {
 
   static void showSuccessSnackBar(BuildContext context, String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
+      SnackBar(        content: Row(
           children: [
             const Icon(Icons.check_circle, color: Colors.white),
             const SizedBox(width: 8),
-            Expanded(child: Text(message)),
+            Expanded(child: Text(message, style: TextStyle(color: Colors.white))),
           ],
         ),
         backgroundColor: Colors.green,
@@ -67,12 +66,11 @@ class ErrorHandler {
 
   static void showWarningSnackBar(BuildContext context, String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
+      SnackBar(        content: Row(
           children: [
             const Icon(Icons.warning, color: Colors.white),
             const SizedBox(width: 8),
-            Expanded(child: Text(message)),
+            Expanded(child: Text(message, style: TextStyle(color: Colors.white))),
           ],
         ),
         backgroundColor: Colors.orange,
@@ -83,12 +81,11 @@ class ErrorHandler {
 
   static void showErrorSnackBar(BuildContext context, dynamic error) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
+      SnackBar(        content: Row(
           children: [
             const Icon(Icons.error, color: Colors.white),
             const SizedBox(width: 8),
-            Expanded(child: Text(getErrorMessage(error))),
+            Expanded(child: Text(getErrorMessage(error), style: TextStyle(color: Colors.white))),
           ],
         ),
         backgroundColor: Colors.red,

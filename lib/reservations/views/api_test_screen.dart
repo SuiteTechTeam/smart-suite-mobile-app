@@ -66,12 +66,12 @@ class _ApiTestScreenState extends State<ApiTestScreen> {
                             : const Text('Run Connectivity Tests'),
                       ),
                     ),
-                    const SizedBox(height: 12),
-                    SizedBox(
+                    const SizedBox(height: 12),                    SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.amber,
+                          foregroundColor: Colors.black87,
                         ),
                         onPressed: isRunningTests ? null : _testHotelCreationOnly,
                         child: const Text('Test Hotel Creation Only'),

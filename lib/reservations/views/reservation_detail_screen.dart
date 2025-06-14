@@ -125,8 +125,7 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
         statusIcon = Icons.info;
     }
 
-    return Scaffold(
-      appBar: AppBar(
+    return Scaffold(      appBar: AppBar(
         title: const Text('Booking Details'),
         backgroundColor: const Color(0xFF474C74),
         foregroundColor: Colors.white,

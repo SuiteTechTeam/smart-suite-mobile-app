@@ -51,8 +51,7 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
+  Widget build(BuildContext context) {    return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -62,17 +61,15 @@ class _RegisterPageState extends State<RegisterPage> {
       body: SafeArea(
         child: BlocConsumer<AuthBloc, AuthState>(
           listener: (context, state) {
-            if (state is AuthError) {
-              ScaffoldMessenger.of(context).showSnackBar(
+            if (state is AuthError) {              ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text(state.message),
+                  content: Text(state.message, style: const TextStyle(color: Colors.white)),
                   backgroundColor: Colors.red,
                 ),
               );
-            } else if (state is AuthSignUpSuccess) {
-              ScaffoldMessenger.of(context).showSnackBar(
+            } else if (state is AuthSignUpSuccess) {              ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text('Account created successfully! Please sign in.'),
+                  content: Text('Account created successfully! Please sign in.', style: TextStyle(color: Colors.white)),
                   backgroundColor: Colors.green,
                 ),
               );

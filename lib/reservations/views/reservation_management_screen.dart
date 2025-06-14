@@ -371,8 +371,7 @@ class _ReservationManagementScreenState extends State<ReservationManagementScree
                     style: const TextStyle(fontSize: 12, fontWeight: FontWeight.normal),
                   ),
               ],
-            ),
-            backgroundColor: Theme.of(context).primaryColor,
+            ),            backgroundColor: Theme.of(context).primaryColor,
             foregroundColor: Colors.white,
             actions: [
               IconButton(

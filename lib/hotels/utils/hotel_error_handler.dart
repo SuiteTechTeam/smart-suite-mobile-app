@@ -12,8 +12,7 @@ class HotelErrorHandler {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: Colors.red[600],
-        action: onRetry != null
+        backgroundColor: Colors.red[600],        action: onRetry != null
             ? SnackBarAction(
                 label: 'Retry',
                 textColor: Colors.white,

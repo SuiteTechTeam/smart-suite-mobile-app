@@ -12,8 +12,7 @@ class HotelDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
+    return Scaffold(      appBar: AppBar(
         title: const Text('Hotel Details'),
         backgroundColor: Theme.of(context).primaryColor,
         foregroundColor: Colors.white,

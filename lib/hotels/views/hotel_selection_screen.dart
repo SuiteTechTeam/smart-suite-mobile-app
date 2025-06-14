@@ -27,8 +27,7 @@ class HotelSelectionView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
+    return Scaffold(      appBar: AppBar(
         title: const Text('Select Hotel'),
         backgroundColor: Theme.of(context).primaryColor,
         foregroundColor: Colors.white,
@@ -39,10 +38,9 @@ class HotelSelectionView extends StatelessWidget {
               SnackBar(content: Text(state.message)),
             );
             Navigator.pop(context, true);
-          } else if (state is hotel_state.HotelError) {
-            ScaffoldMessenger.of(context).showSnackBar(
+          } else if (state is hotel_state.HotelError) {            ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('Error: ${state.message}'),
+                content: Text('Error: ${state.message}', style: const TextStyle(color: Colors.white)),
                 backgroundColor: Colors.red,
               ),
             );

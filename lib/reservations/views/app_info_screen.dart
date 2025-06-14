@@ -48,8 +48,7 @@ class _AppInfoScreenState extends State<AppInfoScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
+    return Scaffold(      appBar: AppBar(
         title: const Text('App Information'),
         backgroundColor: Theme.of(context).primaryColor,
         foregroundColor: Colors.white,

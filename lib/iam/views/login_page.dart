@@ -90,12 +90,11 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
             listener: (context, state) {
               if (state is AuthError) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Row(
+                  SnackBar(                    content: Row(
                       children: [
                         const Icon(Icons.error_outline, color: Colors.white),
                         const SizedBox(width: 8),
-                        Expanded(child: Text(state.message)),
+                        Expanded(child: Text(state.message, style: TextStyle(color: Colors.white))),
                       ],
                     ),
                     backgroundColor: Colors.red.shade600,
