@@ -271,12 +271,11 @@ class _ApiTestScreenState extends State<ApiTestScreen> {
     } catch (e) {
       _addTestResult('Reservation Service', false, 'Failed to get reservations: \\${_getDetailedErrorMessage(e)}');
     }
-  }
-  Future<void> _testHotelCreation() async {
+  }  Future<void> _testHotelCreation() async {
     try {
       
-      // This is the exact JSON format required by the API
-      final hotelData = HotelUtils.generateTestHotelData(); // Owner ID 2 is used for testing
+      // Use authenticated user's data for hotel creation test
+      final hotelData = await HotelUtils.generateTestHotelDataForAuthenticatedUser();
 
       // Direct API call with exact JSON format
       final response = await _hotelService.authenticatedPost(

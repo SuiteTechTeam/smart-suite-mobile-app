@@ -264,6 +264,14 @@ class AuthenticationException implements Exception {
   String toString() => 'AuthenticationException: $message';
 }
 
+class AccessDeniedException implements Exception {
+  final String message;
+  AccessDeniedException(this.message);
+  
+  @override
+  String toString() => 'AccessDeniedException: $message';
+}
+
 class NetworkException implements Exception {
   final String message;
   NetworkException(this.message);

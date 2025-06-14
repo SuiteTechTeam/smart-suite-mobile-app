@@ -346,15 +346,14 @@ class HotelManagementView extends StatelessWidget {
             ElevatedButton(
               onPressed: () async {
                 if (formKey.currentState!.validate()) {
-                  Navigator.of(dialogContext).pop();
-                    final hotelData = {
+                  Navigator.of(dialogContext).pop();                  final hotelData = {
                     'name': nameController.text.trim(),
                     'address': addressController.text.trim(),
                     'phone': phoneController.text.trim(),
                     'email': emailController.text.trim(),
                     'description': descriptionController.text.trim().isEmpty 
                         ? null : descriptionController.text.trim(),
-                    'ownerId': existingHotel?.ownerId ?? 2, // Use existing ownerId or default to 2 as per your example
+                    // ownerId is no longer needed - HotelService now uses authenticated user's ID
                   };
 
                   if (existingHotel != null) {

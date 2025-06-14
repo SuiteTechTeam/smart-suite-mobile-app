@@ -57,93 +57,93 @@ class HotelBloc extends Bloc<HotelEvent, hotel_state.HotelState> {
     } catch (e) {
       emit(hotel_state.HotelError('Failed to load hotels: ${e.toString()}'));
     }
-  }
-  Future<void> _onHotelCreateRequested(
+  }  Future<void> _onHotelCreateRequested(
     HotelCreateRequested event,
     Emitter<hotel_state.HotelState> emit,
   ) async {
     try {
-      final currentState = state;
-      if (currentState is hotel_state.HotelLoaded) {
-        // Check if user has owner role before allowing hotel creation
-        if (currentState.userRole?.toLowerCase() != 'owner') {
-          emit(hotel_state.HotelError('Access denied. Only owners can create hotels.'));
-          return;
-        }
+      emit(hotel_state.HotelLoading());
 
-        emit(hotel_state.HotelLoading());
-
-        if (event.hotelData['name'] == null || event.hotelData['name'].isEmpty) {
-          emit(hotel_state.HotelError('Hotel name cannot be empty.'));
-          return;
-        }
-
-        if (currentState.userId == null) {
-          emit(hotel_state.HotelError('User ID is not available.'));
-          throw Exception('User ID is not available.');
-        }        await hotelService.createHotel(
-          name: event.hotelData['name'],
-          address: event.hotelData['address'],
-          phone: event.hotelData['phone'],
-          email: event.hotelData['email'],
-          description: event.hotelData['description'],
-          ownerId: event.hotelData['ownerId'] ?? currentState.userId,
-        );
-
-        // Reload hotels to get the updated list
-        add(HotelLoadRequested());
-        
-        emit(hotel_state.HotelOperationSuccess(
-          message: 'Hotel created successfully',
-          hotels: currentState.hotels,
-        ));
+      if (event.hotelData['name'] == null || event.hotelData['name'].isEmpty) {
+        emit(hotel_state.HotelError('Hotel name cannot be empty.'));
+        return;
       }
+
+      // The HotelService now handles all authentication and authorization checks
+      // No need to pass ownerId as it will use the authenticated user's ID
+      await hotelService.createHotel(
+        name: event.hotelData['name'],
+        address: event.hotelData['address'],
+        phone: event.hotelData['phone'],
+        email: event.hotelData['email'],
+        description: event.hotelData['description'],
+        // ownerId is no longer passed - service uses authenticated user's ID
+      );
+
+      // Reload hotels to get the updated list
+      add(HotelLoadRequested());
+      
+      emit(hotel_state.HotelOperationSuccess(
+        message: 'Hotel created successfully',
+        hotels: [], // Will be updated by the reload
+      ));
     } catch (e) {
       emit(hotel_state.HotelError('Failed to create hotel: ${e.toString()}'));
     }
-  }
-  Future<void> _onHotelUpdateRequested(
+  }  Future<void> _onHotelUpdateRequested(
     HotelUpdateRequested event,
     Emitter<hotel_state.HotelState> emit,
   ) async {
     try {
-      final currentState = state;
-      if (currentState is hotel_state.HotelLoaded) {
-        // Check if user has owner role before allowing hotel update
-        if (currentState.userRole?.toLowerCase() != 'owner') {
-          emit(hotel_state.HotelError('Access denied. Only owners can update hotels.'));
-          return;
-        }
+      emit(hotel_state.HotelLoading());
 
-        emit(hotel_state.HotelLoading());
+      // The HotelService now handles all authentication and authorization checks
+      // No need to pass ownerId as it will use the authenticated user's ID
+      await hotelService.updateHotel(
+        hotelId: event.hotelId,
+        name: event.hotelData['name'],
+        address: event.hotelData['address'],
+        phone: event.hotelData['phone'],
+        email: event.hotelData['email'],
+        description: event.hotelData['description'],
+        // ownerId is no longer passed - service uses authenticated user's ID
+      );
 
-        await hotelService.updateHotel(
-          hotelId: event.hotelId,
-          name: event.hotelData['name'],
-          address: event.hotelData['address'],
-          phone: event.hotelData['phone'],
-          email: event.hotelData['email'],
-          description: event.hotelData['description'],
-          ownerId: currentState.userId!,
-        );
+      // Reload hotels to get the updated list
+      add(HotelLoadRequested());
 
-        // Reload hotels to get the updated list
-        add(HotelLoadRequested());
-
-        emit(hotel_state.HotelOperationSuccess(
-          message: 'Hotel updated successfully',
-          hotels: currentState.hotels,
-        ));
-      }
+      emit(hotel_state.HotelOperationSuccess(
+        message: 'Hotel updated successfully',
+        hotels: [], // Will be updated by the reload
+      ));
     } catch (e) {
       emit(hotel_state.HotelError('Failed to update hotel: ${e.toString()}'));
     }
-  }
-  Future<void> _onHotelDeleteRequested(
+  }  Future<void> _onHotelDeleteRequested(
     HotelDeleteRequested event,
     Emitter<hotel_state.HotelState> emit,
   ) async {
-    emit(hotel_state.HotelError('Delete hotel is not supported by the backend.'));
+    try {
+      emit(hotel_state.HotelLoading());
+
+      // The HotelService now handles all authentication and authorization checks
+      // Only authenticated owners can delete their own hotels
+      final success = await hotelService.deleteHotel(event.hotelId);
+      
+      if (success) {
+        // Reload hotels to get the updated list
+        add(HotelLoadRequested());
+        
+        emit(hotel_state.HotelOperationSuccess(
+          message: 'Hotel deleted successfully',
+          hotels: [], // Will be updated by the reload
+        ));
+      } else {
+        emit(hotel_state.HotelError('Failed to delete hotel'));
+      }
+    } catch (e) {
+      emit(hotel_state.HotelError('Failed to delete hotel: ${e.toString()}'));
+    }
   }Future<void> _onHotelSelected(
     HotelSelected event,
     Emitter<hotel_state.HotelState> emit,
