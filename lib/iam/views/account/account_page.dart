@@ -9,7 +9,8 @@ class AccountPage extends StatefulWidget {
   State<AccountPage> createState() => _AccountPageState();
 }
 
-class _AccountPageState extends State<AccountPage> with TickerProviderStateMixin {
+class _AccountPageState extends State<AccountPage>
+    with TickerProviderStateMixin {
   Map<String, dynamic>? userInfo;
   bool isLoading = true;
   final UserService _userService = UserService();
@@ -36,7 +37,9 @@ class _AccountPageState extends State<AccountPage> with TickerProviderStateMixin
   }
 
   Future<void> _fetchUserInfo() async {
-    setState(() { isLoading = true; });
+    setState(() {
+      isLoading = true;
+    });
     final info = await _userService.getUserInfoFromApi();
     setState(() {
       userInfo = info;
@@ -49,14 +52,18 @@ class _AccountPageState extends State<AccountPage> with TickerProviderStateMixin
 
   void _showEditDialog() {
     final nameController = TextEditingController(text: userInfo?['name'] ?? '');
-    final emailController = TextEditingController(text: userInfo?['email'] ?? '');
-    
+    final emailController = TextEditingController(
+      text: userInfo?['email'] ?? '',
+    );
+
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) {
         return Dialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
           elevation: 16,
           child: Container(
             padding: const EdgeInsets.all(24),
@@ -65,20 +72,13 @@ class _AccountPageState extends State<AccountPage> with TickerProviderStateMixin
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [
-                  Colors.blue.shade50,
-                  Colors.white,
-                ],
+                colors: [Colors.blue.shade50, Colors.white],
               ),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(
-                  Icons.edit_rounded,
-                  size: 48,
-                  color: Colors.blue,
-                ),
+                const Icon(Icons.edit_rounded, size: 48, color: Colors.blue),
                 const SizedBox(height: 16),
                 const Text(
                   'Edit Profile',
@@ -99,7 +99,10 @@ class _AccountPageState extends State<AccountPage> with TickerProviderStateMixin
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Colors.blue, width: 2),
+                      borderSide: const BorderSide(
+                        color: Colors.blue,
+                        width: 2,
+                      ),
                     ),
                   ),
                 ),
@@ -114,7 +117,10 @@ class _AccountPageState extends State<AccountPage> with TickerProviderStateMixin
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Colors.blue, width: 2),
+                      borderSide: const BorderSide(
+                        color: Colors.blue,
+                        width: 2,
+                      ),
                     ),
                   ),
                 ),
@@ -145,13 +151,21 @@ class _AccountPageState extends State<AccountPage> with TickerProviderStateMixin
                             'name': nameController.text,
                             'email': emailController.text,
                           };
-                          final success = await _userService.updateUserInfo(updated);
+                          final success = await _userService.updateUserInfo(
+                            updated,
+                          );
                           if (success) {
                             Navigator.of(context).pop();
                             _fetchUserInfo();
-                            _showSnackBar('Profile updated successfully!', Colors.green);
+                            _showSnackBar(
+                              'Profile updated successfully!',
+                              Colors.green,
+                            );
                           } else {
-                            _showSnackBar('Update failed. Please try again.', Colors.red);
+                            _showSnackBar(
+                              'Update failed. Please try again.',
+                              Colors.red,
+                            );
                           }
                         },
                         style: ElevatedButton.styleFrom(
@@ -165,7 +179,10 @@ class _AccountPageState extends State<AccountPage> with TickerProviderStateMixin
                         ),
                         child: const Text(
                           'Save',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
@@ -184,7 +201,7 @@ class _AccountPageState extends State<AccountPage> with TickerProviderStateMixin
     final newPasswordController = TextEditingController();
     bool obscureOldPassword = true;
     bool obscureNewPassword = true;
-    
+
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -192,7 +209,9 @@ class _AccountPageState extends State<AccountPage> with TickerProviderStateMixin
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return Dialog(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
               elevation: 16,
               child: Container(
                 padding: const EdgeInsets.all(24),
@@ -201,10 +220,7 @@ class _AccountPageState extends State<AccountPage> with TickerProviderStateMixin
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
-                    colors: [
-                      Colors.orange.shade50,
-                      Colors.white,
-                    ],
+                    colors: [Colors.orange.shade50, Colors.white],
                   ),
                 ),
                 child: Column(
@@ -233,7 +249,9 @@ class _AccountPageState extends State<AccountPage> with TickerProviderStateMixin
                         prefixIcon: const Icon(Icons.lock_outline),
                         suffixIcon: IconButton(
                           icon: Icon(
-                            obscureOldPassword ? Icons.visibility : Icons.visibility_off,
+                            obscureOldPassword
+                                ? Icons.visibility
+                                : Icons.visibility_off,
                           ),
                           onPressed: () {
                             setDialogState(() {
@@ -246,7 +264,10 @@ class _AccountPageState extends State<AccountPage> with TickerProviderStateMixin
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Colors.orange, width: 2),
+                          borderSide: const BorderSide(
+                            color: Colors.orange,
+                            width: 2,
+                          ),
                         ),
                       ),
                     ),
@@ -259,7 +280,9 @@ class _AccountPageState extends State<AccountPage> with TickerProviderStateMixin
                         prefixIcon: const Icon(Icons.lock_reset),
                         suffixIcon: IconButton(
                           icon: Icon(
-                            obscureNewPassword ? Icons.visibility : Icons.visibility_off,
+                            obscureNewPassword
+                                ? Icons.visibility
+                                : Icons.visibility_off,
                           ),
                           onPressed: () {
                             setDialogState(() {
@@ -272,7 +295,10 @@ class _AccountPageState extends State<AccountPage> with TickerProviderStateMixin
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Colors.orange, width: 2),
+                          borderSide: const BorderSide(
+                            color: Colors.orange,
+                            width: 2,
+                          ),
                         ),
                       ),
                     ),
@@ -304,9 +330,15 @@ class _AccountPageState extends State<AccountPage> with TickerProviderStateMixin
                               );
                               if (success) {
                                 Navigator.of(context).pop();
-                                _showSnackBar('Password changed successfully!', Colors.green);
+                                _showSnackBar(
+                                  'Password changed successfully!',
+                                  Colors.green,
+                                );
                               } else {
-                                _showSnackBar('Password change failed. Please try again.', Colors.red);
+                                _showSnackBar(
+                                  'Password change failed. Please try again.',
+                                  Colors.red,
+                                );
                               }
                             },
                             style: ElevatedButton.styleFrom(
@@ -320,7 +352,10 @@ class _AccountPageState extends State<AccountPage> with TickerProviderStateMixin
                             ),
                             child: const Text(
                               'Change',
-                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                         ),
@@ -362,7 +397,9 @@ class _AccountPageState extends State<AccountPage> with TickerProviderStateMixin
       context: context,
       builder: (context) {
         return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
           title: const Row(
             children: [
               Icon(Icons.logout, color: Colors.red, size: 28),
@@ -370,7 +407,9 @@ class _AccountPageState extends State<AccountPage> with TickerProviderStateMixin
               Text('Sign Out'),
             ],
           ),
-          content: const Text('Are you sure you want to sign out of your account?'),
+          content: const Text(
+            'Are you sure you want to sign out of your account?',
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
@@ -438,11 +477,7 @@ class _AccountPageState extends State<AccountPage> with TickerProviderStateMixin
                 ),
               ],
             ),
-            child: const Icon(
-              Icons.person,
-              size: 50,
-              color: Color(0xFF3B82F6),
-            ),
+            child: const Icon(Icons.person, size: 50, color: Color(0xFF3B82F6)),
           ),
           const SizedBox(height: 16),
           Text(
@@ -456,10 +491,7 @@ class _AccountPageState extends State<AccountPage> with TickerProviderStateMixin
           const SizedBox(height: 4),
           Text(
             userInfo?['email'] ?? 'user@example.com',
-            style: const TextStyle(
-              fontSize: 16,
-              color: Colors.white70,
-            ),
+            style: const TextStyle(fontSize: 16, color: Colors.white70),
           ),
         ],
       ),
@@ -488,10 +520,7 @@ class _AccountPageState extends State<AccountPage> with TickerProviderStateMixin
               gradient: LinearGradient(
                 begin: Alignment.centerLeft,
                 end: Alignment.centerRight,
-                colors: [
-                  color.withOpacity(0.1),
-                  Colors.white,
-                ],
+                colors: [color.withOpacity(0.1), Colors.white],
               ),
             ),
             child: Row(
@@ -502,11 +531,7 @@ class _AccountPageState extends State<AccountPage> with TickerProviderStateMixin
                     color: color.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Icon(
-                    icon,
-                    color: color,
-                    size: 24,
-                  ),
+                  child: Icon(icon, color: color, size: 24),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -548,26 +573,6 @@ class _AccountPageState extends State<AccountPage> with TickerProviderStateMixin
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
-      appBar: AppBar(
-        title: const Text(
-          'Account',
-          style: TextStyle(
-            fontWeight: FontWeight.w500,
-            color: Colors.white,
-            fontSize: 20,
-          ),
-        ),
-        centerTitle: true,
-        backgroundColor: const Color(0xFF6B7280), // Color gris como en la imagen
-        elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh_rounded, color: Colors.white),
-            onPressed: _fetchUserInfo,
-          ),
-        ],
-      ),
       body: isLoading
           ? const Center(
               child: Column(
@@ -577,84 +582,78 @@ class _AccountPageState extends State<AccountPage> with TickerProviderStateMixin
                   SizedBox(height: 16),
                   Text(
                     'Loading your profile...',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey,
-                    ),
+                    style: TextStyle(fontSize: 16, color: Colors.grey),
                   ),
                 ],
               ),
             )
           : userInfo == null
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.error_outline,
-                        size: 64,
-                        color: Colors.grey.shade400,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'No user information available',
-                        style: TextStyle(
-                          fontSize: 18,
-                          color: Colors.grey.shade600,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: _fetchUserInfo,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: const Text('Retry'),
-                      ),
-                    ],
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.error_outline,
+                    size: 64,
+                    color: Colors.grey.shade400,
                   ),
-                )
-              : FadeTransition(
-                  opacity: _fadeAnimation,
-                  child: Column(
-                    children: [
-                      _buildProfileHeader(),
-                      Expanded(
-                        child: ListView(
-                          padding: const EdgeInsets.all(24),
-                          children: [
-                            const SizedBox(height: 8),
-                            _buildMenuOption(
-                              icon: Icons.edit_rounded,
-                              title: 'Edit Profile',
-                              subtitle: 'Update your name and email',
-                              onTap: _showEditDialog,
-                              color: Colors.blue,
-                            ),
-                            _buildMenuOption(
-                              icon: Icons.lock_outline_rounded,
-                              title: 'Change Password',
-                              subtitle: 'Update your account password',
-                              onTap: _showChangePasswordDialog,
-                              color: Colors.orange,
-                            ),
-                            _buildMenuOption(
-                              icon: Icons.logout_rounded,
-                              title: 'Sign Out',
-                              subtitle: 'Sign out of your account',
-                              onTap: _showSignOutDialog,
-                              color: Colors.red,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+                  const SizedBox(height: 16),
+                  Text(
+                    'No user information available',
+                    style: TextStyle(fontSize: 18, color: Colors.grey.shade600),
                   ),
-                ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: _fetchUserInfo,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text('Retry'),
+                  ),
+                ],
+              ),
+            )
+          : FadeTransition(
+              opacity: _fadeAnimation,
+              child: Column(
+                children: [
+                  _buildProfileHeader(),
+                  Expanded(
+                    child: ListView(
+                      padding: const EdgeInsets.all(24),
+                      children: [
+                        const SizedBox(height: 8),
+                        _buildMenuOption(
+                          icon: Icons.edit_rounded,
+                          title: 'Edit Profile',
+                          subtitle: 'Update your name and email',
+                          onTap: _showEditDialog,
+                          color: Colors.blue,
+                        ),
+                        _buildMenuOption(
+                          icon: Icons.lock_outline_rounded,
+                          title: 'Change Password',
+                          subtitle: 'Update your account password',
+                          onTap: _showChangePasswordDialog,
+                          color: Colors.orange,
+                        ),
+                        _buildMenuOption(
+                          icon: Icons.logout_rounded,
+                          title: 'Sign Out',
+                          subtitle: 'Sign out of your account',
+                          onTap: _showSignOutDialog,
+                          color: Colors.red,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
     );
   }
 }

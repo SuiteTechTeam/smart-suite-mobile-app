@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../services/auth_repository.dart';
 import '../services/auth_api_service.dart';
@@ -15,27 +16,28 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthSignOutRequested>(_onSignOutRequested);
     on<AuthStatusChecked>(_onAuthStatusChecked);
     on<AuthUserLoaded>(_onAuthUserLoaded);
-  }
-
-  Future<void> _onSignInRequested(
+  }  Future<void> _onSignInRequested(
     AuthSignInRequested event,
     Emitter<AuthState> emit,
   ) async {
+    print('AuthBloc: Starting sign in for ${event.email}...');
     emit(AuthLoading());
     try {
       final user = await _authRepository.signIn(
         event.email,
         event.password,
         event.role,
-      );
+      ).timeout(const Duration(seconds: 30));
+      print('AuthBloc: Sign in successful for ${user.email}');
       emit(AuthAuthenticated(user));
     } on ApiException catch (e) {
+      print('AuthBloc: API Exception during sign in: ${e.message}');
       emit(AuthError(e.message));
     } catch (e) {
+      print('AuthBloc: Unexpected error during sign in: $e');
       emit(AuthError('An unexpected error occurred: $e'));
     }
   }
-
   Future<void> _onSignUpRequested(
     AuthSignUpRequested event,
     Emitter<AuthState> emit,
@@ -49,7 +51,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         event.email,
         event.password,
         event.role,
-      );
+      ).timeout(const Duration(seconds: 30));
       emit(AuthSignUpSuccess());
     } on ApiException catch (e) {
       emit(AuthError(e.message));
@@ -68,25 +70,36 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     } catch (e) {
       emit(AuthError('Failed to sign out: $e'));
     }
-  }
-
-  Future<void> _onAuthStatusChecked(
+  }  Future<void> _onAuthStatusChecked(
     AuthStatusChecked event,
     Emitter<AuthState> emit,
   ) async {
+    print('AuthBloc: Starting auth status check...');
     try {
-      final isAuthenticated = await _authRepository.isAuthenticated();
+      final isAuthenticated = await _authRepository.isAuthenticated()
+          .timeout(const Duration(seconds: 10));
+      print('AuthBloc: isAuthenticated = $isAuthenticated');
+      
       if (isAuthenticated) {
-        final user = await _authRepository.getCurrentUser();
+        print('AuthBloc: Getting current user...');
+        final user = await _authRepository.getCurrentUser()
+            .timeout(const Duration(seconds: 10));
+        print('AuthBloc: Current user = ${user?.email}');
+        
         if (user != null) {
+          print('AuthBloc: Emitting AuthAuthenticated');
           emit(AuthAuthenticated(user));
         } else {
+          print('AuthBloc: User is null, emitting AuthUnauthenticated');
           emit(AuthUnauthenticated());
         }
       } else {
+        print('AuthBloc: Not authenticated, emitting AuthUnauthenticated');
         emit(AuthUnauthenticated());
       }
     } catch (e) {
+      print('AuthBloc: Error during auth status check: $e');
+      // En caso de timeout o cualquier error, asumimos que no está autenticado
       emit(AuthUnauthenticated());
     }
   }

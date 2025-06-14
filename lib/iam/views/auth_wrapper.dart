@@ -1,22 +1,56 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:smart_suite/iam/viewmodels/auth_event.dart';
 import '../viewmodels/auth_bloc.dart';
 import '../viewmodels/auth_state.dart';
 import 'login_page.dart';
-import 'home_page.dart';
+import 'home_tab_navigation.dart';
 
-class AuthWrapper extends StatelessWidget {
+class AuthWrapper extends StatefulWidget {
   const AuthWrapper({super.key});
+
+  @override
+  State<AuthWrapper> createState() => _AuthWrapperState();
+}
+
+class _AuthWrapperState extends State<AuthWrapper> {
+  Timer? _timeoutTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    // Add a fallback timeout of 15 seconds
+    _timeoutTimer = Timer(const Duration(seconds: 15), () {
+      if (mounted) {
+        final currentState = context.read<AuthBloc>().state;
+        if (currentState is AuthLoading || currentState is AuthInitial) {
+          // If still loading after 15 seconds, assume unauthenticated
+          context.read<AuthBloc>().add(AuthStatusChecked());
+        }
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timeoutTimer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, state) {
+        // Cancel timeout if we get a definitive state
+        if (state is! AuthLoading && state is! AuthInitial) {
+          _timeoutTimer?.cancel();
+        }
+
         if (state is AuthLoading || state is AuthInitial) {
           return const HotelLoadingScreen();
         } else if (state is AuthAuthenticated) {
-          return const HomePage();
+          return const HomeTabNavigation();
         } else if (state is AuthError) {
           return HotelErrorScreen(
             message: state.message,
@@ -60,6 +94,7 @@ class _HotelLoadingScreenState extends State<HotelLoadingScreen>
   ];
 
   int _currentMessageIndex = 0;
+  bool _showDebugButton = false;
 
   @override
   void initState() {
@@ -110,6 +145,15 @@ class _HotelLoadingScreenState extends State<HotelLoadingScreen>
 
     // Cambiar mensajes cada 2 segundos
     _startMessageRotation();
+    
+    // Mostrar botón de debug después de 10 segundos
+    Timer(const Duration(seconds: 10), () {
+      if (mounted) {
+        setState(() {
+          _showDebugButton = true;
+        });
+      }
+    });
   }
 
   void _startMessageRotation() {
@@ -337,9 +381,7 @@ class _HotelLoadingScreenState extends State<HotelLoadingScreen>
                     ),
                   ),
 
-                  const SizedBox(height: 40),
-
-                  // Footer con versión
+                  const SizedBox(height: 40),                  // Footer con versión
                   Text(
                     'Conectando a la Suite IoT v2.1',
                     style: theme.textTheme.bodySmall?.copyWith(
@@ -347,6 +389,20 @@ class _HotelLoadingScreenState extends State<HotelLoadingScreen>
                       fontWeight: FontWeight.w300,
                     ),
                   ),
+                  
+                  // Botón de debug (aparece después de 10 segundos)
+                  if (_showDebugButton) ...[
+                    const SizedBox(height: 20),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pushNamed('/debug-auth');
+                      },
+                      style: TextButton.styleFrom(
+                        foregroundColor: Colors.white.withValues(alpha: 0.7),
+                      ),
+                      child: const Text('Debug Auth Issues'),
+                    ),
+                  ],
                 ],
               ),
             ),

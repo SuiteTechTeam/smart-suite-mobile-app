@@ -12,37 +12,55 @@ class StorageService {
     await _storage.write(key: _tokenKey, value: user.token);
     await _storage.write(key: _userKey, value: jsonEncode(user.toJson()));
   }
-
   Future<String?> getToken() async {
-    return await _storage.read(key: _tokenKey);
+    try {
+      return await _storage.read(key: _tokenKey)
+          .timeout(const Duration(seconds: 5));
+    } catch (e) {
+      return null;
+    }
   }
-
   Future<AuthenticatedUser?> getAuthenticatedUser() async {
-    final userJson = await _storage.read(key: _userKey);
-    
-    if (userJson != null) {
-      try {
-        final userData = jsonDecode(userJson);
-        return AuthenticatedUser.fromJson(userData);
-      } catch (e) {
-        // If there's an error parsing, clear the stored data
-        await clearAuthenticatedUser();
-        return null;
+    try {
+      final userJson = await _storage.read(key: _userKey)
+          .timeout(const Duration(seconds: 5));
+      
+      if (userJson != null) {
+        try {
+          final userData = jsonDecode(userJson);
+          return AuthenticatedUser.fromJson(userData);
+        } catch (e) {
+          // If there's an error parsing, clear the stored data
+          await clearAuthenticatedUser();
+          return null;
+        }
       }
+      return null;
+    } catch (e) {
+      return null;
     }
-    return null;
-  }
-
-  Future<bool> isAuthenticated() async {
-    final token = await getToken();
-    if (token != null && token.isNotEmpty) {
-      try {
-        return !JwtDecoder.isExpired(token);
-      } catch (e) {
-        return false;
+  }  Future<bool> isAuthenticated() async {
+    print('StorageService: Checking authentication status...');
+    try {
+      final token = await getToken();
+      print('StorageService: Token retrieved: ${token != null ? 'exists' : 'null'}');
+      
+      if (token != null && token.isNotEmpty) {
+        try {
+          final isExpired = JwtDecoder.isExpired(token);
+          print('StorageService: Token expired: $isExpired');
+          return !isExpired;
+        } catch (e) {
+          print('StorageService: Error checking token expiration: $e');
+          return false;
+        }
       }
+      print('StorageService: No valid token found');
+      return false;
+    } catch (e) {
+      print('StorageService: Error in isAuthenticated: $e');
+      return false;
     }
-    return false;
   }
 
   Future<void> clearAuthenticatedUser() async {
