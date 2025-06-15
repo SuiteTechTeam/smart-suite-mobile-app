@@ -6,6 +6,7 @@ import '../viewmodels/hotel_bloc.dart';
 import '../viewmodels/hotel_event.dart';
 import '../viewmodels/hotel_state.dart' as hotel_state;
 import '../../iam/services/auth_service.dart';
+import 'room_management_screen.dart';
 
 class HotelManagementScreen extends StatelessWidget {
   const HotelManagementScreen({super.key});
@@ -204,6 +205,19 @@ class HotelManagementView extends StatelessWidget {
                     backgroundColor: Theme.of(context).primaryColor,
                     foregroundColor: Colors.white,
                   ),
+                ),
+                const SizedBox(width: 8),
+                OutlinedButton.icon(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => RoomManagementScreen(hotelId: hotel.id),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.meeting_room, size: 16),
+                  label: const Text('Ver habitaciones'),
                 ),
               ],
             ),
