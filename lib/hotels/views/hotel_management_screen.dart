@@ -7,6 +7,7 @@ import '../viewmodels/hotel_event.dart';
 import '../viewmodels/hotel_state.dart' as hotel_state;
 import '../../iam/services/auth_service.dart';
 import 'room_management_screen.dart';
+import '../utils/hotel_auth_validator.dart';
 
 class HotelManagementScreen extends StatelessWidget {
   const HotelManagementScreen({super.key});
@@ -78,22 +79,45 @@ class HotelManagementView extends StatelessWidget {
             
             if (state is hotel_state.HotelLoaded) {
               if (state.hotels.isEmpty) {
-                return const Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.hotel_outlined,
-                        size: 64,
-                        color: Colors.grey,
-                      ),
-                      SizedBox(height: 16),
-                      Text(
-                        'No hotels found',
-                        style: TextStyle(fontSize: 16, color: Colors.grey),
-                      ),
-                    ],
-                  ),
+                return Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    FutureBuilder<bool>(
+                      future: HotelAuthValidator.isCurrentUserOwner(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return const SizedBox.shrink();
+                        }
+                        if (snapshot.hasData && snapshot.data == true) {
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 24.0),
+                            child: ElevatedButton.icon(
+                              onPressed: () => _showCreateHotelDialog(context),
+                              icon: const Icon(Icons.add),
+                              label: const Text('Crear hotel'),
+                              style: ElevatedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(30),
+                                ),
+                              ),
+                            ),
+                          );
+                        }
+                        return const SizedBox.shrink();
+                      },
+                    ),
+                    const Icon(
+                      Icons.hotel_outlined,
+                      size: 64,
+                      color: Colors.grey,
+                    ),
+                    SizedBox(height: 16),
+                    Text(
+                      'No hotels found',
+                      style: TextStyle(fontSize: 16, color: Colors.grey),
+                    ),
+                  ],
                 );
               }
               
@@ -111,17 +135,47 @@ class HotelManagementView extends StatelessWidget {
           },
         ),
       ),
-      floatingActionButton: BlocBuilder<HotelBloc, hotel_state.HotelState>(
-        builder: (context, state) {
-          if (state is hotel_state.HotelLoaded && state.userRole?.toLowerCase() == 'owner') {
-            return FloatingActionButton(
-              onPressed: () => _showCreateHotelDialog(context),
-              backgroundColor: Theme.of(context).primaryColor,
-              child: const Icon(Icons.add, color: Colors.white),
-            );
-          }
-          return const SizedBox.shrink();
-        },
+      // Remove the floatingActionButton from here
+      // Instead, overlay the button at the center using a Stack
+      // Add a Stack to overlay the button at the center
+      extendBody: true,
+      extendBodyBehindAppBar: true,
+      bottomNavigationBar: Stack(
+        alignment: Alignment.center,
+        children: [
+          // Main tab bar or other widgets can go here if needed
+          // ...existing code...
+          BlocBuilder<HotelBloc, hotel_state.HotelState>(
+            builder: (context, state) {
+              return FutureBuilder<bool>(
+                future: HotelAuthValidator.isCurrentUserOwner(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const SizedBox.shrink();
+                  }
+                  if (snapshot.hasData && snapshot.data == true) {
+                    // Show the button only if user is owner
+                    return Positioned(
+                      bottom: 24,
+                      child: ElevatedButton.icon(
+                        onPressed: () => _showCreateHotelDialog(context),
+                        icon: const Icon(Icons.add),
+                        label: const Text('Crear hotel'),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                        ),
+                      ),
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
+              );
+            },
+          ),
+        ],
       ),
     );
   }

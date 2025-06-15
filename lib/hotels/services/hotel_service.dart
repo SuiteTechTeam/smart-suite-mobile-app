@@ -133,9 +133,10 @@ class HotelService extends BaseService {
     int? ownerId, // This parameter is now ignored for security
   }) async {
     try {
+      // Validate that the current user is an owner using HotelAuthValidator
+      await HotelAuthValidator.validateOwnerAccess();
       // Get the authenticated user's ID and validate they are an owner
       final authenticatedOwnerId = await _getAuthenticatedOwnerId();
-      
       // Always use the authenticated user's ID, ignore any passed ownerId
       final body = {
         'name': name,
