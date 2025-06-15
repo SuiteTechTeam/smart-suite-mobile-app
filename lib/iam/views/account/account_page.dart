@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../services/user_service.dart';
 import '../../utils/auth_utils.dart';
+import '../../../reservations/views/api_test_screen.dart';
 
 class AccountPage extends StatefulWidget {
   const AccountPage({super.key});
@@ -435,6 +436,12 @@ class _AccountPageState extends State<AccountPage>
     );
   }
 
+  void _showApiTestScreen() {
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (context) => const ApiTestScreen()));
+  }
+
   Widget _buildProfileHeader() {
     return Container(
       padding: const EdgeInsets.all(24),
@@ -647,6 +654,12 @@ class _AccountPageState extends State<AccountPage>
                           subtitle: 'Sign out of your account',
                           onTap: _showSignOutDialog,
                           color: Colors.red,
+                        ),
+                        const Divider(),
+                        ListTile(
+                          leading: Icon(Icons.api),
+                          title: Text('API Test'),
+                          onTap: _showApiTestScreen,
                         ),
                       ],
                     ),
