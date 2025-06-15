@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../views/home_page.dart';
 import '../../hotels/views/hotel_management_screen.dart';
 import '../../reservations/views/reservation_management_screen.dart';
-import '../../reservations/views/api_test_screen.dart';
 import '../views/account/account_page.dart';
 
 class HomeTabNavigation extends StatefulWidget {
@@ -22,7 +21,6 @@ class _HomeTabNavigationState extends State<HomeTabNavigation>
     HomePage(),
     HotelManagementScreen(),
     ReservationManagementScreen(),
-    ApiTestScreen(),
     AccountPage(),
   ];
 
@@ -49,14 +47,6 @@ class _HomeTabNavigationState extends State<HomeTabNavigation>
       activeIcon: Icons.book_online,
       gradient: LinearGradient(
         colors: [Color(0xFFFF9800), Color(0xFFFFB74D)],
-      ),
-    ),
-    TabInfo(
-      title: 'API Test',
-      icon: Icons.api_rounded,
-      activeIcon: Icons.api,
-      gradient: LinearGradient(
-        colors: [Color(0xFF9C27B0), Color(0xFFBA68C8)],
       ),
     ),
     TabInfo(
