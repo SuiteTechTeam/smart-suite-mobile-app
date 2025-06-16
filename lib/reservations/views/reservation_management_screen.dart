@@ -53,6 +53,9 @@ class _ReservationManagementScreenState extends State<ReservationManagementScree
           hotelId = tokenHotelId;
         });
       }
+      // Get the hotel name based on the ID
+      await _loadHotelName();
+      // Fetch reservations
       await _fetchReservations();
       return;
     }
@@ -65,6 +68,9 @@ class _ReservationManagementScreenState extends State<ReservationManagementScree
           hotelId = storedHotelId;
         });
       }
+      // Get the hotel name based on the ID
+      await _loadHotelName();
+      // Fetch reservations
       await _fetchReservations();
       return;
     }
@@ -661,5 +667,25 @@ class _ReservationManagementScreenState extends State<ReservationManagementScree
         Text(label, style: const TextStyle(fontSize: 12)),
       ],
     );
+  }
+
+  Future<void> _loadHotelName() async {
+    if (hotelId == null) return;
+    
+    try {
+      final hotelData = await _hotelService.getHotelById(hotelId!);
+      if (hotelData != null && mounted) {
+        setState(() {
+          hotelName = hotelData.name;
+        });
+      }
+    } catch (e) {
+      // If we can't load the hotel name, just use the ID
+      if (mounted) {
+        setState(() {
+          hotelName = null; // Will display "Hotel ID: X" instead
+        });
+      }
+    }
   }
 }

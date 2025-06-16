@@ -1,10 +1,16 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
-import 'storage_service.dart';
 
 class AuthService {
   final FlutterSecureStorage storage = const FlutterSecureStorage();
-  final StorageService _storageService = StorageService();
+  
+  // Constantes para los nombres de claims
+  static const String SID_CLAIM = 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/sid';
+  static const String ROLE_CLAIM = 'http://schemas.microsoft.com/ws/2008/06/identity/claims/role';
+  static const String LOCALITY_CLAIM = 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/locality';
+  static const String EMAIL_CLAIM = 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress';
+  static const String EMAIL_SIMPLE = 'Email';
+  static const String USERID_SIMPLE = 'UserId';
 
   AuthService();
 
@@ -13,63 +19,114 @@ class AuthService {
     return await storage.read(key: 'token');
   }
 
-  /// Get user ID from storage
+  /// Get user ID from JWT (ClaimTypes.Sid)
   Future<int?> getUserId() async {
-    try {
-      final user = await _storageService.getAuthenticatedUser();
-      return user?.id;
-    } catch (e) {
-      return null;
-    }
-  }
-
-  /// Get user role from storage
-  Future<String?> getUserRole() async {
-    try {
-      final user = await _storageService.getAuthenticatedUser();
-      return user?.role;
-    } catch (e) {
-      return null;
-    }
-  }
-
-  /// Get user roleId from storage
-  Future<int?> getUserRoleId() async {
-    try {
-      final user = await _storageService.getAuthenticatedUser();
-      return user?.roleId;
-    } catch (e) {
-      return null;
-    }
-  }
-
-  /// Get user email from storage
-  Future<String?> getUserEmail() async {
-    try {
-      final user = await _storageService.getAuthenticatedUser();
-      return user?.email;
-    } catch (e) {
-      return null;
-    }
-  }
-
-  /// Get all user information from storage (respuesta del endpoint sign-in)
-  Future<Map<String, dynamic>?> getUserInfo() async {
-    try {
-      final user = await _storageService.getAuthenticatedUser();
-      if (user != null) {
-        return user.toJson();
+    final token = await getToken();
+    if (token != null && !JwtDecoder.isExpired(token)) {
+      final decoded = JwtDecoder.decode(token);
+      
+      // Intentar con el claim completo primero
+      var sid = decoded[SID_CLAIM];
+      
+      // Si no existe, probar con el claim simple
+      if (sid == null) {
+        sid = decoded[USERID_SIMPLE] ?? decoded['sid'];
       }
-      return null;
+      
+      if (sid != null) return int.tryParse(sid.toString());
+    }
+    return null;
+  }
+
+  /// Get user role from JWT (ClaimTypes.Role)
+  Future<String?> getUserRole() async {
+    final token = await getToken();
+    if (token != null && !JwtDecoder.isExpired(token)) {
+      final decoded = JwtDecoder.decode(token);
+      
+      // Intentar con el claim completo primero
+      final role = decoded[ROLE_CLAIM] ?? decoded['role'];
+      
+      if (role != null) {
+        final roleStr = role.toString();
+        // If the role has a prefix like ROLE_, strip it off
+        if (roleStr.startsWith('ROLE_')) {
+          return roleStr.substring(5).toLowerCase();
+        }
+        return roleStr.toLowerCase();
+      }
+    }
+    return null;
+  }
+
+  /// Get hotel ID from JWT (ClaimTypes.Locality)
+  Future<int?> getHotelIdFromToken() async {
+    final token = await getToken();
+    if (token != null && !JwtDecoder.isExpired(token)) {
+      final decoded = JwtDecoder.decode(token);
+      
+      // Intentar con el claim completo primero
+      final hotel = decoded[LOCALITY_CLAIM] ?? decoded['locality'];
+      
+      if (hotel != null && hotel.toString().isNotEmpty) {
+        return int.tryParse(hotel.toString());
+      }
+    }
+    return null;
+  }
+
+  /// Get user email from JWT (ClaimTypes.Email)
+  Future<String?> getUserEmail() async {
+    final token = await getToken();
+    if (token != null && !JwtDecoder.isExpired(token)) {
+      final decoded = JwtDecoder.decode(token);
+      
+      // Intentar con el claim completo primero, luego con claim simple, y finalmente con la versión abreviada
+      final email = decoded[EMAIL_CLAIM] ?? decoded[EMAIL_SIMPLE] ?? decoded['email'];
+      
+      return email?.toString();
+    }
+    return null;
+  }
+
+  Future<Map<String, dynamic>?> getCurrentUserInfo() async {
+    try {
+      final userInfo = await getUserInfo();
+      if (userInfo == null) return null;
+      
+      // Agregar roleId si está disponible
+      final roleId = await getUserId();
+      if (roleId != null) {
+        userInfo['roleId'] = roleId;
+      }
+      
+      return userInfo;
     } catch (e) {
       return null;
     }
   }
 
-  /// Get hotel ID from JWT token (if present)
-  Future<int?> getHotelIdFromToken() async {
-    // Si el modelo AuthenticatedUser tiene hotelId, aquí deberías retornarlo
-    // Si no, deberías extender AuthenticatedUser para incluirlo
+  /// Get all user information from JWT
+  Future<Map<String, dynamic>?> getUserInfo() async {
+    final token = await getToken();
+    if (token != null && !JwtDecoder.isExpired(token)) {
+      final decoded = JwtDecoder.decode(token);
+      
+      // Obtener claims usando nombres completos primero, luego versiones simplificadas como respaldo
+      final sidClaim = decoded[SID_CLAIM] ?? decoded[USERID_SIMPLE] ?? decoded['sid'];
+      final roleClaim = decoded[ROLE_CLAIM] ?? decoded['role'];
+      final localityClaim = decoded[LOCALITY_CLAIM] ?? decoded['locality'];
+      final emailClaim = decoded[EMAIL_CLAIM] ?? decoded[EMAIL_SIMPLE] ?? decoded['email'];
+      
+      return {
+        'id': sidClaim != null ? int.tryParse(sidClaim.toString()) : null,
+        'role': roleClaim?.toString(),
+        'hotelId': localityClaim != null && localityClaim.toString().isNotEmpty 
+            ? int.tryParse(localityClaim.toString()) 
+            : null,
+        'email': emailClaim?.toString(),
+      };
+    }
     return null;
   }
 

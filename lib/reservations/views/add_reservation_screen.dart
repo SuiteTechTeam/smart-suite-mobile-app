@@ -33,6 +33,7 @@ class _AddReservationScreenState extends State<AddReservationScreen> {
   int? hotelId;
   List<ReservationResource> availableResources = [];
   bool isLoadingResources = false;
+  String? _userRole; // Rol del usuario autenticado
 
   final List<String> resourceTypes = [
     'restaurant',
@@ -56,18 +57,20 @@ class _AddReservationScreenState extends State<AddReservationScreen> {
     if (token != null) {
       try {
         Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
-        
-        // Try to get user ID for customer ID field
-        String? userId = decodedToken['sub'] ?? decodedToken['id']?.toString();
+        // Usar claims estándar
+        String? userId = decodedToken['sid']?.toString();
         if (userId != null && _customerIdController.text.isEmpty) {
           _customerIdController.text = userId;
         }
-        
-        // Set default title based on user name if available
-        String? userName = decodedToken['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'];
-        if (userName != null && _titleController.text.isEmpty) {
-          _titleController.text = 'Reservation for $userName';
+        // Set default title based on user email if available
+        String? userEmail = decodedToken['email'];
+        if (userEmail != null && _titleController.text.isEmpty) {
+          _titleController.text = 'Reservation for $userEmail';
         }
+        // Guardar el rol para uso posterior si es necesario
+        setState(() {
+          _userRole = decodedToken['role']?.toString().toLowerCase();
+        });
       } catch (e) {
         // Token parsing failed, continue without pre-filling
       }
@@ -78,7 +81,7 @@ class _AddReservationScreenState extends State<AddReservationScreen> {
     String? token = await storage.read(key: 'token');
     if (token != null) {
       Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
-      String? locality = decodedToken['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/locality'];
+      String? locality = decodedToken['locality'];
       return locality != null ? int.tryParse(locality) : null;
     }
     return null;
@@ -384,6 +387,7 @@ class _AddReservationScreenState extends State<AddReservationScreen> {
                 label: 'Customer ID',
                 keyboardType: TextInputType.number,
                 validator: (value) => value?.isEmpty == true ? 'Please enter customer ID' : null,
+                enabled: _userRole != 'guest', // Solo editable para owner/admin
               ),
               
               const SizedBox(height: 24),
@@ -451,6 +455,7 @@ class _AddReservationScreenState extends State<AddReservationScreen> {
     String? Function(String?)? validator,
     TextInputType? keyboardType,
     int maxLines = 1,
+    bool enabled = true,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
@@ -463,6 +468,7 @@ class _AddReservationScreenState extends State<AddReservationScreen> {
         validator: validator,
         keyboardType: keyboardType,
         maxLines: maxLines,
+        enabled: enabled,
       ),
     );
   }

@@ -146,4 +146,9 @@ class ReservationService extends BaseService {
       rethrow;
     }
   }
+
+  // NOTE: In Smart Suite, 'booking' and 'reservation' are the same concept.
+  // All endpoints and models for 'booking' are handled as 'reservation' in the app.
+  // The ReservationService and UI allow all roles (Owner, Admin, Guest) to create reservations.
+  // The AddReservationScreen will now adapt the Customer ID field based on user role.
 }

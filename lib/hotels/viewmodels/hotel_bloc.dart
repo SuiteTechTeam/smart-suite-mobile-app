@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:jwt_decoder/jwt_decoder.dart';
 import '../services/hotel_service.dart';
 import '../models/hotel.dart';
 import '../../iam/services/auth_service.dart';
@@ -30,16 +29,9 @@ class HotelBloc extends Bloc<HotelEvent, hotel_state.HotelState> {
     Emitter<hotel_state.HotelState> emit,
   ) async {
     try {
-      emit(hotel_state.HotelLoading());      // Get user information from token
-      String? token = await _storageService.getToken();
-      String? userRole;
-      int? userId;
-
-      if (token != null) {
-        Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
-        userRole = decodedToken['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
-        userId = int.tryParse(decodedToken['sub'] ?? '');
-      }
+      emit(hotel_state.HotelLoading());      // Get user information from token using AuthService, which has the correct claim fields
+      String? userRole = await authService.getUserRole();
+      int? userId = await authService.getUserId();
 
       // Load hotels based on user role
       List<Hotel> hotels;

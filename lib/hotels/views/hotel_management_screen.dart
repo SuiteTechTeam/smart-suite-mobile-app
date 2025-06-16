@@ -30,6 +30,11 @@ class HotelManagementView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Hotel Management'),
+        backgroundColor: Theme.of(context).primaryColor,
+        foregroundColor: Colors.white,
+      ),
       body: BlocListener<HotelBloc, hotel_state.HotelState>(
         listener: (context, state) {
           if (state is hotel_state.HotelOperationSuccess) {
@@ -79,45 +84,30 @@ class HotelManagementView extends StatelessWidget {
             
             if (state is hotel_state.HotelLoaded) {
               if (state.hotels.isEmpty) {
-                return Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    FutureBuilder<bool>(
-                      future: HotelAuthValidator.isCurrentUserOwner(),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
-                          return const SizedBox.shrink();
-                        }
-                        if (snapshot.hasData && snapshot.data == true) {
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 24.0),
-                            child: ElevatedButton.icon(
-                              onPressed: () => _showCreateHotelDialog(context),
-                              icon: const Icon(Icons.add),
-                              label: const Text('Crear hotel'),
-                              style: ElevatedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(30),
-                                ),
-                              ),
-                            ),
-                          );
-                        }
-                        return const SizedBox.shrink();
-                      },
-                    ),
-                    const Icon(
-                      Icons.hotel_outlined,
-                      size: 64,
-                      color: Colors.grey,
-                    ),
-                    SizedBox(height: 16),
-                    Text(
-                      'No hotels found',
-                      style: TextStyle(fontSize: 16, color: Colors.grey),
-                    ),
-                  ],
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          context.read<HotelBloc>().add(HotelLoadRequested());
+                        },
+                        child: const Text('Refresh'),
+                      ),
+                      const Icon(
+                        Icons.hotel_outlined,
+                        size: 64,
+                        color: Colors.grey,
+                      ),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'No hotels found',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 16, color: Colors.grey),
+                      ),
+                    ],
+                  ),
                 );
               }
               
@@ -135,47 +125,20 @@ class HotelManagementView extends StatelessWidget {
           },
         ),
       ),
-      // Remove the floatingActionButton from here
-      // Instead, overlay the button at the center using a Stack
-      // Add a Stack to overlay the button at the center
-      extendBody: true,
-      extendBodyBehindAppBar: true,
-      bottomNavigationBar: Stack(
-        alignment: Alignment.center,
-        children: [
-          // Main tab bar or other widgets can go here if needed
-          // ...existing code...
-          BlocBuilder<HotelBloc, hotel_state.HotelState>(
-            builder: (context, state) {
-              return FutureBuilder<bool>(
-                future: HotelAuthValidator.isCurrentUserOwner(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const SizedBox.shrink();
-                  }
-                  if (snapshot.hasData && snapshot.data == true) {
-                    // Show the button only if user is owner
-                    return Positioned(
-                      bottom: 24,
-                      child: ElevatedButton.icon(
-                        onPressed: () => _showCreateHotelDialog(context),
-                        icon: const Icon(Icons.add),
-                        label: const Text('Crear hotel'),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                        ),
-                      ),
-                    );
-                  }
-                  return const SizedBox.shrink();
-                },
-              );
-            },
-          ),
-        ],
+      floatingActionButton: FutureBuilder<bool>(
+        future: HotelAuthValidator.isCurrentUserOwner(),
+        builder: (context, snapshot) {
+          print('[HotelScreen] FAB Builder - isOwner: ${snapshot.data}, hasData: ${snapshot.hasData}, hasError: ${snapshot.hasError}');
+          if (snapshot.hasData && snapshot.data == true) {
+            return FloatingActionButton.extended(
+              onPressed: () => _showCreateHotelDialog(context),
+              icon: const Icon(Icons.add),
+              label: const Text('New Hotel'),
+              backgroundColor: Theme.of(context).primaryColor,
+            );
+          }
+          return const SizedBox.shrink(); // No FAB for non-owner users
+        },
       ),
     );
   }

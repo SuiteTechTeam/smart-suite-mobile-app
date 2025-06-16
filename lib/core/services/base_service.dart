@@ -1,7 +1,9 @@
 import 'dart:convert';
-import 'dart:io';
+import 'dart:io'; // For SocketException, HttpException
+import 'dart:async'; // For TimeoutException
 import 'package:http/http.dart' as http;
 import 'package:jwt_decoder/jwt_decoder.dart';
+import '../../iam/services/auth_service.dart';
 import '../../iam/services/storage_service.dart';
 import '../config/app_config.dart';
 
@@ -145,7 +147,7 @@ abstract class BaseService {
   }
 
   /// Execute HTTP request with timeout and error handling
-  Future<http.Response> _executeWithTimeout(Future<http.Response> Function() request) async {
+  Future<http.Response> _executeWithTimeout(Future<http.Response> Function() request) async {    
     try {
       final response = await request().timeout(_defaultTimeout);
       
@@ -156,14 +158,13 @@ abstract class BaseService {
     } on SocketException catch (e) {
       throw NetworkException('Unable to connect to server. Please check your internet connection. Details: $e');
     } on HttpException catch (e) {
-      throw NetworkException('HTTP error: $e');
+      throw NetworkException('HTTP error encountered: $e');
     } on FormatException catch (e) {
       throw NetworkException('Invalid response format: $e');
+    } on TimeoutException {
+      throw NetworkException('Request timeout: Server took too long to respond. Please try again.');
     } catch (e) {
-      if (e.toString().contains('TimeoutException')) {
-        throw NetworkException('Request timeout: Server took too long to respond. Please try again.');
-      }
-      rethrow;
+      throw NetworkException('Network error: ${e.toString()}');
     }
   }
 
@@ -186,17 +187,38 @@ abstract class BaseService {
         throw ServerException('Server temporarily unavailable. Please try again later.');
     }
   }
-
   /// Get user information from JWT token
   Future<Map<String, dynamic>?> getUserInfo() async {
     try {
       final token = await _storageService.getToken();
       if (token != null && !JwtDecoder.isExpired(token)) {
         final decodedToken = JwtDecoder.decode(token);
-        final roleString = decodedToken['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+        
+        // Usar los nombres completos de los claims de JWT
+        final String sidClaim = AuthService.SID_CLAIM;
+        final String roleClaim = AuthService.ROLE_CLAIM;
+        final String localityClaim = AuthService.LOCALITY_CLAIM;
+        final String emailClaim = AuthService.EMAIL_CLAIM;
+        final String emailSimple = AuthService.EMAIL_SIMPLE;
+        final String userIdSimple = AuthService.USERID_SIMPLE;
+        
+        // Intentar obtener datos desde claims completos primero, luego desde versiones simplificadas
+        final sid = decodedToken[sidClaim] ?? decodedToken[userIdSimple] ?? decodedToken['sid'];
+        final roleString = decodedToken[roleClaim] ?? decodedToken['role'];
+        final locality = decodedToken[localityClaim] ?? decodedToken['locality'];
+        final email = decodedToken[emailClaim] ?? decodedToken[emailSimple] ?? decodedToken['email'];
+        
         int? roleId;
         if (roleString != null) {
-          switch (roleString.toLowerCase()) {
+          // Extraer el nombre del rol, quitando el prefijo 'ROLE_' si existe
+          String roleName = roleString.toString();
+          if (roleName.startsWith('ROLE_')) {
+            roleName = roleName.substring(5).toLowerCase();
+          } else {
+            roleName = roleName.toLowerCase();
+          }
+          
+          switch (roleName) {
             case 'owner':
               roleId = 1;
               break;
@@ -210,13 +232,14 @@ abstract class BaseService {
               roleId = null;
           }
         }
+        
         return {
-          'id': int.tryParse(decodedToken['sub'] ?? ''),
-          'email': decodedToken['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'],
-          'role': roleString,
+          'id': sid != null ? int.tryParse(sid.toString()) : null,
+          'email': email?.toString(),
+          'role': roleString?.toString(),
           'roleId': roleId,
-          'hotelId': decodedToken['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/locality'] != null
-              ? int.tryParse(decodedToken['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/locality'])
+          'hotelId': locality != null && locality.toString().isNotEmpty
+              ? int.tryParse(locality.toString())
               : null,
         };
       }

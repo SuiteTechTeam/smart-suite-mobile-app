@@ -1,4 +1,7 @@
 class Reservation {
+  // NOTE: In Smart Suite, 'booking' and 'reservation' are the same concept.
+  // This model is used for both creating and displaying bookings/reservations.
+
   final int? id;
   final int paymentCustomerId;
   final int roomId;

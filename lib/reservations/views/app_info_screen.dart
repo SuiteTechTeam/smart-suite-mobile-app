@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
+import 'package:intl/intl.dart';  // For date formatting
 import '../../core/config/app_config.dart';
+import '../../iam/services/auth_service.dart';
 
 class AppInfoScreen extends StatefulWidget {
   const AppInfoScreen({super.key});
@@ -12,9 +14,12 @@ class AppInfoScreen extends StatefulWidget {
 
 class _AppInfoScreenState extends State<AppInfoScreen> {
   final storage = const FlutterSecureStorage();
+  final AuthService _authService = AuthService();
   Map<String, dynamic>? userInfo;
+  Map<String, dynamic>? jwtClaims;
   String? hotelId;
   bool isLoading = true;
+  bool isTokenExpired = false;
 
   @override
   void initState() {
@@ -24,14 +29,28 @@ class _AppInfoScreenState extends State<AppInfoScreen> {
 
   Future<void> _loadUserInfo() async {
     try {
-      String? token = await storage.read(key: 'token');
+      setState(() {
+        isLoading = true;
+      });
+      
+      String? token = await _authService.getToken();
       String? storedHotelId = await storage.read(key: 'selected_hotel_id');
       
       if (token != null) {
+        // Decode the full JWT for display
         Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
+        
+        // Check if token is valid and not expired
+        bool tokenExpired = JwtDecoder.isExpired(token);
+        
+        // Get simplified user info from AuthService
+        Map<String, dynamic>? simplifiedInfo = await _authService.getUserInfo();
+        
         setState(() {
-          userInfo = decodedToken;
+          jwtClaims = decodedToken;
+          userInfo = simplifiedInfo;
           hotelId = storedHotelId;
+          isTokenExpired = tokenExpired;
           isLoading = false;
         });
       } else {
@@ -44,6 +63,92 @@ class _AppInfoScreenState extends State<AppInfoScreen> {
         isLoading = false;
       });
     }
+  }
+  // Helper method to format role names for better readability
+  String formatRoleName(String? roleName) {
+    if (roleName == null || roleName.isEmpty) return 'Not available';
+    
+    // Handle ROLE_ prefix commonly used in JWT role claims
+    if (roleName.startsWith('ROLE_')) {
+      String cleaned = roleName.substring(5); // Remove 'ROLE_' prefix
+      return cleaned.substring(0, 1).toUpperCase() + cleaned.substring(1).toLowerCase();
+    }
+    
+    // Standard capitalization for other roles
+    return roleName.substring(0, 1).toUpperCase() + roleName.substring(1).toLowerCase();
+  }
+
+  // Helper method to format JWT timestamp claims
+  String _formatExpiration(dynamic timestamp) {
+    if (timestamp == null) return 'Unknown';
+    
+    try {
+      // JWT timestamps are in seconds since epoch
+      final dateTime = DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
+      
+      // Format with intl package
+      final DateFormat formatter = DateFormat('yyyy-MM-dd HH:mm:ss');
+      return formatter.format(dateTime.toLocal());
+    } catch (e) {
+      return 'Invalid date format';
+    }
+  }
+
+  // Helper method to build section headers for user info card
+  Widget _buildSectionHeader(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: Text(
+        title,
+        style: const TextStyle(
+          fontSize: 16, 
+          fontWeight: FontWeight.bold,
+          color: Colors.blueGrey,
+        ),
+      ),
+    );
+  }
+
+  // Helper method to format claim values for display
+  String _formatClaimValue(dynamic value) {
+    if (value == null) return 'null';
+    
+    // Handle timestamps (exp, iat, nbf)
+    if (value is num && 
+        (jwtClaims!.keys.contains('exp') && 
+         value.toString() == jwtClaims!['exp'].toString() ||
+         jwtClaims!.keys.contains('iat') && 
+         value.toString() == jwtClaims!['iat'].toString() ||
+         jwtClaims!.keys.contains('nbf') && 
+         value.toString() == jwtClaims!['nbf'].toString())) {
+      return _formatExpiration(value);
+    }
+    
+    // Handle arrays/lists
+    if (value is List) {
+      return value.join(', ');
+    }
+    
+    // Handle other values
+    return value.toString();
+  }
+
+  // Mapa para nombres amigables de claims JWT
+  Map<String, String> get claimNameMap => {
+    'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/sid': 'User ID (SID)',
+    'http://schemas.microsoft.com/ws/2008/06/identity/claims/role': 'Role',
+    'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/locality': 'Hotel ID (Locality)',
+    'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress': 'Email Address',
+    'Email': 'Email (Simple)',
+    'UserId': 'User ID (Simple)',
+    'exp': 'Token Expiration',
+    'iss': 'Token Issuer',
+    'aud': 'Audience',
+  };
+  
+  // Método para obtener nombre amigable de un claim
+  String getFriendlyClaimName(String claimKey) {
+    return claimNameMap[claimKey] ?? claimKey;
   }
 
   @override
@@ -105,6 +210,8 @@ class _AppInfoScreenState extends State<AppInfoScreen> {
   }
 
   Widget _buildUserInfoCard() {
+    bool isTokenValid = jwtClaims != null;
+    
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -113,22 +220,86 @@ class _AppInfoScreenState extends State<AppInfoScreen> {
           children: [
             Row(
               children: [
-                Icon(Icons.person, color: Theme.of(context).primaryColor),
+                Icon(
+                  isTokenValid ? (isTokenExpired ? Icons.person_off : Icons.person) : Icons.person_off,
+                  color: isTokenValid ? (isTokenExpired ? Colors.orange : Theme.of(context).primaryColor) : Colors.red,
+                ),
                 const SizedBox(width: 8),
                 const Text(
                   'User Information',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
+                const Spacer(),
+                if (isTokenValid)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: isTokenExpired ? Colors.orange.withOpacity(0.2) : Colors.green.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      isTokenExpired ? 'Token Expired' : 'Token Active',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: isTokenExpired ? Colors.orange : Colors.green,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  )
               ],
             ),
-            const SizedBox(height: 12),
+            const Divider(),
+            
             if (userInfo != null) ...[
-              _buildInfoRow('Name', userInfo!['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'] ?? 'Not available'),
-              _buildInfoRow('Role', userInfo!['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] ?? 'Not available'),
-              _buildInfoRow('User ID', userInfo!['sub'] ?? 'Not available'),
-              _buildInfoRow('Email', userInfo!['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'] ?? 'Not available'),
+              // User Identity Section
+              _buildSectionHeader('User Identity'),
+              _buildInfoRow('User ID', userInfo!['id']?.toString() ?? 'Not available'),
+              _buildInfoRow('Email', userInfo!['email'] ?? 'Not available'),
+              
+              const SizedBox(height: 12),
+              
+              // Access Control Section
+              _buildSectionHeader('Access Control'),
+              _buildInfoRow('Role', formatRoleName(userInfo!['role'])),
+              _buildInfoRow('Hotel ID', userInfo!['hotelId']?.toString() ?? 'Not available'),
+              
+              if (jwtClaims != null) ...[
+                const SizedBox(height: 16),
+                
+                // Token Information Section
+                _buildSectionHeader('Token Information'),
+                _buildInfoRow('Issued At', jwtClaims!['iat'] != null ? _formatExpiration(jwtClaims!['iat']) : 'Unknown'),
+                _buildInfoRow('Expires At', jwtClaims!['exp'] != null ? _formatExpiration(jwtClaims!['exp']) : 'Unknown'),
+                _buildInfoRow('Issuer', jwtClaims!['iss']?.toString() ?? 'Unknown'),
+                _buildInfoRow('Audience', jwtClaims!['aud']?.toString() ?? 'Unknown'),
+                
+                const SizedBox(height: 16),
+                
+                // Raw Claims Section
+                ExpansionTile(
+                  title: const Text(
+                    'All JWT Claims',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  children: [
+                    ...jwtClaims!.entries.map((entry) => _buildInfoRow(
+                      getFriendlyClaimName(entry.key),
+                      _formatClaimValue(entry.value),
+                    )).toList(),
+                  ],
+                ),
+              ],
             ] else
-              const Text('No user information available'),
+              const Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Center(
+                  child: Text(
+                    'No user information available.\nPlease log in first.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                ),
+              ),
           ],
         ),
       ),
@@ -151,10 +322,16 @@ class _AppInfoScreenState extends State<AppInfoScreen> {
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ],
-            ),            const SizedBox(height: 12),
+            ),
+            const Divider(),
             _buildInfoRow('API Base URL', AppConfig.smartSuiteBaseUrl),
             _buildInfoRow('Current Hotel ID', hotelId ?? 'Not set'),
-            _buildInfoRow('Token Status', userInfo != null ? 'Valid' : 'Invalid'),
+            if (jwtClaims != null) ...[
+              _buildInfoRow('Authentication', 'JWT Bearer Token'),
+            ] else ...[
+              _buildInfoRow('Authentication', 'Not authenticated'),
+            ],
+            _buildInfoRow('App Environment', AppConfig.environment),
           ],
         ),
       ),

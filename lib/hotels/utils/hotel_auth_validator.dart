@@ -95,8 +95,29 @@ class HotelAuthValidator {
   static Future<bool> isCurrentUserOwner() async {
     try {
       final role = await _authService.getUserRole();
-      return role?.toLowerCase() == 'owner';
+      print('[HotelAuthValidator] Checking if current user is owner. Role: $role');
+      
+      if (role == null) return false;
+      
+      // Check for "owner" or "ROLE_OWNER" in various formats
+      final String normalizedRole = role.toLowerCase();
+      
+      // Direct comparison with lowercase
+      if (normalizedRole == 'owner') return true;
+      
+      // Check for ROLE_ prefix (case insensitive)
+      if (normalizedRole == 'role_owner') return true;
+      
+      // Check if prefix is present and strip it
+      if (role.toUpperCase().startsWith('ROLE_')) {
+        final strippedRole = role.substring(5).toLowerCase();
+        return strippedRole == 'owner';
+      }
+      
+      print('[HotelAuthValidator] User is not an owner. Role: $role');
+      return false;
     } catch (e) {
+      print('[HotelAuthValidator] Error checking if user is owner: $e');
       return false;
     }
   }
