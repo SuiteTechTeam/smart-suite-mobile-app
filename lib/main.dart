@@ -21,8 +21,8 @@ void main() async {
   try {
     runApp(const SmartSuiteApp());
   } catch (e, stackTrace) {
-    print('Error starting app: $e');
-    print('Stack trace: $stackTrace');
+    debugPrint('Error starting app: $e');
+    debugPrint('Stack trace: $stackTrace');
     // You could show a fallback error screen here if needed
     runApp(const SmartSuiteApp());
   }

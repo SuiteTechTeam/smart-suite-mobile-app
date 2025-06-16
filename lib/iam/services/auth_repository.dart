@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 import '../models/sign_up_request.dart';
 import '../models/sign_in_request.dart';
 import '../models/authenticated_user.dart';
@@ -21,7 +23,7 @@ class AuthRepository {
       roleId: role.id,
     );
 
-    print('AuthRepository: Attempting sign-in for $email with role ${role.name}');
+    debugPrint('AuthRepository: Attempting sign-in for $email with role ${role.name}');
     
     try {
       // Try the normal sign-in first
@@ -36,14 +38,14 @@ class AuthRepository {
         role: role.name,
       );
       await _storageService.saveAuthenticatedUser(authenticatedUser);
-      print('AuthRepository: Sign-in successful');
+      debugPrint('AuthRepository: Sign-in successful');
       return authenticatedUser;
     } catch (e) {
-      print('AuthRepository: Primary sign-in failed: $e');
+      debugPrint('AuthRepository: Primary sign-in failed: $e');
       
       // Try the fallback method
       try {
-        print('AuthRepository: Trying fallback sign-in method...');
+        debugPrint('AuthRepository: Trying fallback sign-in method...');
         final authenticatedUserFromApi = await _apiService.signInWithFallback(request);
         
         final authenticatedUser = AuthenticatedUser(
@@ -54,10 +56,10 @@ class AuthRepository {
           role: role.name,
         );
         await _storageService.saveAuthenticatedUser(authenticatedUser);
-        print('AuthRepository: Fallback sign-in successful');
+        debugPrint('AuthRepository: Fallback sign-in successful');
         return authenticatedUser;
       } catch (fallbackError) {
-        print('AuthRepository: Fallback sign-in also failed: $fallbackError');
+        debugPrint('AuthRepository: Fallback sign-in also failed: $fallbackError');
         rethrow; // Re-throw the original error
       }    }
   }

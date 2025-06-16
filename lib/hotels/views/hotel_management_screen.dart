@@ -128,7 +128,7 @@ class HotelManagementView extends StatelessWidget {
       floatingActionButton: FutureBuilder<bool>(
         future: HotelAuthValidator.isCurrentUserOwner(),
         builder: (context, snapshot) {
-          print('[HotelScreen] FAB Builder - isOwner: ${snapshot.data}, hasData: ${snapshot.hasData}, hasError: ${snapshot.hasError}');
+          debugPrint('[HotelScreen] FAB Builder - isOwner: ${snapshot.data}, hasData: ${snapshot.hasData}, hasError: ${snapshot.hasError}');
           if (snapshot.hasData && snapshot.data == true) {
             return FloatingActionButton.extended(
               onPressed: () => _showCreateHotelDialog(context),

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:smart_suite/hotels/models/hotel.dart';
@@ -143,7 +144,7 @@ void main() {
         } catch (e) {
           // This will likely fail due to authentication requirements in tests
           // but we're primarily testing the data format and security model
-          print('Expected error in test (auth required): $e');
+          debugPrint('Expected error in test (auth required): $e');
         }
       } catch (e) {
         fail('Test failed with error: $e');

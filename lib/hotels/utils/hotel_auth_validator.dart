@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 import '../../iam/services/auth_service.dart';
 import '../../core/services/base_service.dart';
 
@@ -95,7 +97,7 @@ class HotelAuthValidator {
   static Future<bool> isCurrentUserOwner() async {
     try {
       final role = await _authService.getUserRole();
-      print('[HotelAuthValidator] Checking if current user is owner. Role: $role');
+      debugPrint('[HotelAuthValidator] Checking if current user is owner. Role: $role');
       
       if (role == null) return false;
       
@@ -114,10 +116,10 @@ class HotelAuthValidator {
         return strippedRole == 'owner';
       }
       
-      print('[HotelAuthValidator] User is not an owner. Role: $role');
+      debugPrint('[HotelAuthValidator] User is not an owner. Role: $role');
       return false;
     } catch (e) {
-      print('[HotelAuthValidator] Error checking if user is owner: $e');
+      debugPrint('[HotelAuthValidator] Error checking if user is owner: $e');
       return false;
     }
   }

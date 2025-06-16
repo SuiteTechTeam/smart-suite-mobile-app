@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import '../models/authenticated_user.dart';
@@ -40,25 +41,25 @@ class StorageService {
       return null;
     }
   }  Future<bool> isAuthenticated() async {
-    print('StorageService: Checking authentication status...');
+    debugPrint('StorageService: Checking authentication status...');
     try {
       final token = await getToken();
-      print('StorageService: Token retrieved: ${token != null ? 'exists' : 'null'}');
+      debugPrint('StorageService: Token retrieved: ${token != null ? 'exists' : 'null'}');
       
       if (token != null && token.isNotEmpty) {
         try {
           final isExpired = JwtDecoder.isExpired(token);
-          print('StorageService: Token expired: $isExpired');
+          debugPrint('StorageService: Token expired: $isExpired');
           return !isExpired;
         } catch (e) {
-          print('StorageService: Error checking token expiration: $e');
+          debugPrint('StorageService: Error checking token expiration: $e');
           return false;
         }
       }
-      print('StorageService: No valid token found');
+      debugPrint('StorageService: No valid token found');
       return false;
     } catch (e) {
-      print('StorageService: Error in isAuthenticated: $e');
+      debugPrint('StorageService: Error in isAuthenticated: $e');
       return false;
     }
   }
