@@ -151,30 +151,31 @@ class HotelManagementView extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+          children: [            Row(
               children: [
                 Icon(
                   Icons.hotel,
                   color: Theme.of(context).primaryColor,
-                  size: 24,
+                  size: 22, // Icono ligeramente más pequeño
                 ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     hotel.name,
                     style: const TextStyle(
-                      fontSize: 18,
+                      fontSize: 16, // Texto ligeramente más pequeño
                       fontWeight: FontWeight.bold,
                     ),
                     overflow: TextOverflow.ellipsis,
+                    maxLines: 1, // Limitar a una línea
                   ),
                 ),
+                const SizedBox(width: 4), // Añadir un poco de espacio
                 Text(
                   'ID: ${hotel.id}',
                   style: TextStyle(
                     color: Colors.grey[600],
-                    fontSize: 12,
+                    fontSize: 11, // Texto ligeramente más pequeño
                   ),
                 ),
               ],
@@ -188,72 +189,75 @@ class HotelManagementView extends StatelessWidget {
             if (hotel.description != null && hotel.description!.isNotEmpty) ...[
               const SizedBox(height: 8),
               _buildInfoRow(Icons.description, hotel.description!),
-            ],
-            if (hotel.rating != null) ...[
+            ],            if (hotel.rating != null) ...[
               const SizedBox(height: 8),
               Row(
                 children: [
-                  Icon(Icons.star, size: 16, color: Colors.amber[700]),
-                  const SizedBox(width: 8),
+                  Icon(Icons.star, size: 14, color: Colors.amber[700]),
+                  const SizedBox(width: 6),
                   Text(
                     '${hotel.rating!.toStringAsFixed(1)} / 5.0',
-                    style: TextStyle(color: Colors.grey[700]),
+                    style: TextStyle(color: Colors.grey[700], fontSize: 13),
                   ),
                 ],
               ),
-            ],
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                if (userRole?.toLowerCase() == 'owner') ...[
-                  TextButton.icon(
-                    onPressed: () => _showUpdateHotelDialog(context, hotel),
-                    icon: const Icon(Icons.edit, size: 16),
-                    label: const Text('Edit'),
+            ],const SizedBox(height: 16),
+            // Hacemos los botones scrollables horizontalmente para prevenir desbordamiento
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  if (userRole?.toLowerCase() == 'owner') ...[
+                    TextButton.icon(
+                      onPressed: () => _showUpdateHotelDialog(context, hotel),
+                      icon: const Icon(Icons.edit, size: 16),
+                      label: const Text('Edit'),
+                    ),
+                    const SizedBox(width: 8),
+                  ],
+                  ElevatedButton.icon(
+                    onPressed: () => _selectHotel(context, hotel.id),
+                    icon: const Icon(Icons.check, size: 16),
+                    label: const Text('Select'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).primaryColor,
+                      foregroundColor: Colors.white,
+                    ),
                   ),
                   const SizedBox(width: 8),
-                ],
-                ElevatedButton.icon(
-                  onPressed: () => _selectHotel(context, hotel.id),
-                  icon: const Icon(Icons.check, size: 16),
-                  label: const Text('Select'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).primaryColor,
-                    foregroundColor: Colors.white,
+                  OutlinedButton.icon(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => RoomManagementScreen(hotelId: hotel.id),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.meeting_room, size: 16),
+                    label: const Text('Rooms'),  // Texto más corto
                   ),
-                ),
-                const SizedBox(width: 8),
-                OutlinedButton.icon(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => RoomManagementScreen(hotelId: hotel.id),
-                      ),
-                    );
-                  },
-                  icon: const Icon(Icons.meeting_room, size: 16),
-                  label: const Text('Ver habitaciones'),
-                ),
-              ],
+                ],
+              ),
             ),
           ],
         ),
       ),
     );
   }
-
   Widget _buildInfoRow(IconData icon, String text) {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start, // Alinear al inicio para textos largos
       children: [
         Icon(icon, size: 16, color: Colors.grey[600]),
         const SizedBox(width: 8),
         Expanded(
           child: Text(
             text,
-            style: TextStyle(color: Colors.grey[700]),
+            style: TextStyle(color: Colors.grey[700], fontSize: 13), // Texto ligeramente más pequeño
             overflow: TextOverflow.ellipsis,
+            maxLines: 2, // Permitir hasta 2 líneas
           ),
         ),
       ],
