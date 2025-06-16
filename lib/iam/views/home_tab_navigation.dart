@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../views/home_page.dart';
 import '../../hotels/views/hotel_management_screen.dart';
-import '../../reservations/views/reservation_management_screen.dart';
+import '../../booking/views/reservation_management_screen.dart';
 import '../views/account/account_page.dart';
 
 class HomeTabNavigation extends StatefulWidget {
