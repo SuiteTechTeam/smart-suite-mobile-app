@@ -145,14 +145,14 @@ class _DebugAuthScreenState extends State<DebugAuthScreen> {
                           setState(() {
                             _isTestingConnectivity = true;
                           });
-
+                          // Capture messenger to avoid using context across async gap
+                          final messenger = ScaffoldMessenger.of(context);
                           try {
                             final apiService = AuthApiService();
                             final isConnected = await apiService
                                 .testConnectivity();
-
                             if (mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
+                              messenger.showSnackBar(
                                 SnackBar(
                                   content: Text(
                                     isConnected
@@ -168,7 +168,7 @@ class _DebugAuthScreenState extends State<DebugAuthScreen> {
                             }
                           } catch (e) {
                             if (mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
+                              messenger.showSnackBar(
                                 SnackBar(
                                   content: Text(
                                     'Connectivity error: $e',
