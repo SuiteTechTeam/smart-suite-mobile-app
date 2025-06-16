@@ -195,12 +195,12 @@ abstract class BaseService {
         final decodedToken = JwtDecoder.decode(token);
         
         // Usar los nombres completos de los claims de JWT
-        final String sidClaim = AuthService.SID_CLAIM;
-        final String roleClaim = AuthService.ROLE_CLAIM;
-        final String localityClaim = AuthService.LOCALITY_CLAIM;
-        final String emailClaim = AuthService.EMAIL_CLAIM;
-        final String emailSimple = AuthService.EMAIL_SIMPLE;
-        final String userIdSimple = AuthService.USERID_SIMPLE;
+        final String sidClaim = AuthService.sidClaimKey;
+        final String roleClaim = AuthService.roleClaimKey;
+        final String localityClaim = AuthService.localityClaimKey;
+        final String emailClaim = AuthService.emailClaimKey;
+        final String emailSimple = AuthService.emailSimpleKey;
+        final String userIdSimple = AuthService.userIdSimpleKey;
         
         // Intentar obtener datos desde claims completos primero, luego desde versiones simplificadas
         final sid = decodedToken[sidClaim] ?? decodedToken[userIdSimple] ?? decodedToken['sid'];
