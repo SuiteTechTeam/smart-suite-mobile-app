@@ -50,8 +50,9 @@ class RoomService extends BaseService {
 
     if (response.statusCode == 200) {
       final Map<String, dynamic> jsonData = json.decode(response.body);
-      if (jsonData.isEmpty)
+      if (jsonData.isEmpty) {
         return null; // Or handle as appropriate if API returns empty for not found
+      }
       return Room.fromJson(jsonData);
     } else if (response.statusCode == 404) {
       return null; // Room not found
