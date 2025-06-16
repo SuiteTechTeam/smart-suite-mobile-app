@@ -285,7 +285,7 @@ class _AppInfoScreenState extends State<AppInfoScreen> {
                     ...jwtClaims!.entries.map((entry) => _buildInfoRow(
                       getFriendlyClaimName(entry.key),
                       _formatClaimValue(entry.value),
-                    )).toList(),
+                    )),
                   ],
                 ),
               ],

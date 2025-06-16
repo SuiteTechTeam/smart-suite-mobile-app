@@ -4,7 +4,7 @@ import '../models/room.dart';
 import '../../core/services/base_service.dart';
 
 class RoomService extends BaseService {
-  RoomService({http.Client? httpClient}) : super(httpClient: httpClient);
+  RoomService({super.httpClient});
 
   // Create a new room
   Future<Room> createRoom(Room room) async {

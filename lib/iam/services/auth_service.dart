@@ -29,9 +29,7 @@ class AuthService {
       var sid = decoded[SID_CLAIM];
       
       // Si no existe, probar con el claim simple
-      if (sid == null) {
-        sid = decoded[USERID_SIMPLE] ?? decoded['sid'];
-      }
+      sid ??= decoded[USERID_SIMPLE] ?? decoded['sid'];
       
       if (sid != null) return int.tryParse(sid.toString());
     }

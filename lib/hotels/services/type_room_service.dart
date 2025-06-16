@@ -4,7 +4,7 @@ import '../models/type_room.dart';
 import '../../core/services/base_service.dart';
 
 class TypeRoomService extends BaseService {
-  TypeRoomService({http.Client? httpClient}) : super(httpClient: httpClient);
+  TypeRoomService({super.httpClient});
 
   Future<List<TypeRoom>> getAllTypeRooms(int hotelId) async {
     final response = await authenticatedGet('type-room/get-all-type-rooms?hotelid=$hotelId');
