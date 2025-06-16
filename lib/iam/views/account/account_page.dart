@@ -163,6 +163,8 @@ class _AccountPageState extends State<AccountPage>
                     Expanded(
                       child: ElevatedButton(
                         onPressed: () async {
+                          final navigator = Navigator.of(context);
+                          final messenger = ScaffoldMessenger.of(context);
                           final updated = {
                             ...?userInfo,
                             'name': nameController.text,
@@ -171,17 +173,22 @@ class _AccountPageState extends State<AccountPage>
                           final success = await _userService.updateUserInfo(
                             updated,
                           );
+                          if (!mounted) return;
                           if (success) {
-                            Navigator.of(context).pop();
+                            navigator.pop();
                             _fetchUserInfo();
-                            _showSnackBar(
-                              'Profile updated successfully!',
-                              Colors.green,
+                            messenger.showSnackBar(
+                              const SnackBar(
+                                content: Text('Profile updated successfully!'),
+                                backgroundColor: Colors.green,
+                              ),
                             );
                           } else {
-                            _showSnackBar(
-                              'Update failed. Please try again.',
-                              Colors.red,
+                            messenger.showSnackBar(
+                              const SnackBar(
+                                content: Text('Update failed. Please try again.'),
+                                backgroundColor: Colors.red,
+                              ),
                             );
                           }
                         },
@@ -341,20 +348,27 @@ class _AccountPageState extends State<AccountPage>
                         Expanded(
                           child: ElevatedButton(
                             onPressed: () async {
+                              final navigator = Navigator.of(context);
+                              final messenger = ScaffoldMessenger.of(context);
                               final success = await _userService.changePassword(
                                 oldPasswordController.text,
                                 newPasswordController.text,
                               );
+                              if (!mounted) return;
                               if (success) {
-                                Navigator.of(context).pop();
-                                _showSnackBar(
-                                  'Password changed successfully!',
-                                  Colors.green,
+                                navigator.pop();
+                                messenger.showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Password changed successfully!'),
+                                    backgroundColor: Colors.green,
+                                  ),
                                 );
                               } else {
-                                _showSnackBar(
-                                  'Password change failed. Please try again.',
-                                  Colors.red,
+                                messenger.showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Password change failed. Please try again.'),
+                                    backgroundColor: Colors.red,
+                                  ),
                                 );
                               }
                             },
@@ -385,27 +399,6 @@ class _AccountPageState extends State<AccountPage>
           },
         );
       },
-    );
-  }
-
-  void _showSnackBar(String message, Color color) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            Icon(
-              color == Colors.green ? Icons.check_circle : Icons.error,
-              color: Colors.white,
-            ),
-            const SizedBox(width: 8),
-            Expanded(child: Text(message)),
-          ],
-        ),
-        backgroundColor: color,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        margin: const EdgeInsets.all(16),
-      ),
     );
   }
 
