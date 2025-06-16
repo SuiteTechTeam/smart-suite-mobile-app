@@ -12,17 +12,9 @@ class HomeTabNavigation extends StatefulWidget {
 }
 
 class _HomeTabNavigationState extends State<HomeTabNavigation>
-    with TickerProviderStateMixin {
-  int _selectedIndex = 0;
+    with TickerProviderStateMixin {  int _selectedIndex = 0;
   late PageController _pageController;
   late AnimationController _animationController;
-
-  static const List<Widget> _widgetOptions = <Widget>[
-    HomePage(),
-    HotelManagementScreen(),
-    ReservationManagementScreen(),
-    AccountPage(),
-  ];
 
   static const List<TabInfo> _tabs = <TabInfo>[
     TabInfo(
@@ -96,17 +88,27 @@ class _HomeTabNavigationState extends State<HomeTabNavigation>
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
+  @override  Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    // Calculate bottom navigation bar height with margin
+    // We use 16 for top and bottom margins, plus around 56-60 for the nav bar itself
+    // Add extra padding (19px + safety margin) to prevent overflow
+    final bottomNavHeight = MediaQuery.of(context).padding.bottom + 16 + 16 + 60 + 20;
     
     return Scaffold(
       extendBody: true,
       appBar: _buildModernAppBar(context, isDark),
-      body: PageView(
-        controller: _pageController,
-        onPageChanged: _onPageChanged,
-        children: _widgetOptions,
+      body: SafeArea(
+        bottom: false, // We'll handle bottom padding manually
+        child: Padding(
+          padding: EdgeInsets.only(bottom: bottomNavHeight),
+          child: PageView(
+            controller: _pageController,
+            onPageChanged: _onPageChanged,
+            children: _buildScrollablePages(),
+          ),
+        ),
       ),
       bottomNavigationBar: _buildModernBottomNavBar(context, isDark),
       floatingActionButton: _selectedIndex == 2 ? _buildFAB(context) : null,
@@ -165,9 +167,7 @@ class _HomeTabNavigationState extends State<HomeTabNavigation>
         const SizedBox(width: 8),
       ],
     );
-  }
-
-  Widget _buildModernBottomNavBar(BuildContext context, bool isDark) {
+  }  Widget _buildModernBottomNavBar(BuildContext context, bool isDark) {
     return Container(
       margin: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -239,6 +239,14 @@ class _HomeTabNavigationState extends State<HomeTabNavigation>
       elevation: 4,
       extendedPadding: const EdgeInsets.symmetric(horizontal: 20),
     );
+  }  // Build scrollable versions of each page
+  List<Widget> _buildScrollablePages() {
+    return const [
+      HomePage(),
+      HotelManagementScreen(),
+      ReservationManagementScreen(),
+      AccountPage(),
+    ];
   }
 }
 
