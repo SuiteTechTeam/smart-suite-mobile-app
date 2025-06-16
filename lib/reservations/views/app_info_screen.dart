@@ -234,7 +234,7 @@ class _AppInfoScreenState extends State<AppInfoScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: isTokenExpired ? Colors.orange.withOpacity(0.2) : Colors.green.withOpacity(0.2),
+                      color: isTokenExpired ? const Color.fromARGB(255, 255, 154, 0).withValues(alpha: 0.2) : const Color.fromARGB(255, 76, 175, 80).withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(

@@ -494,7 +494,7 @@ class _AccountPageState extends State<AccountPage>
               color: Colors.white,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
+                  color: Colors.black.withValues(alpha: 0.2),
                   blurRadius: 20,
                   offset: const Offset(0, 10),
                 ),
@@ -543,7 +543,7 @@ class _AccountPageState extends State<AccountPage>
               gradient: LinearGradient(
                 begin: Alignment.centerLeft,
                 end: Alignment.centerRight,
-                colors: [color.withOpacity(0.1), Colors.white],
+                colors: [color.withValues(alpha: 0.1), Colors.white],
               ),
             ),
             child: Row(
@@ -551,7 +551,7 @@ class _AccountPageState extends State<AccountPage>
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.2),
+                    color: color.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(icon, color: color, size: 24),

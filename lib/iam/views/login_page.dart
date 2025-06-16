@@ -79,9 +79,9 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Theme.of(context).primaryColor.withOpacity(0.1),
+              Theme.of(context).primaryColor.withValues(alpha: 0.1),
               Colors.white,
-              Theme.of(context).primaryColor.withOpacity(0.05),
+              Theme.of(context).primaryColor.withValues(alpha: 0.05),
             ],
           ),
         ),
@@ -135,7 +135,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                 borderRadius: BorderRadius.circular(24),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.08),
+                                    color: Colors.black.withValues(alpha: 0.08),
                                     blurRadius: 20,
                                     offset: const Offset(0, 10),
                                   ),
@@ -193,13 +193,13 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
             gradient: LinearGradient(
               colors: [
                 Theme.of(context).primaryColor,
-                Theme.of(context).primaryColor.withOpacity(0.7),
+                Theme.of(context).primaryColor.withValues(alpha: 0.7),
               ],
             ),
             borderRadius: BorderRadius.circular(25),
             boxShadow: [
               BoxShadow(
-                color: Theme.of(context).primaryColor.withOpacity(0.3),
+                color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
                 blurRadius: 20,
                 offset: const Offset(0, 10),
               ),
@@ -449,13 +449,13 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
         gradient: LinearGradient(
           colors: [
             Theme.of(context).primaryColor,
-            Theme.of(context).primaryColor.withOpacity(0.8),
+            Theme.of(context).primaryColor.withValues(alpha: 0.8),
           ],
         ),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Theme.of(context).primaryColor.withOpacity(0.3),
+            color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
             blurRadius: 15,
             offset: const Offset(0, 8),
           ),
@@ -560,8 +560,6 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
         return Icons.admin_panel_settings;
       case UserRole.guest:
         return Icons.person;
-      default:
-        return Icons.person_outline;
     }
   }
 }

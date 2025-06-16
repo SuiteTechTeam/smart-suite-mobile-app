@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
 import '../models/type_room.dart';
 import '../../core/services/base_service.dart';
 
