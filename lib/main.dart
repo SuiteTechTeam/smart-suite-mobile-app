@@ -16,7 +16,7 @@ import 'booking/views/api_test_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Add error handling for initialization
   try {
     runApp(const SmartSuiteApp());
@@ -47,7 +47,8 @@ class SmartSuiteApp extends StatelessWidget {
         theme: _buildLightTheme(),
         darkTheme: _buildDarkTheme(),
         themeMode: ThemeMode.system,
-        home: const AuthWrapper(),        routes: {
+        home: const AuthWrapper(),
+        routes: {
           '/login': (context) => const LoginPage(),
           '/home': (context) => const HomeTabNavigation(),
           '/reservations': (context) => const ReservationManagementScreen(),
@@ -66,7 +67,9 @@ class SmartSuiteApp extends StatelessWidget {
           return null;
         },
         onUnknownRoute: (settings) {
-          return MaterialPageRoute(builder: (context) => const HomeTabNavigation());
+          return MaterialPageRoute(
+            builder: (context) => const HomeTabNavigation(),
+          );
         },
         debugShowCheckedModeBanner: false,
       ),
@@ -89,9 +92,7 @@ class SmartSuiteApp extends StatelessWidget {
       cardTheme: CardThemeData(
         elevation: 2,
         shadowColor: Colors.black12,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -103,9 +104,7 @@ class SmartSuiteApp extends StatelessWidget {
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: Colors.grey.shade300),
@@ -136,9 +135,7 @@ class SmartSuiteApp extends StatelessWidget {
       cardTheme: CardThemeData(
         elevation: 2,
         shadowColor: Colors.black26,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -150,9 +147,7 @@ class SmartSuiteApp extends StatelessWidget {
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: Colors.grey.shade600),
@@ -164,7 +159,8 @@ class SmartSuiteApp extends StatelessWidget {
         filled: true,
         fillColor: Colors.grey.shade900,
       ),
-    );  }
+    );
+  }
 }
 
 class ModernLoadingScreen extends StatefulWidget {
@@ -203,11 +199,7 @@ class _ModernLoadingScreenState extends State<ModernLoadingScreen>
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF2196F3),
-              Color(0xFF21CBF3),
-              Color(0xFF03DAC6),
-            ],
+            colors: [Color(0xFF2196F3), Color(0xFF21CBF3), Color(0xFF03DAC6)],
           ),
         ),
         child: Center(
@@ -227,7 +219,12 @@ class _ModernLoadingScreenState extends State<ModernLoadingScreen>
                         borderRadius: BorderRadius.circular(25),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color.fromARGB(255, 0, 0, 0).withValues(alpha: 0.1),
+                            color: const Color.fromARGB(
+                              255,
+                              0,
+                              0,
+                              0,
+                            ).withValues(alpha: 0.1),
                             blurRadius: 20,
                             offset: const Offset(0, 10),
                           ),
@@ -254,10 +251,7 @@ class _ModernLoadingScreenState extends State<ModernLoadingScreen>
               const SizedBox(height: 10),
               const Text(
                 'Cargando tu experiencia...',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.white70,
-                ),
+                style: TextStyle(fontSize: 16, color: Colors.white70),
               ),
               const SizedBox(height: 30),
               const SizedBox(
@@ -294,10 +288,7 @@ class ModernErrorScreen extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              Colors.red.shade400,
-              Colors.red.shade600,
-            ],
+            colors: [Colors.red.shade400, Colors.red.shade600],
           ),
         ),
         child: Center(
@@ -339,10 +330,7 @@ class ModernErrorScreen extends StatelessWidget {
                 Text(
                   message,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    color: Colors.white70,
-                  ),
+                  style: const TextStyle(fontSize: 16, color: Colors.white70),
                 ),
                 const SizedBox(height: 40),
                 ElevatedButton.icon(

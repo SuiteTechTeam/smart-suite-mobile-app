@@ -13,10 +13,9 @@ class HotelSelectionScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => HotelBloc(
-        hotelService: HotelService(),
-        authService: AuthService(),
-      )..add(HotelLoadRequested()),
+      create: (context) =>
+          HotelBloc(hotelService: HotelService(), authService: AuthService())
+            ..add(HotelLoadRequested()),
       child: const HotelSelectionView(),
     );
   }
@@ -27,20 +26,26 @@ class HotelSelectionView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(      appBar: AppBar(
+    return Scaffold(
+      appBar: AppBar(
         title: const Text('Select Hotel'),
         backgroundColor: Theme.of(context).primaryColor,
         foregroundColor: Colors.white,
       ),
-      body: BlocListener<HotelBloc, hotel_state.HotelState>(        listener: (context, state) {
+      body: BlocListener<HotelBloc, hotel_state.HotelState>(
+        listener: (context, state) {
           if (state is hotel_state.HotelSelectionState) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message)),
-            );
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(state.message)));
             Navigator.pop(context, true);
-          } else if (state is hotel_state.HotelError) {            ScaffoldMessenger.of(context).showSnackBar(
+          } else if (state is hotel_state.HotelError) {
+            ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('Error: ${state.message}', style: const TextStyle(color: Colors.white)),
+                content: Text(
+                  'Error: ${state.message}',
+                  style: const TextStyle(color: Colors.white),
+                ),
                 backgroundColor: Colors.red,
               ),
             );
@@ -51,17 +56,13 @@ class HotelSelectionView extends StatelessWidget {
             if (state is hotel_state.HotelLoading) {
               return const Center(child: CircularProgressIndicator());
             }
-            
+
             if (state is hotel_state.HotelError) {
               return Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(
-                      Icons.error_outline,
-                      size: 64,
-                      color: Colors.red[400],
-                    ),
+                    Icon(Icons.error_outline, size: 64, color: Colors.red[400]),
                     const SizedBox(height: 16),
                     Text(
                       'Error: ${state.message}',
@@ -79,18 +80,14 @@ class HotelSelectionView extends StatelessWidget {
                 ),
               );
             }
-            
+
             if (state is hotel_state.HotelLoaded) {
               if (state.hotels.isEmpty) {
                 return const Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(
-                        Icons.hotel_outlined,
-                        size: 64,
-                        color: Colors.grey,
-                      ),
+                      Icon(Icons.hotel_outlined, size: 64, color: Colors.grey),
                       SizedBox(height: 16),
                       Text(
                         'No hotels available',
@@ -100,7 +97,7 @@ class HotelSelectionView extends StatelessWidget {
                   ),
                 );
               }
-              
+
               return ListView.builder(
                 padding: const EdgeInsets.all(16.0),
                 itemCount: state.hotels.length,
@@ -110,7 +107,7 @@ class HotelSelectionView extends StatelessWidget {
                 },
               );
             }
-            
+
             return const Center(child: CircularProgressIndicator());
           },
         ),
@@ -125,49 +122,30 @@ class HotelSelectionView extends StatelessWidget {
       child: ListTile(
         leading: CircleAvatar(
           backgroundColor: Theme.of(context).primaryColor,
-          child: Icon(
-            Icons.hotel,
-            color: Colors.white,
-            size: 20,
-          ),
+          child: Icon(Icons.hotel, color: Colors.white, size: 20),
         ),
         title: Text(
           hotel.name,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-          ),
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              hotel.address,
-              style: TextStyle(color: Colors.grey[600]),
-            ),
+            Text(hotel.address, style: TextStyle(color: Colors.grey[600])),
             const SizedBox(height: 4),
             Row(
               children: [
                 Text(
                   'ID: ${hotel.id}',
-                  style: TextStyle(
-                    color: Colors.grey[500],
-                    fontSize: 12,
-                  ),
+                  style: TextStyle(color: Colors.grey[500], fontSize: 12),
                 ),
                 if (hotel.rating != null) ...[
                   const SizedBox(width: 12),
-                  Icon(
-                    Icons.star,
-                    size: 14,
-                    color: Colors.amber[700],
-                  ),
+                  Icon(Icons.star, size: 14, color: Colors.amber[700]),
                   const SizedBox(width: 2),
                   Text(
                     hotel.rating!.toStringAsFixed(1),
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 12,
-                    ),
+                    style: TextStyle(color: Colors.grey[600], fontSize: 12),
                   ),
                 ],
               ],
@@ -184,10 +162,7 @@ class HotelSelectionView extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             minimumSize: const Size(60, 32),
           ),
-          child: const Text(
-            'Select',
-            style: TextStyle(fontSize: 12),
-          ),
+          child: const Text('Select', style: TextStyle(fontSize: 12)),
         ),
         isThreeLine: true,
       ),

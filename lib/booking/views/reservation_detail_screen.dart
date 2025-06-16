@@ -8,7 +8,8 @@ class ReservationDetailScreen extends StatefulWidget {
   const ReservationDetailScreen({super.key, required this.reservation});
 
   @override
-  State<ReservationDetailScreen> createState() => _ReservationDetailScreenState();
+  State<ReservationDetailScreen> createState() =>
+      _ReservationDetailScreenState();
 }
 
 class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
@@ -24,7 +25,10 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
 
   Future<void> _updateReservationStatus(String newStatus) async {
     try {
-      await _reservationService.updateReservationStatus(reservation.id!, newStatus);
+      await _reservationService.updateReservationStatus(
+        reservation.id!,
+        newStatus,
+      );
       setState(() {
         reservation = Reservation(
           id: reservation.id,
@@ -49,7 +53,9 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
   }
 
   void _showSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   void _showStatusUpdateDialog() {
@@ -125,12 +131,14 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
         statusIcon = Icons.info;
     }
 
-    return Scaffold(      appBar: AppBar(
+    return Scaffold(
+      appBar: AppBar(
         title: const Text('Booking Details'),
         backgroundColor: const Color(0xFF474C74),
         foregroundColor: Colors.white,
         actions: [
-          if (reservation.state != 'completed' && reservation.state != 'cancelled')
+          if (reservation.state != 'completed' &&
+              reservation.state != 'cancelled')
             IconButton(
               icon: const Icon(Icons.edit),
               onPressed: _showStatusUpdateDialog,
@@ -223,7 +231,9 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
             ),
             const SizedBox(height: 4),
             Text(
-              reservation.description.isNotEmpty ? reservation.description : 'No description provided',
+              reservation.description.isNotEmpty
+                  ? reservation.description
+                  : 'No description provided',
               style: const TextStyle(fontSize: 14, color: Colors.grey),
             ),
           ],
@@ -250,7 +260,10 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
             _buildInfoRow('Number of Nights:', '${reservation.nightCount}'),
             const SizedBox(height: 8),
             if (reservation.createdAt != null)
-              _buildInfoRow('Booked on:', _formatDateTime(reservation.createdAt!)),
+              _buildInfoRow(
+                'Booked on:',
+                _formatDateTime(reservation.createdAt!),
+              ),
           ],
         ),
       ),
@@ -270,7 +283,10 @@ class _ReservationDetailScreenState extends State<ReservationDetailScreen> {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
-            _buildInfoRow('Room Price per Night:', '\$${reservation.priceRoom.toStringAsFixed(2)}'),
+            _buildInfoRow(
+              'Room Price per Night:',
+              '\$${reservation.priceRoom.toStringAsFixed(2)}',
+            ),
             _buildInfoRow('Number of Nights:', '${reservation.nightCount}'),
             const Divider(),
             _buildInfoRow(

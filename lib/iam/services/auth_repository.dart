@@ -14,21 +14,27 @@ class AuthRepository {
   AuthRepository({
     required AuthApiService apiService,
     required StorageService storageService,
-  })  : _apiService = apiService,
-        _storageService = storageService;
-  Future<AuthenticatedUser> signIn(String email, String password, UserRole role) async {
+  }) : _apiService = apiService,
+       _storageService = storageService;
+  Future<AuthenticatedUser> signIn(
+    String email,
+    String password,
+    UserRole role,
+  ) async {
     final request = SignInRequest(
       email: email,
       password: password,
       roleId: role.id,
     );
 
-    debugPrint('AuthRepository: Attempting sign-in for $email with role ${role.name}');
-    
+    debugPrint(
+      'AuthRepository: Attempting sign-in for $email with role ${role.name}',
+    );
+
     try {
       // Try the normal sign-in first
       final authenticatedUserFromApi = await _apiService.signIn(request);
-      
+
       // El backend no retorna roleId ni role, así que los agregamos manualmente
       final authenticatedUser = AuthenticatedUser(
         id: authenticatedUserFromApi.id,
@@ -42,12 +48,14 @@ class AuthRepository {
       return authenticatedUser;
     } catch (e) {
       debugPrint('AuthRepository: Primary sign-in failed: $e');
-      
+
       // Try the fallback method
       try {
         debugPrint('AuthRepository: Trying fallback sign-in method...');
-        final authenticatedUserFromApi = await _apiService.signInWithFallback(request);
-        
+        final authenticatedUserFromApi = await _apiService.signInWithFallback(
+          request,
+        );
+
         final authenticatedUser = AuthenticatedUser(
           id: authenticatedUserFromApi.id,
           email: authenticatedUserFromApi.email,
@@ -59,12 +67,22 @@ class AuthRepository {
         debugPrint('AuthRepository: Fallback sign-in successful');
         return authenticatedUser;
       } catch (fallbackError) {
-        debugPrint('AuthRepository: Fallback sign-in also failed: $fallbackError');
+        debugPrint(
+          'AuthRepository: Fallback sign-in also failed: $fallbackError',
+        );
         rethrow; // Re-throw the original error
-      }    }
+      }
+    }
   }
 
-  Future<void> signUp(String name, String surname, String phone, String email, String password, UserRole role) async {
+  Future<void> signUp(
+    String name,
+    String surname,
+    String phone,
+    String email,
+    String password,
+    UserRole role,
+  ) async {
     final request = SignUpRequest(
       name: name,
       surname: surname,

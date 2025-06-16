@@ -56,13 +56,11 @@ class UserService extends BaseService {
         debugPrint('[UserService] Data received from API');
 
         // Include the role info in returned data
-        return {
-          ...data,
-          'role': role,
-          'id': id,
-        };
+        return {...data, 'role': role, 'id': id};
       } else {
-        debugPrint('[UserService] Failed to get user info: ${response.statusCode} - ${response.body}');
+        debugPrint(
+          '[UserService] Failed to get user info: ${response.statusCode} - ${response.body}',
+        );
       }
     } catch (e) {
       debugPrint('[UserService] Error getting user info: $e');
@@ -78,15 +76,15 @@ class UserService extends BaseService {
         debugPrint('[UserService] No user info from token for update');
         return false;
       }
-      
+
       final roleRaw = userInfo['role']?.toString().toUpperCase();
       final id = userInfo['id'];
-      
+
       if (roleRaw == null || id == null) {
         debugPrint('[UserService] Missing role or id in token for update');
         return false;
       }
-      
+
       // Parse the role from JWT format (e.g., "ROLE_OWNER" -> "owner")
       String role;
       if (roleRaw.startsWith('ROLE_')) {
@@ -94,9 +92,9 @@ class UserService extends BaseService {
       } else {
         role = roleRaw.toLowerCase();
       }
-      
+
       debugPrint('[UserService] Update role: $role, ID: $id');
-      
+
       String endpoint;
       if (role == 'admin') {
         endpoint = 'user/admins/$id';
@@ -108,11 +106,11 @@ class UserService extends BaseService {
         debugPrint('[UserService] Unknown role for update: $role');
         return false;
       }
-      
+
       debugPrint('[UserService] Calling update API endpoint: $endpoint');
       final response = await authenticatedPut(endpoint, body: data);
       debugPrint('[UserService] API update response: ${response.statusCode}');
-      
+
       return response.statusCode == 200;
     } catch (e) {
       debugPrint('[UserService] Error updating user info: $e');
@@ -128,15 +126,17 @@ class UserService extends BaseService {
         debugPrint('[UserService] No user info from token for password change');
         return false;
       }
-      
+
       final roleRaw = userInfo['role']?.toString().toUpperCase();
       final id = userInfo['id'];
-      
+
       if (roleRaw == null || id == null) {
-        debugPrint('[UserService] Missing role or id in token for password change');
+        debugPrint(
+          '[UserService] Missing role or id in token for password change',
+        );
         return false;
       }
-      
+
       // Parse the role from JWT format (e.g., "ROLE_OWNER" -> "owner")
       String role;
       if (roleRaw.startsWith('ROLE_')) {
@@ -144,9 +144,9 @@ class UserService extends BaseService {
       } else {
         role = roleRaw.toLowerCase();
       }
-      
+
       debugPrint('[UserService] Change password role: $role, ID: $id');
-      
+
       String endpoint;
       if (role == 'admin') {
         endpoint = 'user/admins/$id/password';
@@ -158,14 +158,18 @@ class UserService extends BaseService {
         debugPrint('[UserService] Unknown role for password change: $role');
         return false;
       }
-      
-      debugPrint('[UserService] Calling password change API endpoint: $endpoint');
-      final response = await authenticatedPut(endpoint, body: {
-        'oldPassword': oldPassword,
-        'newPassword': newPassword,
-      });
-      debugPrint('[UserService] API password change response: ${response.statusCode}');
-      
+
+      debugPrint(
+        '[UserService] Calling password change API endpoint: $endpoint',
+      );
+      final response = await authenticatedPut(
+        endpoint,
+        body: {'oldPassword': oldPassword, 'newPassword': newPassword},
+      );
+      debugPrint(
+        '[UserService] API password change response: ${response.statusCode}',
+      );
+
       return response.statusCode == 200;
     } catch (e) {
       debugPrint('[UserService] Error changing password: $e');

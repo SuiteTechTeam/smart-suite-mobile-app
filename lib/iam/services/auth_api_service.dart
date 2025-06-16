@@ -25,40 +25,51 @@ class AuthApiService {
 
   final http.Client _httpClient;
 
-  AuthApiService({http.Client? httpClient}) 
-      : _httpClient = httpClient ?? _createHttpClient();
-      
+  AuthApiService({http.Client? httpClient})
+    : _httpClient = httpClient ?? _createHttpClient();
+
   // Create a more robust HTTP client
   static http.Client _createHttpClient() {
     final client = http.Client();
     // Add any additional configuration if needed
     return client;
-  }Future<AuthenticatedUser> signIn(SignInRequest request) async {
+  }
+
+  Future<AuthenticatedUser> signIn(SignInRequest request) async {
     debugPrint('AuthApiService: baseUrl = $baseUrl');
     debugPrint('AuthApiService: apiVersion = $apiVersion');
-    
+
     String finalUrl = '$baseUrl/$apiVersion/authentication/sign-in';
     debugPrint('AuthApiService: Initial URL = $finalUrl');
-    debugPrint('AuthApiService: Expected URL = https://smart-suite-web-service.azurewebsites.net/api/v1/authentication/sign-in');
+    debugPrint(
+      'AuthApiService: Expected URL = https://smart-suite-web-service.azurewebsites.net/api/v1/authentication/sign-in',
+    );
     debugPrint('AuthApiService: Request body: ${jsonEncode(request.toJson())}');
-      // Test connectivity first
+    // Test connectivity first
     debugPrint('AuthApiService: Testing connectivity before sign-in...');
     final isConnected = await testConnectivity();
     if (!isConnected) {
-      throw ApiException('Unable to reach the server. Please check your internet connection and try again.');
+      throw ApiException(
+        'Unable to reach the server. Please check your internet connection and try again.',
+      );
     }
-    debugPrint('AuthApiService: Connectivity test passed, proceeding with sign-in...');
-    
-    try {      debugPrint('AuthApiService: Making HTTP POST request...');      final response = await _httpClient.post(
-        Uri.parse(finalUrl),
-        headers: {
-          'Content-Type': 'application/json',
-          'accept': '*/*',
-        },
-        body: jsonEncode(request.toJson()),
-      ).timeout(const Duration(seconds: 30));
+    debugPrint(
+      'AuthApiService: Connectivity test passed, proceeding with sign-in...',
+    );
 
-      debugPrint('AuthApiService: Response status code: ${response.statusCode}');
+    try {
+      debugPrint('AuthApiService: Making HTTP POST request...');
+      final response = await _httpClient
+          .post(
+            Uri.parse(finalUrl),
+            headers: {'Content-Type': 'application/json', 'accept': '*/*'},
+            body: jsonEncode(request.toJson()),
+          )
+          .timeout(const Duration(seconds: 30));
+
+      debugPrint(
+        'AuthApiService: Response status code: ${response.statusCode}',
+      );
       debugPrint('AuthApiService: Response headers: ${response.headers}');
       debugPrint('AuthApiService: Response body: ${response.body}');
 
@@ -73,12 +84,17 @@ class AuthApiService {
           'Failed to sign in: HTTP ${response.statusCode} - ${response.body}',
           statusCode: response.statusCode,
         );
-      }    } on SocketException catch (e) {
+      }
+    } on SocketException catch (e) {
       debugPrint('AuthApiService: Socket exception (network issue): $e');
-      throw ApiException('Network connection failed: ${e.message}. Please check your internet connection.');
+      throw ApiException(
+        'Network connection failed: ${e.message}. Please check your internet connection.',
+      );
     } on TimeoutException catch (e) {
       debugPrint('AuthApiService: Timeout exception: $e');
-      throw ApiException('Request timed out. The server might be slow or unreachable.');
+      throw ApiException(
+        'Request timed out. The server might be slow or unreachable.',
+      );
     } on FormatException catch (e) {
       debugPrint('AuthApiService: Format exception (JSON parsing): $e');
       throw ApiException('Invalid response format from server: $e');
@@ -95,32 +111,40 @@ class AuthApiService {
       // Try normal sign-in first
       return await signIn(request);
     } catch (e) {
-      debugPrint('AuthApiService: Primary sign-in failed, trying fallback methods...');
-      
+      debugPrint(
+        'AuthApiService: Primary sign-in failed, trying fallback methods...',
+      );
+
       // Try with different timeout settings
       try {
         debugPrint('AuthApiService: Attempting with longer timeout...');
-        
-        final response = await _httpClient.post(
-          Uri.parse('$baseUrl/$apiVersion/authentication/sign-in'),
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': '*/*',
-            'User-Agent': 'Smart-Suite-Mobile-App/1.0',
-            'Connection': 'keep-alive',
-          },
-          body: jsonEncode(request.toJson()),
-        ).timeout(const Duration(seconds: 60)); // Longer timeout
-        
+
+        final response = await _httpClient
+            .post(
+              Uri.parse('$baseUrl/$apiVersion/authentication/sign-in'),
+              headers: {
+                'Content-Type': 'application/json',
+                'Accept': '*/*',
+                'User-Agent': 'Smart-Suite-Mobile-App/1.0',
+                'Connection': 'keep-alive',
+              },
+              body: jsonEncode(request.toJson()),
+            )
+            .timeout(const Duration(seconds: 60)); // Longer timeout
+
         if (response.statusCode == 200) {
           final jsonData = jsonDecode(response.body);
           return AuthenticatedUser.fromJson(jsonData);
         } else {
-          throw ApiException('Sign-in failed with status ${response.statusCode}: ${response.body}');
+          throw ApiException(
+            'Sign-in failed with status ${response.statusCode}: ${response.body}',
+          );
         }
       } catch (fallbackError) {
         debugPrint('AuthApiService: Fallback also failed: $fallbackError');
-        throw ApiException('All sign-in attempts failed. Original error: $e, Fallback error: $fallbackError');
+        throw ApiException(
+          'All sign-in attempts failed. Original error: $e, Fallback error: $fallbackError',
+        );
       }
     }
   }
@@ -129,24 +153,31 @@ class AuthApiService {
   Future<bool> testConnectivity() async {
     try {
       debugPrint('AuthApiService: Testing connectivity to $baseUrl...');
-      
+
       // Try DNS resolution first
-      final addresses = await InternetAddress.lookup('smart-suite-web-service.azurewebsites.net')
-          .timeout(const Duration(seconds: 10));
-      debugPrint('AuthApiService: DNS resolved successfully: ${addresses.map((addr) => addr.address).join(', ')}');
-      
+      final addresses = await InternetAddress.lookup(
+        'smart-suite-web-service.azurewebsites.net',
+      ).timeout(const Duration(seconds: 10));
+      debugPrint(
+        'AuthApiService: DNS resolved successfully: ${addresses.map((addr) => addr.address).join(', ')}',
+      );
+
       // Try a simple GET request to check if server is reachable
-      final response = await _httpClient.get(
-        Uri.parse('$baseUrl/$apiVersion/'),
-        headers: {
-          'Accept': '*/*',
-          'User-Agent': 'Smart-Suite-Mobile-App/1.0',
-        },
-      ).timeout(const Duration(seconds: 15));
-      
-      debugPrint('AuthApiService: Connectivity test response: ${response.statusCode}');
-      return response.statusCode < 500; // Accept any response except server errors
-      
+      final response = await _httpClient
+          .get(
+            Uri.parse('$baseUrl/$apiVersion/'),
+            headers: {
+              'Accept': '*/*',
+              'User-Agent': 'Smart-Suite-Mobile-App/1.0',
+            },
+          )
+          .timeout(const Duration(seconds: 15));
+
+      debugPrint(
+        'AuthApiService: Connectivity test response: ${response.statusCode}',
+      );
+      return response.statusCode <
+          500; // Accept any response except server errors
     } catch (e) {
       debugPrint('AuthApiService: Connectivity test failed: $e');
       return false;
@@ -164,15 +195,16 @@ class AuthApiService {
   Future<void> signUpOwner(SignUpRequest request) async {
     await _signUp(request, 'sign-up-owner');
   }
+
   Future<void> _signUp(SignUpRequest request, String endpoint) async {
     try {
-      final response = await _httpClient.post(
-        Uri.parse('$baseUrl/$apiVersion/authentication/$endpoint'),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode(request.toJson()),
-      ).timeout(const Duration(seconds: 30));
+      final response = await _httpClient
+          .post(
+            Uri.parse('$baseUrl/$apiVersion/authentication/$endpoint'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode(request.toJson()),
+          )
+          .timeout(const Duration(seconds: 30));
 
       if (response.statusCode != 200 && response.statusCode != 201) {
         throw ApiException(

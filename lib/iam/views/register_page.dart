@@ -51,7 +51,8 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   @override
-  Widget build(BuildContext context) {    return Scaffold(
+  Widget build(BuildContext context) {
+    return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -61,15 +62,23 @@ class _RegisterPageState extends State<RegisterPage> {
       body: SafeArea(
         child: BlocConsumer<AuthBloc, AuthState>(
           listener: (context, state) {
-            if (state is AuthError) {              ScaffoldMessenger.of(context).showSnackBar(
+            if (state is AuthError) {
+              ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text(state.message, style: const TextStyle(color: Colors.white)),
+                  content: Text(
+                    state.message,
+                    style: const TextStyle(color: Colors.white),
+                  ),
                   backgroundColor: Colors.red,
                 ),
               );
-            } else if (state is AuthSignUpSuccess) {              ScaffoldMessenger.of(context).showSnackBar(
+            } else if (state is AuthSignUpSuccess) {
+              ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text('Account created successfully! Please sign in.', style: TextStyle(color: Colors.white)),
+                  content: Text(
+                    'Account created successfully! Please sign in.',
+                    style: TextStyle(color: Colors.white),
+                  ),
                   backgroundColor: Colors.green,
                 ),
               );
@@ -87,18 +96,19 @@ class _RegisterPageState extends State<RegisterPage> {
                     // Header
                     Text(
                       'Create Account',
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).primaryColor,
-                      ),
+                      style: Theme.of(context).textTheme.headlineSmall
+                          ?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).primaryColor,
+                          ),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 8),
                     Text(
                       'Please fill in your information to create an account.',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.grey[600],
-                      ),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 32),
@@ -120,7 +130,10 @@ class _RegisterPageState extends State<RegisterPage> {
                         value: _selectedRole,
                         decoration: const InputDecoration(
                           border: InputBorder.none,
-                          contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
                         ),
                         items: UserRole.values.map((role) {
                           return DropdownMenuItem(
@@ -146,9 +159,8 @@ class _RegisterPageState extends State<RegisterPage> {
                             children: [
                               Text(
                                 'First Name',
-                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                ),
+                                style: Theme.of(context).textTheme.titleMedium
+                                    ?.copyWith(fontWeight: FontWeight.w600),
                               ),
                               const SizedBox(height: 8),
                               TextFormField(
@@ -160,11 +172,15 @@ class _RegisterPageState extends State<RegisterPage> {
                                   ),
                                   enabledBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(12),
-                                    borderSide: BorderSide(color: Colors.grey[300]!),
+                                    borderSide: BorderSide(
+                                      color: Colors.grey[300]!,
+                                    ),
                                   ),
                                   focusedBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(12),
-                                    borderSide: BorderSide(color: Theme.of(context).primaryColor),
+                                    borderSide: BorderSide(
+                                      color: Theme.of(context).primaryColor,
+                                    ),
                                   ),
                                 ),
                                 validator: (value) {
@@ -184,9 +200,8 @@ class _RegisterPageState extends State<RegisterPage> {
                             children: [
                               Text(
                                 'Last Name',
-                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                ),
+                                style: Theme.of(context).textTheme.titleMedium
+                                    ?.copyWith(fontWeight: FontWeight.w600),
                               ),
                               const SizedBox(height: 8),
                               TextFormField(
@@ -198,11 +213,15 @@ class _RegisterPageState extends State<RegisterPage> {
                                   ),
                                   enabledBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(12),
-                                    borderSide: BorderSide(color: Colors.grey[300]!),
+                                    borderSide: BorderSide(
+                                      color: Colors.grey[300]!,
+                                    ),
                                   ),
                                   focusedBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(12),
-                                    borderSide: BorderSide(color: Theme.of(context).primaryColor),
+                                    borderSide: BorderSide(
+                                      color: Theme.of(context).primaryColor,
+                                    ),
                                   ),
                                 ),
                                 validator: (value) {
@@ -242,7 +261,9 @@ class _RegisterPageState extends State<RegisterPage> {
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Theme.of(context).primaryColor),
+                          borderSide: BorderSide(
+                            color: Theme.of(context).primaryColor,
+                          ),
                         ),
                       ),
                       validator: (value) {
@@ -277,14 +298,18 @@ class _RegisterPageState extends State<RegisterPage> {
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Theme.of(context).primaryColor),
+                          borderSide: BorderSide(
+                            color: Theme.of(context).primaryColor,
+                          ),
                         ),
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Please enter your email';
                         }
-                        if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                        if (!RegExp(
+                          r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                        ).hasMatch(value)) {
                           return 'Please enter a valid email';
                         }
                         return null;
@@ -308,7 +333,9 @@ class _RegisterPageState extends State<RegisterPage> {
                         prefixIcon: const Icon(Icons.lock_outlined),
                         suffixIcon: IconButton(
                           icon: Icon(
-                            _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                            _isPasswordVisible
+                                ? Icons.visibility
+                                : Icons.visibility_off,
                           ),
                           onPressed: () {
                             setState(() {
@@ -325,7 +352,9 @@ class _RegisterPageState extends State<RegisterPage> {
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Theme.of(context).primaryColor),
+                          borderSide: BorderSide(
+                            color: Theme.of(context).primaryColor,
+                          ),
                         ),
                       ),
                       validator: (value) {
@@ -356,11 +385,14 @@ class _RegisterPageState extends State<RegisterPage> {
                         prefixIcon: const Icon(Icons.lock_outlined),
                         suffixIcon: IconButton(
                           icon: Icon(
-                            _isConfirmPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                            _isConfirmPasswordVisible
+                                ? Icons.visibility
+                                : Icons.visibility_off,
                           ),
                           onPressed: () {
                             setState(() {
-                              _isConfirmPasswordVisible = !_isConfirmPasswordVisible;
+                              _isConfirmPasswordVisible =
+                                  !_isConfirmPasswordVisible;
                             });
                           },
                         ),
@@ -373,7 +405,9 @@ class _RegisterPageState extends State<RegisterPage> {
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Theme.of(context).primaryColor),
+                          borderSide: BorderSide(
+                            color: Theme.of(context).primaryColor,
+                          ),
                         ),
                       ),
                       validator: (value) {
@@ -392,7 +426,9 @@ class _RegisterPageState extends State<RegisterPage> {
                     SizedBox(
                       height: 50,
                       child: ElevatedButton(
-                        onPressed: state is AuthLoading ? null : _handleRegister,
+                        onPressed: state is AuthLoading
+                            ? null
+                            : _handleRegister,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Theme.of(context).primaryColor,
                           foregroundColor: Colors.white,
@@ -402,7 +438,9 @@ class _RegisterPageState extends State<RegisterPage> {
                           elevation: 2,
                         ),
                         child: state is AuthLoading
-                            ? const CircularProgressIndicator(color: Colors.white)
+                            ? const CircularProgressIndicator(
+                                color: Colors.white,
+                              )
                             : const Text(
                                 'Create Account',
                                 style: TextStyle(

@@ -45,8 +45,12 @@ class Reservation {
       amount: (json['amount'] ?? 0.0).toDouble(),
       state: json['state'] ?? 'pending',
       preferenceId: json['preferenceId'] ?? 0,
-      createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : null,
-      updatedAt: json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : null,
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'])
+          : null,
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.parse(json['updatedAt'])
+          : null,
     );
   }
 
@@ -63,12 +67,12 @@ class Reservation {
       'state': state,
       'preferenceId': preferenceId,
     };
-    
+
     // Only include id if it exists (for updates)
     if (id != null) {
       json['id'] = id!;
     }
-    
+
     return json;
   }
 }

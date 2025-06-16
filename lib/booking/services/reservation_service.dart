@@ -3,7 +3,6 @@ import '../models/reservation.dart';
 import '../../core/services/base_service.dart';
 
 class ReservationService extends BaseService {
-
   ReservationService({super.httpClient});
 
   // Create a new reservation (booking)
@@ -17,7 +16,9 @@ class ReservationService extends BaseService {
       if (response.statusCode == 200 || response.statusCode == 201) {
         return true;
       } else {
-        throw Exception('Failed to create reservation: ${response.statusCode} - ${response.body}');
+        throw Exception(
+          'Failed to create reservation: ${response.statusCode} - ${response.body}',
+        );
       }
     } catch (e) {
       rethrow;
@@ -27,28 +28,37 @@ class ReservationService extends BaseService {
   // Get all reservations (bookings) for a hotel
   Future<List<Reservation>> getReservationsByHotelId(int hotelId) async {
     try {
-      final response = await authenticatedGet('booking/get-all-bookings?hotelId=$hotelId');
+      final response = await authenticatedGet(
+        'booking/get-all-bookings?hotelId=$hotelId',
+      );
 
       if (response.statusCode == 200) {
         final List<dynamic> jsonData = json.decode(response.body);
         return jsonData.map((json) => Reservation.fromJson(json)).toList();
       } else {
-        throw Exception('Failed to load reservations: ${response.statusCode} - ${response.body}');
+        throw Exception(
+          'Failed to load reservations: ${response.statusCode} - ${response.body}',
+        );
       }
     } catch (e) {
       rethrow;
     }
   }
+
   // Get reservations (bookings) by customer
   Future<List<Reservation>> getReservationsByCustomerId(int customerId) async {
     try {
-      final response = await authenticatedGet('booking/get-booking-by-customer-id?customerId=$customerId');
+      final response = await authenticatedGet(
+        'booking/get-booking-by-customer-id?customerId=$customerId',
+      );
 
       if (response.statusCode == 200) {
         final List<dynamic> jsonData = json.decode(response.body);
         return jsonData.map((json) => Reservation.fromJson(json)).toList();
       } else {
-        throw Exception('Failed to load customer reservations: ${response.statusCode} - ${response.body}');
+        throw Exception(
+          'Failed to load customer reservations: ${response.statusCode} - ${response.body}',
+        );
       }
     } catch (e) {
       rethrow;
@@ -58,7 +68,9 @@ class ReservationService extends BaseService {
   // Get reservation (booking) by ID
   Future<Reservation?> getReservationById(int reservationId) async {
     try {
-      final response = await authenticatedGet('booking/get-booking-by-id?id=$reservationId');
+      final response = await authenticatedGet(
+        'booking/get-booking-by-id?id=$reservationId',
+      );
 
       if (response.statusCode == 200) {
         final jsonData = json.decode(response.body);
@@ -66,32 +78,35 @@ class ReservationService extends BaseService {
       } else if (response.statusCode == 404) {
         return null;
       } else {
-        throw Exception('Failed to load reservation: ${response.statusCode} - ${response.body}');
+        throw Exception(
+          'Failed to load reservation: ${response.statusCode} - ${response.body}',
+        );
       }
     } catch (e) {
       rethrow;
     }
   }
+
   // Update reservation status
   Future<bool> updateReservationStatus(int reservationId, String state) async {
     try {
       final response = await authenticatedPut(
         'booking/update-booking-state',
-        body: {
-          'id': reservationId,
-          'state': state
-        },
+        body: {'id': reservationId, 'state': state},
       );
 
       if (response.statusCode == 200) {
         return true;
       } else {
-        throw Exception('Failed to update reservation status: ${response.statusCode} - ${response.body}');
+        throw Exception(
+          'Failed to update reservation status: ${response.statusCode} - ${response.body}',
+        );
       }
     } catch (e) {
       rethrow;
     }
   }
+
   // Cancel reservation
   Future<bool> cancelReservation(int reservationId) async {
     try {
@@ -111,20 +126,22 @@ class ReservationService extends BaseService {
   }
 
   // Update reservation end date
-  Future<bool> updateReservationEndDate(int reservationId, DateTime endDate) async {
+  Future<bool> updateReservationEndDate(
+    int reservationId,
+    DateTime endDate,
+  ) async {
     try {
       final response = await authenticatedPut(
         'booking/update-booking-end-date',
-        body: {
-          'id': reservationId,
-          'endDate': endDate.toIso8601String()
-        },
+        body: {'id': reservationId, 'endDate': endDate.toIso8601String()},
       );
 
       if (response.statusCode == 200) {
         return true;
       } else {
-        throw Exception('Failed to update reservation end date: ${response.statusCode} - ${response.body}');
+        throw Exception(
+          'Failed to update reservation end date: ${response.statusCode} - ${response.body}',
+        );
       }
     } catch (e) {
       rethrow;
@@ -132,15 +149,22 @@ class ReservationService extends BaseService {
   }
 
   // Get reservations by hotel ID and state
-  Future<List<Reservation>> getReservationsByHotelIdAndState(int hotelId, String state) async {
+  Future<List<Reservation>> getReservationsByHotelIdAndState(
+    int hotelId,
+    String state,
+  ) async {
     try {
-      final response = await authenticatedGet('booking/get-booking-by-hotel-id-and-state?hotelId=$hotelId&state=$state');
+      final response = await authenticatedGet(
+        'booking/get-booking-by-hotel-id-and-state?hotelId=$hotelId&state=$state',
+      );
 
       if (response.statusCode == 200) {
         final List<dynamic> jsonData = json.decode(response.body);
         return jsonData.map((json) => Reservation.fromJson(json)).toList();
       } else {
-        throw Exception('Failed to load reservations by hotel and state: ${response.statusCode} - ${response.body}');
+        throw Exception(
+          'Failed to load reservations by hotel and state: ${response.statusCode} - ${response.body}',
+        );
       }
     } catch (e) {
       rethrow;

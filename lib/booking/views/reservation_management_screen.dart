@@ -11,15 +11,17 @@ class ReservationManagementScreen extends StatefulWidget {
   const ReservationManagementScreen({super.key});
 
   @override
-  State<ReservationManagementScreen> createState() => _ReservationManagementScreenState();
+  State<ReservationManagementScreen> createState() =>
+      _ReservationManagementScreenState();
 }
 
-class _ReservationManagementScreenState extends State<ReservationManagementScreen> {
+class _ReservationManagementScreenState
+    extends State<ReservationManagementScreen> {
   late ReservationService _reservationService;
   late HotelService _hotelService;
   late AuthService _authService;
   static const storage = FlutterSecureStorage();
-  
+
   List<Reservation> reservations = [];
   bool isLoading = true;
   int? hotelId;
@@ -59,7 +61,7 @@ class _ReservationManagementScreenState extends State<ReservationManagementScree
       await _fetchReservations();
       return;
     }
-      
+
     // If not in token, try to get from stored preferences
     int? storedHotelId = await _getStoredHotelId();
     if (storedHotelId != null) {
@@ -74,7 +76,7 @@ class _ReservationManagementScreenState extends State<ReservationManagementScree
       await _fetchReservations();
       return;
     }
-    
+
     // If no hotel ID found anywhere, show dialog
     if (mounted) {
       setState(() {
@@ -93,7 +95,8 @@ class _ReservationManagementScreenState extends State<ReservationManagementScree
         });
       }
       // Use the updated ReservationService method (now uses /api/booking/get-all-bookings)
-      List<Reservation> fetchedReservations = await _reservationService.getReservationsByHotelId(hotelId!);
+      List<Reservation> fetchedReservations = await _reservationService
+          .getReservationsByHotelId(hotelId!);
       if (mounted) {
         setState(() {
           reservations = fetchedReservations;
@@ -108,11 +111,14 @@ class _ReservationManagementScreenState extends State<ReservationManagementScree
       }
     }
   }
+
   List<Reservation> get filteredReservations {
     if (selectedFilter == 'all') {
       return reservations;
     }
-    return reservations.where((reservation) => reservation.state == selectedFilter).toList();
+    return reservations
+        .where((reservation) => reservation.state == selectedFilter)
+        .toList();
   }
 
   Future<void> _addReservation() async {
@@ -127,7 +133,9 @@ class _ReservationManagementScreenState extends State<ReservationManagementScree
   }
 
   void _showSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   void _showHotelIdDialog() {
@@ -177,7 +185,7 @@ class _ReservationManagementScreenState extends State<ReservationManagementScree
 
   void _showHotelIdInputDialog() {
     TextEditingController hotelIdController = TextEditingController();
-    
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -242,7 +250,10 @@ class _ReservationManagementScreenState extends State<ReservationManagementScree
             hotelName = hotelData.name;
           });
         }
-        await storage.write(key: 'selected_hotel_id', value: newHotelId.toString());
+        await storage.write(
+          key: 'selected_hotel_id',
+          value: newHotelId.toString(),
+        );
         if (mounted) {
           _showSnackBar('Connected to hotel: ${hotelName ?? 'ID $newHotelId'}');
         }
@@ -254,9 +265,14 @@ class _ReservationManagementScreenState extends State<ReservationManagementScree
             isLoading = false;
           });
         }
-        await storage.write(key: 'selected_hotel_id', value: newHotelId.toString());
+        await storage.write(
+          key: 'selected_hotel_id',
+          value: newHotelId.toString(),
+        );
         if (mounted) {
-          _showSnackBar('Hotel ID $newHotelId not found on server. Using for testing.');
+          _showSnackBar(
+            'Hotel ID $newHotelId not found on server. Using for testing.',
+          );
         }
         await _fetchReservations();
       }
@@ -281,7 +297,7 @@ class _ReservationManagementScreenState extends State<ReservationManagementScree
   void _showAvailableHotelsDialog() async {
     try {
       final hotels = await _hotelService.getAllHotels();
-      
+
       if (mounted) {
         showDialog(
           context: context,
@@ -299,7 +315,9 @@ class _ReservationManagementScreenState extends State<ReservationManagementScree
                           final hotel = hotels[index];
                           return ListTile(
                             title: Text(hotel.name),
-                            subtitle: Text('ID: ${hotel.id} - ${hotel.address}'),
+                            subtitle: Text(
+                              'ID: ${hotel.id} - ${hotel.address}',
+                            ),
                             onTap: () {
                               Navigator.of(context).pop();
                               _setHotelId(hotel.id);
@@ -332,6 +350,7 @@ class _ReservationManagementScreenState extends State<ReservationManagementScree
       _showHotelIdInputDialog(); // Fallback to manual input
     }
   }
+
   // Utility methods for formatting
   String _formatDate(DateTime date) {
     final now = DateTime.now();
@@ -344,8 +363,20 @@ class _ReservationManagementScreenState extends State<ReservationManagementScree
     } else if (checkDate == tomorrow) {
       return 'Tomorrow';
     } else {
-      final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                     'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      final months = [
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec',
+      ];
       return '${months[date.month - 1]} ${date.day}';
     }
   }
@@ -364,7 +395,7 @@ class _ReservationManagementScreenState extends State<ReservationManagementScree
         }
 
         role = snapshot.data;
-        
+
         return Scaffold(
           appBar: AppBar(
             title: Column(
@@ -374,10 +405,14 @@ class _ReservationManagementScreenState extends State<ReservationManagementScree
                 if (hotelId != null)
                   Text(
                     hotelName != null ? hotelName! : 'Hotel ID: $hotelId',
-                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.normal),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.normal,
+                    ),
                   ),
               ],
-            ),            backgroundColor: Theme.of(context).primaryColor,
+            ),
+            backgroundColor: Theme.of(context).primaryColor,
             foregroundColor: Colors.white,
             actions: [
               IconButton(
@@ -395,7 +430,8 @@ class _ReservationManagementScreenState extends State<ReservationManagementScree
           body: Column(
             children: [
               _buildHeader(),
-              if (!isLoading && reservations.isNotEmpty) _buildReservationStats(),
+              if (!isLoading && reservations.isNotEmpty)
+                _buildReservationStats(),
               _buildFilterChips(),
               Expanded(
                 child: isLoading
@@ -437,19 +473,13 @@ class _ReservationManagementScreenState extends State<ReservationManagementScree
             const Expanded(
               child: Text(
                 'Reservations Management',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 overflow: TextOverflow.ellipsis,
               ),
             ),
             Text(
               'Total: ${filteredReservations.length}',
-              style: const TextStyle(
-                fontSize: 14,
-                color: Colors.grey,
-              ),
+              style: const TextStyle(fontSize: 14, color: Colors.grey),
             ),
           ],
         ),
@@ -538,11 +568,8 @@ class _ReservationManagementScreenState extends State<ReservationManagementScree
       margin: const EdgeInsets.only(bottom: 12.0),
       elevation: 2,
       child: ListTile(
-        leading: Icon(
-          statusIcon,
-          color: statusColor,
-          size: 32,
-        ),        title: Text(
+        leading: Icon(statusIcon, color: statusColor, size: 32),
+        title: Text(
           'Room Booking #${reservation.id ?? 'N/A'}',
           style: const TextStyle(fontWeight: FontWeight.bold),
           overflow: TextOverflow.ellipsis,
@@ -566,7 +593,8 @@ class _ReservationManagementScreenState extends State<ReservationManagementScree
           width: 80,
           child: Row(
             mainAxisSize: MainAxisSize.min,
-            children: [              Flexible(
+            children: [
+              Flexible(
                 child: Text(
                   reservation.state.toUpperCase(),
                   style: TextStyle(
@@ -586,7 +614,8 @@ class _ReservationManagementScreenState extends State<ReservationManagementScree
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => ReservationDetailScreen(reservation: reservation),
+              builder: (context) =>
+                  ReservationDetailScreen(reservation: reservation),
             ),
           ).then((_) => _fetchReservations());
         },
@@ -598,9 +627,14 @@ class _ReservationManagementScreenState extends State<ReservationManagementScree
   Widget _buildReservationStats() {
     if (reservations.isEmpty) return const SizedBox.shrink();
 
-    final totalReservations = reservations.length;    final confirmedCount = reservations.where((r) => r.state == 'confirmed').length;
+    final totalReservations = reservations.length;
+    final confirmedCount = reservations
+        .where((r) => r.state == 'confirmed')
+        .length;
     final pendingCount = reservations.where((r) => r.state == 'pending').length;
-    final cancelledCount = reservations.where((r) => r.state == 'cancelled').length;
+    final cancelledCount = reservations
+        .where((r) => r.state == 'cancelled')
+        .length;
     final totalRevenue = reservations
         .where((r) => r.state == 'confirmed')
         .fold(0.0, (sum, r) => sum + r.amount);
@@ -620,16 +654,32 @@ class _ReservationManagementScreenState extends State<ReservationManagementScree
             Row(
               children: [
                 Expanded(
-                  child: _buildStatItem('Total', totalReservations.toString(), Colors.blue),
+                  child: _buildStatItem(
+                    'Total',
+                    totalReservations.toString(),
+                    Colors.blue,
+                  ),
                 ),
                 Expanded(
-                  child: _buildStatItem('Confirmed', confirmedCount.toString(), Colors.green),
+                  child: _buildStatItem(
+                    'Confirmed',
+                    confirmedCount.toString(),
+                    Colors.green,
+                  ),
                 ),
                 Expanded(
-                  child: _buildStatItem('Pending', pendingCount.toString(), Colors.orange),
+                  child: _buildStatItem(
+                    'Pending',
+                    pendingCount.toString(),
+                    Colors.orange,
+                  ),
                 ),
                 Expanded(
-                  child: _buildStatItem('Cancelled', cancelledCount.toString(), Colors.red),
+                  child: _buildStatItem(
+                    'Cancelled',
+                    cancelledCount.toString(),
+                    Colors.red,
+                  ),
                 ),
               ],
             ),
@@ -643,10 +693,17 @@ class _ReservationManagementScreenState extends State<ReservationManagementScree
               ),
               child: Column(
                 children: [
-                  const Text('Total Revenue (Confirmed)', style: TextStyle(fontSize: 12)),
+                  const Text(
+                    'Total Revenue (Confirmed)',
+                    style: TextStyle(fontSize: 12),
+                  ),
                   Text(
                     '\$${totalRevenue.toStringAsFixed(2)}',
-                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.green),
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.green,
+                    ),
                   ),
                 ],
               ),
@@ -662,7 +719,11 @@ class _ReservationManagementScreenState extends State<ReservationManagementScree
       children: [
         Text(
           value,
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: color),
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: color,
+          ),
         ),
         Text(label, style: const TextStyle(fontSize: 12)),
       ],
@@ -671,7 +732,7 @@ class _ReservationManagementScreenState extends State<ReservationManagementScree
 
   Future<void> _loadHotelName() async {
     if (hotelId == null) return;
-    
+
     try {
       final hotelData = await _hotelService.getHotelById(hotelId!);
       if (hotelData != null && mounted) {

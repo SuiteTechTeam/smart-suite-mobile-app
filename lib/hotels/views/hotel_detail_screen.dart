@@ -5,14 +5,12 @@ import '../services/hotel_service.dart';
 class HotelDetailScreen extends StatelessWidget {
   final int hotelId;
 
-  const HotelDetailScreen({
-    super.key,
-    required this.hotelId,
-  });
+  const HotelDetailScreen({super.key, required this.hotelId});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(      appBar: AppBar(
+    return Scaffold(
+      appBar: AppBar(
         title: const Text('Hotel Details'),
         backgroundColor: Theme.of(context).primaryColor,
         foregroundColor: Colors.white,
@@ -29,18 +27,11 @@ class HotelDetailScreen extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.error_outline,
-                    size: 64,
-                    color: Colors.red[400],
-                  ),
+                  Icon(Icons.error_outline, size: 64, color: Colors.red[400]),
                   const SizedBox(height: 16),
                   Text(
                     'Error loading hotel details',
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.red[600],
-                    ),
+                    style: TextStyle(fontSize: 18, color: Colors.red[600]),
                   ),
                   const SizedBox(height: 8),
                   Text(
@@ -66,18 +57,11 @@ class HotelDetailScreen extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.hotel_outlined,
-                    size: 64,
-                    color: Colors.grey[400],
-                  ),
+                  Icon(Icons.hotel_outlined, size: 64, color: Colors.grey[400]),
                   const SizedBox(height: 16),
                   const Text(
                     'Hotel not found',
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.grey,
-                    ),
+                    style: TextStyle(fontSize: 18, color: Colors.grey),
                   ),
                   const SizedBox(height: 16),
                   ElevatedButton(
@@ -184,7 +168,11 @@ class HotelDetailScreen extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 12),
-                        _buildInfoRow(Icons.location_on, 'Address', hotel.address),
+                        _buildInfoRow(
+                          Icons.location_on,
+                          'Address',
+                          hotel.address,
+                        ),
                         const SizedBox(height: 8),
                         _buildInfoRow(Icons.phone, 'Phone', hotel.phone),
                         const SizedBox(height: 8),
@@ -194,7 +182,8 @@ class HotelDetailScreen extends StatelessWidget {
                   ),
                 ),
 
-                if (hotel.description != null && hotel.description!.isNotEmpty) ...[
+                if (hotel.description != null &&
+                    hotel.description!.isNotEmpty) ...[
                   const SizedBox(height: 16),
                   Card(
                     elevation: 2,
@@ -244,7 +233,11 @@ class HotelDetailScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 12),
                         if (hotel.ownerId != null) ...[
-                          _buildInfoRow(Icons.person, 'Owner ID', '${hotel.ownerId}'),
+                          _buildInfoRow(
+                            Icons.person,
+                            'Owner ID',
+                            '${hotel.ownerId}',
+                          ),
                           const SizedBox(height: 8),
                         ],
                         _buildInfoRow(
@@ -278,11 +271,7 @@ class HotelDetailScreen extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(
-          icon,
-          size: 18,
-          color: Colors.grey[600],
-        ),
+        Icon(icon, size: 18, color: Colors.grey[600]),
         const SizedBox(width: 12),
         Expanded(
           child: Column(
@@ -299,10 +288,7 @@ class HotelDetailScreen extends StatelessWidget {
               const SizedBox(height: 2),
               Text(
                 value,
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Colors.black87,
-                ),
+                style: const TextStyle(fontSize: 14, color: Colors.black87),
               ),
             ],
           ),

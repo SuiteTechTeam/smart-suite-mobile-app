@@ -145,7 +145,7 @@ class _HotelLoadingScreenState extends State<HotelLoadingScreen>
 
     // Cambiar mensajes cada 2 segundos
     _startMessageRotation();
-    
+
     // Mostrar botón de debug después de 10 segundos
     Timer(const Duration(seconds: 10), () {
       if (mounted) {
@@ -251,7 +251,9 @@ class _HotelLoadingScreenState extends State<HotelLoadingScreen>
                                     size: const Size(120, 120),
                                     painter: IoTWavesPainter(
                                       animationValue: _waveAnimation.value,
-                                      color: Colors.amber.withValues(alpha: 0.6),
+                                      color: Colors.amber.withValues(
+                                        alpha: 0.6,
+                                      ),
                                     ),
                                   );
                                 },
@@ -381,7 +383,7 @@ class _HotelLoadingScreenState extends State<HotelLoadingScreen>
                     ),
                   ),
 
-                  const SizedBox(height: 40),                  // Footer con versión
+                  const SizedBox(height: 40), // Footer con versión
                   Text(
                     'Conectando a la Suite IoT v2.1',
                     style: theme.textTheme.bodySmall?.copyWith(
@@ -389,7 +391,7 @@ class _HotelLoadingScreenState extends State<HotelLoadingScreen>
                       fontWeight: FontWeight.w300,
                     ),
                   ),
-                  
+
                   // Botón de debug (aparece después de 10 segundos)
                   if (_showDebugButton) ...[
                     const SizedBox(height: 20),
@@ -448,8 +450,8 @@ class _IoTDeviceIndicator extends StatelessWidget {
                   shape: BoxShape.circle,
                   color: color.withValues(alpha: 0.2),
                   border: Border.all(
-                    color: color.withValues(alpha: 0.5), 
-                    width: 2
+                    color: color.withValues(alpha: 0.5),
+                    width: 2,
                   ),
                 ),
                 child: Icon(icon, color: Colors.white, size: 24),

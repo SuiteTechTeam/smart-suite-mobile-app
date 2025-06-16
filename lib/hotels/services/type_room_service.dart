@@ -6,7 +6,9 @@ class TypeRoomService extends BaseService {
   TypeRoomService({super.httpClient});
 
   Future<List<TypeRoom>> getAllTypeRooms(int hotelId) async {
-    final response = await authenticatedGet('type-room/get-all-type-rooms?hotelid=$hotelId');
+    final response = await authenticatedGet(
+      'type-room/get-all-type-rooms?hotelid=$hotelId',
+    );
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
       return data.map((json) => TypeRoom.fromJson(json)).toList();
@@ -16,14 +18,14 @@ class TypeRoomService extends BaseService {
   }
 
   /// Handles both JSON and plain string success responses from backend
-  Future<TypeRoom?> createTypeRoom({required int hotelId, required String description, required double price}) async {
+  Future<TypeRoom?> createTypeRoom({
+    required int hotelId,
+    required String description,
+    required double price,
+  }) async {
     final response = await authenticatedPost(
       'type-room/create-type-room',
-      body: {
-        'hotelId': hotelId,
-        'description': description,
-        'price': price,
-      },
+      body: {'hotelId': hotelId, 'description': description, 'price': price},
     );
     if (response.statusCode == 200 || response.statusCode == 201) {
       try {

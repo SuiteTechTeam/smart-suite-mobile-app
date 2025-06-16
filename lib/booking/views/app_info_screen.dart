@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
-import 'package:intl/intl.dart';  // For date formatting
+import 'package:intl/intl.dart'; // For date formatting
 import '../../core/config/app_config.dart';
 import '../../iam/services/auth_service.dart';
 
@@ -32,20 +32,20 @@ class _AppInfoScreenState extends State<AppInfoScreen> {
       setState(() {
         isLoading = true;
       });
-      
+
       String? token = await _authService.getToken();
       String? storedHotelId = await storage.read(key: 'selected_hotel_id');
-      
+
       if (token != null) {
         // Decode the full JWT for display
         Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
-        
+
         // Check if token is valid and not expired
         bool tokenExpired = JwtDecoder.isExpired(token);
-        
+
         // Get simplified user info from AuthService
         Map<String, dynamic>? simplifiedInfo = await _authService.getUserInfo();
-        
+
         setState(() {
           jwtClaims = decodedToken;
           userInfo = simplifiedInfo;
@@ -64,28 +64,31 @@ class _AppInfoScreenState extends State<AppInfoScreen> {
       });
     }
   }
+
   // Helper method to format role names for better readability
   String formatRoleName(String? roleName) {
     if (roleName == null || roleName.isEmpty) return 'Not available';
-    
+
     // Handle ROLE_ prefix commonly used in JWT role claims
     if (roleName.startsWith('ROLE_')) {
       String cleaned = roleName.substring(5); // Remove 'ROLE_' prefix
-      return cleaned.substring(0, 1).toUpperCase() + cleaned.substring(1).toLowerCase();
+      return cleaned.substring(0, 1).toUpperCase() +
+          cleaned.substring(1).toLowerCase();
     }
-    
+
     // Standard capitalization for other roles
-    return roleName.substring(0, 1).toUpperCase() + roleName.substring(1).toLowerCase();
+    return roleName.substring(0, 1).toUpperCase() +
+        roleName.substring(1).toLowerCase();
   }
 
   // Helper method to format JWT timestamp claims
   String _formatExpiration(dynamic timestamp) {
     if (timestamp == null) return 'Unknown';
-    
+
     try {
       // JWT timestamps are in seconds since epoch
       final dateTime = DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
-      
+
       // Format with intl package
       final DateFormat formatter = DateFormat('yyyy-MM-dd HH:mm:ss');
       return formatter.format(dateTime.toLocal());
@@ -101,7 +104,7 @@ class _AppInfoScreenState extends State<AppInfoScreen> {
       child: Text(
         title,
         style: const TextStyle(
-          fontSize: 16, 
+          fontSize: 16,
           fontWeight: FontWeight.bold,
           color: Colors.blueGrey,
         ),
@@ -112,40 +115,43 @@ class _AppInfoScreenState extends State<AppInfoScreen> {
   // Helper method to format claim values for display
   String _formatClaimValue(dynamic value) {
     if (value == null) return 'null';
-    
+
     // Handle timestamps (exp, iat, nbf)
-    if (value is num && 
-        (jwtClaims!.keys.contains('exp') && 
-         value.toString() == jwtClaims!['exp'].toString() ||
-         jwtClaims!.keys.contains('iat') && 
-         value.toString() == jwtClaims!['iat'].toString() ||
-         jwtClaims!.keys.contains('nbf') && 
-         value.toString() == jwtClaims!['nbf'].toString())) {
+    if (value is num &&
+        (jwtClaims!.keys.contains('exp') &&
+                value.toString() == jwtClaims!['exp'].toString() ||
+            jwtClaims!.keys.contains('iat') &&
+                value.toString() == jwtClaims!['iat'].toString() ||
+            jwtClaims!.keys.contains('nbf') &&
+                value.toString() == jwtClaims!['nbf'].toString())) {
       return _formatExpiration(value);
     }
-    
+
     // Handle arrays/lists
     if (value is List) {
       return value.join(', ');
     }
-    
+
     // Handle other values
     return value.toString();
   }
 
   // Mapa para nombres amigables de claims JWT
   Map<String, String> get claimNameMap => {
-    'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/sid': 'User ID (SID)',
+    'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/sid':
+        'User ID (SID)',
     'http://schemas.microsoft.com/ws/2008/06/identity/claims/role': 'Role',
-    'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/locality': 'Hotel ID (Locality)',
-    'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress': 'Email Address',
+    'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/locality':
+        'Hotel ID (Locality)',
+    'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress':
+        'Email Address',
     'Email': 'Email (Simple)',
     'UserId': 'User ID (Simple)',
     'exp': 'Token Expiration',
     'iss': 'Token Issuer',
     'aud': 'Audience',
   };
-  
+
   // Método para obtener nombre amigable de un claim
   String getFriendlyClaimName(String claimKey) {
     return claimNameMap[claimKey] ?? claimKey;
@@ -153,7 +159,8 @@ class _AppInfoScreenState extends State<AppInfoScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(      appBar: AppBar(
+    return Scaffold(
+      appBar: AppBar(
         title: const Text('App Information'),
         backgroundColor: Theme.of(context).primaryColor,
         foregroundColor: Colors.white,
@@ -211,7 +218,7 @@ class _AppInfoScreenState extends State<AppInfoScreen> {
 
   Widget _buildUserInfoCard() {
     bool isTokenValid = jwtClaims != null;
-    
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -221,8 +228,14 @@ class _AppInfoScreenState extends State<AppInfoScreen> {
             Row(
               children: [
                 Icon(
-                  isTokenValid ? (isTokenExpired ? Icons.person_off : Icons.person) : Icons.person_off,
-                  color: isTokenValid ? (isTokenExpired ? Colors.orange : Theme.of(context).primaryColor) : Colors.red,
+                  isTokenValid
+                      ? (isTokenExpired ? Icons.person_off : Icons.person)
+                      : Icons.person_off,
+                  color: isTokenValid
+                      ? (isTokenExpired
+                            ? Colors.orange
+                            : Theme.of(context).primaryColor)
+                      : Colors.red,
                 ),
                 const SizedBox(width: 8),
                 const Text(
@@ -232,9 +245,24 @@ class _AppInfoScreenState extends State<AppInfoScreen> {
                 const Spacer(),
                 if (isTokenValid)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
-                      color: isTokenExpired ? const Color.fromARGB(255, 255, 154, 0).withValues(alpha: 0.2) : const Color.fromARGB(255, 76, 175, 80).withValues(alpha: 0.2),
+                      color: isTokenExpired
+                          ? const Color.fromARGB(
+                              255,
+                              255,
+                              154,
+                              0,
+                            ).withValues(alpha: 0.2)
+                          : const Color.fromARGB(
+                              255,
+                              76,
+                              175,
+                              80,
+                            ).withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
@@ -245,36 +273,58 @@ class _AppInfoScreenState extends State<AppInfoScreen> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                  )
+                  ),
               ],
             ),
             const Divider(),
-            
+
             if (userInfo != null) ...[
               // User Identity Section
               _buildSectionHeader('User Identity'),
-              _buildInfoRow('User ID', userInfo!['id']?.toString() ?? 'Not available'),
+              _buildInfoRow(
+                'User ID',
+                userInfo!['id']?.toString() ?? 'Not available',
+              ),
               _buildInfoRow('Email', userInfo!['email'] ?? 'Not available'),
-              
+
               const SizedBox(height: 12),
-              
+
               // Access Control Section
               _buildSectionHeader('Access Control'),
               _buildInfoRow('Role', formatRoleName(userInfo!['role'])),
-              _buildInfoRow('Hotel ID', userInfo!['hotelId']?.toString() ?? 'Not available'),
-              
+              _buildInfoRow(
+                'Hotel ID',
+                userInfo!['hotelId']?.toString() ?? 'Not available',
+              ),
+
               if (jwtClaims != null) ...[
                 const SizedBox(height: 16),
-                
+
                 // Token Information Section
                 _buildSectionHeader('Token Information'),
-                _buildInfoRow('Issued At', jwtClaims!['iat'] != null ? _formatExpiration(jwtClaims!['iat']) : 'Unknown'),
-                _buildInfoRow('Expires At', jwtClaims!['exp'] != null ? _formatExpiration(jwtClaims!['exp']) : 'Unknown'),
-                _buildInfoRow('Issuer', jwtClaims!['iss']?.toString() ?? 'Unknown'),
-                _buildInfoRow('Audience', jwtClaims!['aud']?.toString() ?? 'Unknown'),
-                
+                _buildInfoRow(
+                  'Issued At',
+                  jwtClaims!['iat'] != null
+                      ? _formatExpiration(jwtClaims!['iat'])
+                      : 'Unknown',
+                ),
+                _buildInfoRow(
+                  'Expires At',
+                  jwtClaims!['exp'] != null
+                      ? _formatExpiration(jwtClaims!['exp'])
+                      : 'Unknown',
+                ),
+                _buildInfoRow(
+                  'Issuer',
+                  jwtClaims!['iss']?.toString() ?? 'Unknown',
+                ),
+                _buildInfoRow(
+                  'Audience',
+                  jwtClaims!['aud']?.toString() ?? 'Unknown',
+                ),
+
                 const SizedBox(height: 16),
-                
+
                 // Raw Claims Section
                 ExpansionTile(
                   title: const Text(
@@ -282,10 +332,12 @@ class _AppInfoScreenState extends State<AppInfoScreen> {
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   children: [
-                    ...jwtClaims!.entries.map((entry) => _buildInfoRow(
-                      getFriendlyClaimName(entry.key),
-                      _formatClaimValue(entry.value),
-                    )),
+                    ...jwtClaims!.entries.map(
+                      (entry) => _buildInfoRow(
+                        getFriendlyClaimName(entry.key),
+                        _formatClaimValue(entry.value),
+                      ),
+                    ),
                   ],
                 ),
               ],
@@ -347,7 +399,10 @@ class _AppInfoScreenState extends State<AppInfoScreen> {
           children: [
             Row(
               children: [
-                Icon(Icons.featured_play_list, color: Theme.of(context).primaryColor),
+                Icon(
+                  Icons.featured_play_list,
+                  color: Theme.of(context).primaryColor,
+                ),
                 const SizedBox(width: 8),
                 const Text(
                   'Available Features',
@@ -356,12 +411,30 @@ class _AppInfoScreenState extends State<AppInfoScreen> {
               ],
             ),
             const SizedBox(height: 12),
-            _buildFeatureItem('✓ Reservation Management', 'Create, view, and manage hotel reservations'),
-            _buildFeatureItem('✓ Hotel Selection', 'Switch between different hotels'),
-            _buildFeatureItem('✓ User Authentication', 'Secure login with JWT tokens'),
-            _buildFeatureItem('✓ Real-time Updates', 'Live reservation status updates'),
-            _buildFeatureItem('✓ Resource Booking', 'Book restaurants, rooms, and events'),
-            _buildFeatureItem('✓ Customer Management', 'Handle customer information'),
+            _buildFeatureItem(
+              '✓ Reservation Management',
+              'Create, view, and manage hotel reservations',
+            ),
+            _buildFeatureItem(
+              '✓ Hotel Selection',
+              'Switch between different hotels',
+            ),
+            _buildFeatureItem(
+              '✓ User Authentication',
+              'Secure login with JWT tokens',
+            ),
+            _buildFeatureItem(
+              '✓ Real-time Updates',
+              'Live reservation status updates',
+            ),
+            _buildFeatureItem(
+              '✓ Resource Booking',
+              'Book restaurants, rooms, and events',
+            ),
+            _buildFeatureItem(
+              '✓ Customer Management',
+              'Handle customer information',
+            ),
           ],
         ),
       ),
@@ -382,10 +455,7 @@ class _AppInfoScreenState extends State<AppInfoScreen> {
             ),
           ),
           Expanded(
-            child: Text(
-              value,
-              style: const TextStyle(color: Colors.grey),
-            ),
+            child: Text(value, style: const TextStyle(color: Colors.grey)),
           ),
         ],
       ),
@@ -398,10 +468,7 @@ class _AppInfoScreenState extends State<AppInfoScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: const TextStyle(fontWeight: FontWeight.w500),
-          ),
+          Text(title, style: const TextStyle(fontWeight: FontWeight.w500)),
           Text(
             description,
             style: const TextStyle(color: Colors.grey, fontSize: 12),

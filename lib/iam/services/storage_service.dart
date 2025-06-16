@@ -13,19 +13,23 @@ class StorageService {
     await _storage.write(key: _tokenKey, value: user.token);
     await _storage.write(key: _userKey, value: jsonEncode(user.toJson()));
   }
+
   Future<String?> getToken() async {
     try {
-      return await _storage.read(key: _tokenKey)
+      return await _storage
+          .read(key: _tokenKey)
           .timeout(const Duration(seconds: 5));
     } catch (e) {
       return null;
     }
   }
+
   Future<AuthenticatedUser?> getAuthenticatedUser() async {
     try {
-      final userJson = await _storage.read(key: _userKey)
+      final userJson = await _storage
+          .read(key: _userKey)
           .timeout(const Duration(seconds: 5));
-      
+
       if (userJson != null) {
         try {
           final userData = jsonDecode(userJson);
@@ -40,12 +44,16 @@ class StorageService {
     } catch (e) {
       return null;
     }
-  }  Future<bool> isAuthenticated() async {
+  }
+
+  Future<bool> isAuthenticated() async {
     debugPrint('StorageService: Checking authentication status...');
     try {
       final token = await getToken();
-      debugPrint('StorageService: Token retrieved: ${token != null ? 'exists' : 'null'}');
-      
+      debugPrint(
+        'StorageService: Token retrieved: ${token != null ? 'exists' : 'null'}',
+      );
+
       if (token != null && token.isNotEmpty) {
         try {
           final isExpired = JwtDecoder.isExpired(token);
@@ -68,9 +76,11 @@ class StorageService {
     await _storage.delete(key: _tokenKey);
     await _storage.delete(key: _userKey);
     await _storage.delete(key: 'selected_hotel_id');
-  }  Future<Map<String, String>> getAuthHeaders() async {
+  }
+
+  Future<Map<String, String>> getAuthHeaders() async {
     final token = await getToken();
-    
+
     if (token != null && token.isNotEmpty) {
       try {
         // Check if token is not expired
@@ -84,10 +94,8 @@ class StorageService {
         // Token is invalid, return headers without authorization
       }
     }
-    
-    return {
-      'Content-Type': 'application/json',
-    };
+
+    return {'Content-Type': 'application/json'};
   }
 
   // Generic write method for additional storage needs

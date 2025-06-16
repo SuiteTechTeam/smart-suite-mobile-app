@@ -17,20 +17,12 @@ class HotelLoaded extends HotelState {
   final String? userRole;
   final int? userId;
 
-  const HotelLoaded({
-    required this.hotels,
-    this.userRole,
-    this.userId,
-  });
+  const HotelLoaded({required this.hotels, this.userRole, this.userId});
 
   @override
   List<Object?> get props => [hotels, userRole, userId];
 
-  HotelLoaded copyWith({
-    List<Hotel>? hotels,
-    String? userRole,
-    int? userId,
-  }) {
+  HotelLoaded copyWith({List<Hotel>? hotels, String? userRole, int? userId}) {
     return HotelLoaded(
       hotels: hotels ?? this.hotels,
       userRole: userRole ?? this.userRole,
@@ -52,10 +44,7 @@ class HotelOperationSuccess extends HotelState {
   final String message;
   final List<Hotel> hotels;
 
-  const HotelOperationSuccess({
-    required this.message,
-    required this.hotels,
-  });
+  const HotelOperationSuccess({required this.message, required this.hotels});
 
   @override
   List<Object?> get props => [message, hotels];
@@ -65,10 +54,7 @@ class HotelSelectionState extends HotelState {
   final int hotelId;
   final String message;
 
-  const HotelSelectionState({
-    required this.hotelId,
-    required this.message,
-  });
+  const HotelSelectionState({required this.hotelId, required this.message});
 
   @override
   List<Object?> get props => [hotelId, message];

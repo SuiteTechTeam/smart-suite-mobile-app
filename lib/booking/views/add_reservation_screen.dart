@@ -41,7 +41,7 @@ class _AddReservationScreenState extends State<AddReservationScreen> {
     'conference_room',
     'gym',
     'pool',
-    'equipment'
+    'equipment',
   ];
   @override
   void initState() {
@@ -86,6 +86,7 @@ class _AddReservationScreenState extends State<AddReservationScreen> {
     }
     return null;
   }
+
   Future<void> _loadHotelId() async {
     // First try to get hotel ID from JWT token
     int? tokenHotelId = await _getHotelId();
@@ -95,7 +96,7 @@ class _AddReservationScreenState extends State<AddReservationScreen> {
       });
       return;
     }
-    
+
     // If not in token, try to get from stored preferences
     int? storedHotelId = await _getStoredHotelId();
     if (storedHotelId != null) {
@@ -104,7 +105,7 @@ class _AddReservationScreenState extends State<AddReservationScreen> {
       });
       return;
     }
-    
+
     // If no hotel ID found anywhere, show dialog
     _showHotelIdDialog();
   }
@@ -147,7 +148,7 @@ class _AddReservationScreenState extends State<AddReservationScreen> {
 
   void _showHotelIdInputDialog() {
     TextEditingController hotelIdController = TextEditingController();
-    
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -200,14 +201,18 @@ class _AddReservationScreenState extends State<AddReservationScreen> {
     setState(() {
       hotelId = newHotelId;
     });
-    
+
     // Store the hotel ID in secure storage for future use
     await storage.write(key: 'selected_hotel_id', value: newHotelId.toString());
-    
+
     _showSnackBar('Hotel ID set to $newHotelId');
   }
+
   Future<void> _loadAvailableResources() async {
-    if (hotelId == null || selectedDate == null || startTime == null || endTime == null) {
+    if (hotelId == null ||
+        selectedDate == null ||
+        startTime == null ||
+        endTime == null) {
       return;
     }
 
@@ -219,7 +224,7 @@ class _AddReservationScreenState extends State<AddReservationScreen> {
       // Since getAvailableResources doesn't exist in the API, we'll create mock resources
       // In a real implementation, you would call an API to get available rooms
       await Future.delayed(const Duration(seconds: 1)); // Simulate API call
-      
+
       setState(() {
         availableResources = [
           ReservationResource(
@@ -297,12 +302,16 @@ class _AddReservationScreenState extends State<AddReservationScreen> {
       _loadAvailableResources();
     }
   }
+
   Future<void> _saveReservation() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
 
-    if (selectedDate == null || startTime == null || endTime == null || selectedResourceId == null) {
+    if (selectedDate == null ||
+        startTime == null ||
+        endTime == null ||
+        selectedResourceId == null) {
       _showSnackBar('Please complete all required fields');
       return;
     }
@@ -326,14 +335,18 @@ class _AddReservationScreenState extends State<AddReservationScreen> {
 
       // Calculate total amount (simplified calculation)
       final duration = endDateTime.difference(startDateTime).inHours;
-      final selectedResource = availableResources.firstWhere((r) => r.id == selectedResourceId);
-      final totalAmount = duration * selectedResource.pricePerHour;      final reservation = Reservation(
+      final selectedResource = availableResources.firstWhere(
+        (r) => r.id == selectedResourceId,
+      );
+      final totalAmount = duration * selectedResource.pricePerHour;
+      final reservation = Reservation(
         paymentCustomerId: int.parse(_customerIdController.text),
         roomId: selectedResourceId!,
         description: _descriptionController.text,
         startDate: selectedDate!,
         finalDate: endDateTime,
-        priceRoom: selectedResource.pricePerHour, // Using this as room price for now
+        priceRoom:
+            selectedResource.pricePerHour, // Using this as room price for now
         nightCount: duration > 0 ? duration : 1,
         amount: totalAmount,
         state: 'pending',
@@ -341,7 +354,7 @@ class _AddReservationScreenState extends State<AddReservationScreen> {
       );
 
       await _reservationService.createReservation(reservation);
-      
+
       if (mounted) {
         _showSnackBar('Reservation created successfully');
         Navigator.of(context).pop(true);
@@ -354,12 +367,15 @@ class _AddReservationScreenState extends State<AddReservationScreen> {
   }
 
   void _showSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(      appBar: AppBar(
+    return Scaffold(
+      appBar: AppBar(
         title: const Text('New Reservation'),
         backgroundColor: const Color(0xFF474C74),
         foregroundColor: Colors.white,
@@ -375,7 +391,8 @@ class _AddReservationScreenState extends State<AddReservationScreen> {
               _buildTextField(
                 controller: _titleController,
                 label: 'Reservation Title',
-                validator: (value) => value?.isEmpty == true ? 'Please enter a title' : null,
+                validator: (value) =>
+                    value?.isEmpty == true ? 'Please enter a title' : null,
               ),
               _buildTextField(
                 controller: _descriptionController,
@@ -386,30 +403,32 @@ class _AddReservationScreenState extends State<AddReservationScreen> {
                 controller: _customerIdController,
                 label: 'Customer ID',
                 keyboardType: TextInputType.number,
-                validator: (value) => value?.isEmpty == true ? 'Please enter customer ID' : null,
+                validator: (value) =>
+                    value?.isEmpty == true ? 'Please enter customer ID' : null,
                 enabled: _userRole != 'guest', // Solo editable para owner/admin
               ),
-              
+
               const SizedBox(height: 24),
               _buildSectionTitle('Resource & Time'),
               _buildResourceTypeDropdown(),
               _buildDateTimeSelection(),
               _buildResourceSelection(),
-              
+
               const SizedBox(height: 24),
               _buildSectionTitle('Additional Details'),
               _buildTextField(
                 controller: _guestCountController,
                 label: 'Number of Guests',
                 keyboardType: TextInputType.number,
-                validator: (value) => value?.isEmpty == true ? 'Please enter guest count' : null,
+                validator: (value) =>
+                    value?.isEmpty == true ? 'Please enter guest count' : null,
               ),
               _buildTextField(
                 controller: _specialRequestsController,
                 label: 'Special Requests (Optional)',
                 maxLines: 2,
               ),
-              
+
               const SizedBox(height: 32),
               SizedBox(
                 width: double.infinity,
@@ -526,7 +545,7 @@ class _AddReservationScreenState extends State<AddReservationScreen> {
           ),
         ),
         const SizedBox(height: 16),
-        
+
         // Time selection
         Row(
           children: [
@@ -608,17 +627,21 @@ class _AddReservationScreenState extends State<AddReservationScreen> {
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
-        ...availableResources.map((resource) => RadioListTile<int>(
-          title: Text(resource.name),
-          subtitle: Text('Capacity: ${resource.capacity} • \$${resource.pricePerHour}/hour'),
-          value: resource.id,
-          groupValue: selectedResourceId,
-          onChanged: (value) {
-            setState(() {
-              selectedResourceId = value;
-            });
-          },
-        )),
+        ...availableResources.map(
+          (resource) => RadioListTile<int>(
+            title: Text(resource.name),
+            subtitle: Text(
+              'Capacity: ${resource.capacity} • \$${resource.pricePerHour}/hour',
+            ),
+            value: resource.id,
+            groupValue: selectedResourceId,
+            onChanged: (value) {
+              setState(() {
+                selectedResourceId = value;
+              });
+            },
+          ),
+        ),
       ],
     );
   }

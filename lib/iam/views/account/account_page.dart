@@ -42,17 +42,19 @@ class _AccountPageState extends State<AccountPage>
     setState(() {
       isLoading = true;
     });
-    
+
     try {
       debugPrint('[AccountPage] Calling getUserInfoFromApi');
       final info = await _userService.getUserInfoFromApi();
-      debugPrint('[AccountPage] User info response: ${info != null ? "Success" : "Null"}');
-      
+      debugPrint(
+        '[AccountPage] User info response: ${info != null ? "Success" : "Null"}',
+      );
+
       setState(() {
         userInfo = info;
         isLoading = false;
       });
-      
+
       if (info != null) {
         debugPrint('[AccountPage] User data received: ${info.keys.join(', ')}');
         _animationController.forward();
@@ -186,7 +188,9 @@ class _AccountPageState extends State<AccountPage>
                           } else {
                             messenger.showSnackBar(
                               const SnackBar(
-                                content: Text('Update failed. Please try again.'),
+                                content: Text(
+                                  'Update failed. Please try again.',
+                                ),
                                 backgroundColor: Colors.red,
                               ),
                             );
@@ -359,14 +363,18 @@ class _AccountPageState extends State<AccountPage>
                                 navigator.pop();
                                 messenger.showSnackBar(
                                   const SnackBar(
-                                    content: Text('Password changed successfully!'),
+                                    content: Text(
+                                      'Password changed successfully!',
+                                    ),
                                     backgroundColor: Colors.green,
                                   ),
                                 );
                               } else {
                                 messenger.showSnackBar(
                                   const SnackBar(
-                                    content: Text('Password change failed. Please try again.'),
+                                    content: Text(
+                                      'Password change failed. Please try again.',
+                                    ),
                                     backgroundColor: Colors.red,
                                   ),
                                 );

@@ -12,27 +12,31 @@ import '../config/app_config.dart';
 abstract class BaseService {
   final StorageService _storageService = StorageService();
   final http.Client _httpClient;
-  
+
   // Default timeout for HTTP requests
   static const Duration _defaultTimeout = Duration(seconds: 30);
 
-  BaseService({http.Client? httpClient}) 
-      : _httpClient = httpClient ?? http.Client();
+  BaseService({http.Client? httpClient})
+    : _httpClient = httpClient ?? http.Client();
 
   /// Get authenticated headers with JWT token
   Future<Map<String, String>> getAuthHeaders() async {
     try {
       final token = await _storageService.getToken();
-      
+
       if (token == null || token.isEmpty) {
-        throw AuthenticationException('No authentication token found. Please login again.');
+        throw AuthenticationException(
+          'No authentication token found. Please login again.',
+        );
       }
 
       // Check if token is expired
       if (JwtDecoder.isExpired(token)) {
         // Clear expired token
         await _storageService.clearAuthenticatedUser();
-        throw AuthenticationException('Authentication token has expired. Please login again.');
+        throw AuthenticationException(
+          'Authentication token has expired. Please login again.',
+        );
       }
 
       return {
@@ -49,19 +53,19 @@ abstract class BaseService {
 
   /// Get basic headers without authentication (for public endpoints)
   Map<String, String> getBasicHeaders() {
-    return {
-      'Content-Type': 'application/json',
-    };
+    return {'Content-Type': 'application/json'};
   }
 
   /// Build full URL for API endpoints
   String buildUrl(String endpoint) {
     final baseUrl = AppConfig.smartSuiteBaseUrl;
     final apiVersion = AppConfig.apiVersion;
-    
+
     // Remove leading slash if present to avoid double slashes
-    final cleanEndpoint = endpoint.startsWith('/') ? endpoint.substring(1) : endpoint;
-    
+    final cleanEndpoint = endpoint.startsWith('/')
+        ? endpoint.substring(1)
+        : endpoint;
+
     return '$baseUrl/$apiVersion/$cleanEndpoint';
   }
 
@@ -70,20 +74,20 @@ abstract class BaseService {
     return await _executeWithTimeout(() async {
       final headers = await getAuthHeaders();
       final url = buildUrl(endpoint);
-      
-      return await _httpClient.get(
-        Uri.parse(url),
-        headers: headers,
-      );
+
+      return await _httpClient.get(Uri.parse(url), headers: headers);
     });
   }
 
   /// Execute POST request with authentication
-  Future<http.Response> authenticatedPost(String endpoint, {Map<String, dynamic>? body}) async {
+  Future<http.Response> authenticatedPost(
+    String endpoint, {
+    Map<String, dynamic>? body,
+  }) async {
     return await _executeWithTimeout(() async {
       final headers = await getAuthHeaders();
       final url = buildUrl(endpoint);
-      
+
       return await _httpClient.post(
         Uri.parse(url),
         headers: headers,
@@ -93,11 +97,14 @@ abstract class BaseService {
   }
 
   /// Execute PUT request with authentication
-  Future<http.Response> authenticatedPut(String endpoint, {Map<String, dynamic>? body}) async {
+  Future<http.Response> authenticatedPut(
+    String endpoint, {
+    Map<String, dynamic>? body,
+  }) async {
     return await _executeWithTimeout(() async {
       final headers = await getAuthHeaders();
       final url = buildUrl(endpoint);
-      
+
       return await _httpClient.put(
         Uri.parse(url),
         headers: headers,
@@ -111,11 +118,8 @@ abstract class BaseService {
     return await _executeWithTimeout(() async {
       final headers = await getAuthHeaders();
       final url = buildUrl(endpoint);
-      
-      return await _httpClient.delete(
-        Uri.parse(url),
-        headers: headers,
-      );
+
+      return await _httpClient.delete(Uri.parse(url), headers: headers);
     });
   }
 
@@ -124,20 +128,20 @@ abstract class BaseService {
     return await _executeWithTimeout(() async {
       final headers = getBasicHeaders();
       final url = buildUrl(endpoint);
-      
-      return await _httpClient.get(
-        Uri.parse(url),
-        headers: headers,
-      );
+
+      return await _httpClient.get(Uri.parse(url), headers: headers);
     });
   }
 
   /// Execute public POST request (no authentication required)
-  Future<http.Response> publicPost(String endpoint, {Map<String, dynamic>? body}) async {
+  Future<http.Response> publicPost(
+    String endpoint, {
+    Map<String, dynamic>? body,
+  }) async {
     return await _executeWithTimeout(() async {
       final headers = getBasicHeaders();
       final url = buildUrl(endpoint);
-      
+
       return await _httpClient.post(
         Uri.parse(url),
         headers: headers,
@@ -147,22 +151,28 @@ abstract class BaseService {
   }
 
   /// Execute HTTP request with timeout and error handling
-  Future<http.Response> _executeWithTimeout(Future<http.Response> Function() request) async {    
+  Future<http.Response> _executeWithTimeout(
+    Future<http.Response> Function() request,
+  ) async {
     try {
       final response = await request().timeout(_defaultTimeout);
-      
+
       // Handle common HTTP status codes
       _handleResponseErrors(response);
-      
+
       return response;
     } on SocketException catch (e) {
-      throw NetworkException('Unable to connect to server. Please check your internet connection. Details: $e');
+      throw NetworkException(
+        'Unable to connect to server. Please check your internet connection. Details: $e',
+      );
     } on HttpException catch (e) {
       throw NetworkException('HTTP error encountered: $e');
     } on FormatException catch (e) {
       throw NetworkException('Invalid response format: $e');
     } on TimeoutException {
-      throw NetworkException('Request timeout: Server took too long to respond. Please try again.');
+      throw NetworkException(
+        'Request timeout: Server took too long to respond. Please try again.',
+      );
     } catch (e) {
       throw NetworkException('Network error: ${e.toString()}');
     }
@@ -172,9 +182,13 @@ abstract class BaseService {
   void _handleResponseErrors(http.Response response) {
     switch (response.statusCode) {
       case 401:
-        throw AuthenticationException('Unauthorized access. Please login again.');
+        throw AuthenticationException(
+          'Unauthorized access. Please login again.',
+        );
       case 403:
-        throw AuthenticationException('Access forbidden. You don\'t have permission to perform this action.');
+        throw AuthenticationException(
+          'Access forbidden. You don\'t have permission to perform this action.',
+        );
       case 404:
         throw NotFoundException('Resource not found.');
       case 422:
@@ -184,16 +198,19 @@ abstract class BaseService {
       case 502:
       case 503:
       case 504:
-        throw ServerException('Server temporarily unavailable. Please try again later.');
+        throw ServerException(
+          'Server temporarily unavailable. Please try again later.',
+        );
     }
   }
+
   /// Get user information from JWT token
   Future<Map<String, dynamic>?> getUserInfo() async {
     try {
       final token = await _storageService.getToken();
       if (token != null && !JwtDecoder.isExpired(token)) {
         final decodedToken = JwtDecoder.decode(token);
-        
+
         // Usar los nombres completos de los claims de JWT
         final String sidClaim = AuthService.sidClaimKey;
         final String roleClaim = AuthService.roleClaimKey;
@@ -201,13 +218,20 @@ abstract class BaseService {
         final String emailClaim = AuthService.emailClaimKey;
         final String emailSimple = AuthService.emailSimpleKey;
         final String userIdSimple = AuthService.userIdSimpleKey;
-        
+
         // Intentar obtener datos desde claims completos primero, luego desde versiones simplificadas
-        final sid = decodedToken[sidClaim] ?? decodedToken[userIdSimple] ?? decodedToken['sid'];
+        final sid =
+            decodedToken[sidClaim] ??
+            decodedToken[userIdSimple] ??
+            decodedToken['sid'];
         final roleString = decodedToken[roleClaim] ?? decodedToken['role'];
-        final locality = decodedToken[localityClaim] ?? decodedToken['locality'];
-        final email = decodedToken[emailClaim] ?? decodedToken[emailSimple] ?? decodedToken['email'];
-        
+        final locality =
+            decodedToken[localityClaim] ?? decodedToken['locality'];
+        final email =
+            decodedToken[emailClaim] ??
+            decodedToken[emailSimple] ??
+            decodedToken['email'];
+
         int? roleId;
         if (roleString != null) {
           // Extraer el nombre del rol, quitando el prefijo 'ROLE_' si existe
@@ -217,7 +241,7 @@ abstract class BaseService {
           } else {
             roleName = roleName.toLowerCase();
           }
-          
+
           switch (roleName) {
             case 'owner':
               roleId = 1;
@@ -232,7 +256,7 @@ abstract class BaseService {
               roleId = null;
           }
         }
-        
+
         return {
           'id': sid != null ? int.tryParse(sid.toString()) : null,
           'email': email?.toString(),
@@ -282,7 +306,7 @@ abstract class BaseService {
 class AuthenticationException implements Exception {
   final String message;
   AuthenticationException(this.message);
-  
+
   @override
   String toString() => 'AuthenticationException: $message';
 }
@@ -290,7 +314,7 @@ class AuthenticationException implements Exception {
 class AccessDeniedException implements Exception {
   final String message;
   AccessDeniedException(this.message);
-  
+
   @override
   String toString() => 'AccessDeniedException: $message';
 }
@@ -298,7 +322,7 @@ class AccessDeniedException implements Exception {
 class NetworkException implements Exception {
   final String message;
   NetworkException(this.message);
-  
+
   @override
   String toString() => 'NetworkException: $message';
 }
@@ -306,7 +330,7 @@ class NetworkException implements Exception {
 class NotFoundException implements Exception {
   final String message;
   NotFoundException(this.message);
-  
+
   @override
   String toString() => 'NotFoundException: $message';
 }
@@ -314,7 +338,7 @@ class NotFoundException implements Exception {
 class ValidationException implements Exception {
   final String message;
   ValidationException(this.message);
-  
+
   @override
   String toString() => 'ValidationException: $message';
 }
@@ -322,7 +346,7 @@ class ValidationException implements Exception {
 class ServerException implements Exception {
   final String message;
   ServerException(this.message);
-  
+
   @override
   String toString() => 'ServerException: $message';
 }

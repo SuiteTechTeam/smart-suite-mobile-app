@@ -30,11 +30,7 @@ class Room {
   }
 
   Map<String, dynamic> toCreateJson() {
-    return {
-      'typeRoomId': typeRoomId,
-      'hotelId': hotelId,
-      'state': state,
-    };
+    return {'typeRoomId': typeRoomId, 'hotelId': hotelId, 'state': state};
   }
 }
 

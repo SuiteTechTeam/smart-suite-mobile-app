@@ -1,7 +1,8 @@
 class ReservationResource {
   final int id;
   final String name;
-  final String type; // 'restaurant', 'spa', 'conference_room', 'equipment', etc.
+  final String
+  type; // 'restaurant', 'spa', 'conference_room', 'equipment', etc.
   final String description;
   final int capacity;
   final double pricePerHour;

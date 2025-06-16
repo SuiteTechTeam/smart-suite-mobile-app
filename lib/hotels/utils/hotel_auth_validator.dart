@@ -13,7 +13,9 @@ class HotelAuthValidator {
   static Future<void> validateOwnerAccess() async {
     final userRole = await _authService.getUserRole();
     if (userRole?.toLowerCase() != 'owner') {
-      throw AccessDeniedException('Access denied. Only owners can perform this action.');
+      throw AccessDeniedException(
+        'Access denied. Only owners can perform this action.',
+      );
     }
   }
 
@@ -22,31 +24,36 @@ class HotelAuthValidator {
   /// Throws AuthenticationException if user ID not found
   static Future<int> getAuthenticatedOwnerId() async {
     await validateOwnerAccess();
-    
+
     final userId = await _authService.getUserId();
     if (userId == null) {
       throw AuthenticationException('User ID not found. Please login again.');
     }
-    
+
     return userId;
   }
 
   /// Validates if the current user can access a specific hotel
   /// For owners: Ensures they own the hotel
   /// For admin/guest: Allows access (backend will handle specific permissions)
-  static Future<void> validateHotelAccess(int hotelId, Future<Map<String, dynamic>?> Function(int) getHotelById) async {
+  static Future<void> validateHotelAccess(
+    int hotelId,
+    Future<Map<String, dynamic>?> Function(int) getHotelById,
+  ) async {
     final userRole = await _authService.getUserRole();
-    
+
     if (userRole?.toLowerCase() == 'owner') {
       final userId = await _authService.getUserId();
       if (userId == null) {
         throw AuthenticationException('User ID not found. Please login again.');
       }
-      
+
       // For owners, verify they own this hotel
       final hotel = await getHotelById(hotelId);
       if (hotel != null && hotel['ownerId'] != userId) {
-        throw AccessDeniedException('Access denied. You can only access your own hotels.');
+        throw AccessDeniedException(
+          'Access denied. You can only access your own hotels.',
+        );
       }
     }
     // Admin and Guest access will be handled by backend permissions
@@ -56,11 +63,13 @@ class HotelAuthValidator {
   /// Only allows access if the requesting user is the same owner
   static Future<void> validateOwnerHotelsAccess(int requestedOwnerId) async {
     final userRole = await _authService.getUserRole();
-    
+
     if (userRole?.toLowerCase() == 'owner') {
       final userId = await _authService.getUserId();
       if (userId != requestedOwnerId) {
-        throw AccessDeniedException('Access denied. You can only view your own hotels.');
+        throw AccessDeniedException(
+          'Access denied. You can only view your own hotels.',
+        );
       }
     }
     // Admin access will be handled by backend permissions
@@ -78,16 +87,12 @@ class HotelAuthValidator {
   static Future<Map<String, dynamic>?> getCurrentUserInfo() async {
     try {
       await validateAuthentication();
-      
+
       final userId = await _authService.getUserId();
       final userRole = await _authService.getUserRole();
       final userEmail = await _authService.getUserEmail();
-      
-      return {
-        'id': userId,
-        'role': userRole,
-        'email': userEmail,
-      };
+
+      return {'id': userId, 'role': userRole, 'email': userEmail};
     } catch (e) {
       return null;
     }
@@ -97,25 +102,27 @@ class HotelAuthValidator {
   static Future<bool> isCurrentUserOwner() async {
     try {
       final role = await _authService.getUserRole();
-      debugPrint('[HotelAuthValidator] Checking if current user is owner. Role: $role');
-      
+      debugPrint(
+        '[HotelAuthValidator] Checking if current user is owner. Role: $role',
+      );
+
       if (role == null) return false;
-      
+
       // Check for "owner" or "ROLE_OWNER" in various formats
       final String normalizedRole = role.toLowerCase();
-      
+
       // Direct comparison with lowercase
       if (normalizedRole == 'owner') return true;
-      
+
       // Check for ROLE_ prefix (case insensitive)
       if (normalizedRole == 'role_owner') return true;
-      
+
       // Check if prefix is present and strip it
       if (role.toUpperCase().startsWith('ROLE_')) {
         final strippedRole = role.substring(5).toLowerCase();
         return strippedRole == 'owner';
       }
-      
+
       debugPrint('[HotelAuthValidator] User is not an owner. Role: $role');
       return false;
     } catch (e) {
@@ -159,7 +166,7 @@ class HotelAuthValidator {
       }
 
       final role = userInfo['role']?.toString().toLowerCase();
-      
+
       switch (role) {
         case 'owner':
           return {

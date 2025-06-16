@@ -8,11 +8,12 @@ class HotelErrorHandler {
     String? customMessage,
   }) {
     String message = customMessage ?? _getErrorMessage(error);
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: Colors.red[600],        action: onRetry != null
+        backgroundColor: Colors.red[600],
+        action: onRetry != null
             ? SnackBarAction(
                 label: 'Retry',
                 textColor: Colors.white,
@@ -23,6 +24,7 @@ class HotelErrorHandler {
       ),
     );
   }
+
   static String _getErrorMessage(String error) {
     if (error.contains('Network error')) {
       return 'Network connection problem. Please check your internet connection.';
@@ -86,10 +88,7 @@ class HotelErrorHandler {
     );
   }
 
-  static void showValidationErrors(
-    BuildContext context,
-    List<String> errors,
-  ) {
+  static void showValidationErrors(BuildContext context, List<String> errors) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -104,16 +103,18 @@ class HotelErrorHandler {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: errors
-              .map((error) => Padding(
-                    padding: const EdgeInsets.only(bottom: 4),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('• '),
-                        Expanded(child: Text(error)),
-                      ],
-                    ),
-                  ))
+              .map(
+                (error) => Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('• '),
+                      Expanded(child: Text(error)),
+                    ],
+                  ),
+                ),
+              )
               .toList(),
         ),
         actions: [
@@ -164,9 +165,7 @@ class HotelErrorHandler {
             ),
             child: Text(
               confirmText,
-              style: TextStyle(
-                color: isDestructive ? Colors.white : null,
-              ),
+              style: TextStyle(color: isDestructive ? Colors.white : null),
             ),
           ),
         ],
@@ -174,10 +173,7 @@ class HotelErrorHandler {
     );
   }
 
-  static void showSuccessMessage(
-    BuildContext context,
-    String message,
-  ) {
+  static void showSuccessMessage(BuildContext context, String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Row(

@@ -3,11 +3,7 @@ class TypeRoom {
   final String description;
   final double price;
 
-  TypeRoom({
-    required this.id,
-    required this.description,
-    required this.price,
-  });
+  TypeRoom({required this.id, required this.description, required this.price});
 
   factory TypeRoom.fromJson(Map<String, dynamic> json) {
     return TypeRoom(
@@ -20,10 +16,6 @@ class TypeRoom {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'description': description,
-      'price': price,
-    };
+    return {'id': id, 'description': description, 'price': price};
   }
 }

@@ -14,7 +14,7 @@ class AuthUtils {
     final state = context.read<AuthBloc>().state;
     return state is AuthAuthenticated;
   }
-  
+
   /// Get current user if authenticated
   static AuthenticatedUser? getCurrentUser(BuildContext context) {
     final state = context.read<AuthBloc>().state;
@@ -23,28 +23,29 @@ class AuthUtils {
     }
     return null;
   }
-  
+
   /// Navigate to login page if not authenticated
   static void requireAuth(BuildContext context) {
     if (!isAuthenticated(context)) {
       Navigator.of(context).pushReplacementNamed('/login');
     }
   }
-  
+
   /// Sign out the current user
   static void signOut(BuildContext context) {
     context.read<AuthBloc>().add(AuthSignOutRequested());
   }
-    /// Get authentication token from storage
+
+  /// Get authentication token from storage
   static Future<String?> getToken() async {
     return await StorageService().getToken();
   }
-  
+
   /// Get headers with authentication token for API requests
   static Future<Map<String, String>> getAuthHeaders() async {
     return await StorageService().getAuthHeaders();
   }
-  
+
   /// Get all user information from JWT token
   static Future<Map<String, dynamic>?> getUserInfoFromToken() async {
     return await AuthService().getUserInfo();

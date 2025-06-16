@@ -3,16 +3,21 @@ import 'package:flutter/material.dart';
 class ErrorHandler {
   static String getErrorMessage(dynamic error) {
     String errorString = error.toString().toLowerCase();
-    
-    if (errorString.contains('hotel id not found') || errorString.contains('hotel not found')) {
+
+    if (errorString.contains('hotel id not found') ||
+        errorString.contains('hotel not found')) {
       return 'Hotel not found. Please check your hotel ID or contact support.';
-    } else if (errorString.contains('network') || errorString.contains('connection')) {
+    } else if (errorString.contains('network') ||
+        errorString.contains('connection')) {
       return 'Network error. Please check your internet connection and try again.';
-    } else if (errorString.contains('unauthorized') || errorString.contains('401')) {
+    } else if (errorString.contains('unauthorized') ||
+        errorString.contains('401')) {
       return 'Session expired. Please log in again.';
-    } else if (errorString.contains('forbidden') || errorString.contains('403')) {
+    } else if (errorString.contains('forbidden') ||
+        errorString.contains('403')) {
       return 'You don\'t have permission to perform this action.';
-    } else if (errorString.contains('not found') || errorString.contains('404')) {
+    } else if (errorString.contains('not found') ||
+        errorString.contains('404')) {
       return 'The requested resource was not found.';
     } else if (errorString.contains('timeout')) {
       return 'Request timed out. Please try again.';
@@ -23,7 +28,11 @@ class ErrorHandler {
     }
   }
 
-  static void showErrorDialog(BuildContext context, String title, dynamic error) {
+  static void showErrorDialog(
+    BuildContext context,
+    String title,
+    dynamic error,
+  ) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -51,11 +60,14 @@ class ErrorHandler {
 
   static void showSuccessSnackBar(BuildContext context, String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(        content: Row(
+      SnackBar(
+        content: Row(
           children: [
             const Icon(Icons.check_circle, color: Colors.white),
             const SizedBox(width: 8),
-            Expanded(child: Text(message, style: TextStyle(color: Colors.white))),
+            Expanded(
+              child: Text(message, style: TextStyle(color: Colors.white)),
+            ),
           ],
         ),
         backgroundColor: Colors.green,
@@ -66,11 +78,14 @@ class ErrorHandler {
 
   static void showWarningSnackBar(BuildContext context, String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(        content: Row(
+      SnackBar(
+        content: Row(
           children: [
             const Icon(Icons.warning, color: Colors.white),
             const SizedBox(width: 8),
-            Expanded(child: Text(message, style: TextStyle(color: Colors.white))),
+            Expanded(
+              child: Text(message, style: TextStyle(color: Colors.white)),
+            ),
           ],
         ),
         backgroundColor: Colors.orange,
@@ -81,11 +96,17 @@ class ErrorHandler {
 
   static void showErrorSnackBar(BuildContext context, dynamic error) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(        content: Row(
+      SnackBar(
+        content: Row(
           children: [
             const Icon(Icons.error, color: Colors.white),
             const SizedBox(width: 8),
-            Expanded(child: Text(getErrorMessage(error), style: TextStyle(color: Colors.white))),
+            Expanded(
+              child: Text(
+                getErrorMessage(error),
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
           ],
         ),
         backgroundColor: Colors.red,

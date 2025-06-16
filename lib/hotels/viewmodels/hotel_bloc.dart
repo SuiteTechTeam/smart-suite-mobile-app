@@ -12,10 +12,8 @@ class HotelBloc extends Bloc<HotelEvent, hotel_state.HotelState> {
   final AuthService authService;
   final StorageService _storageService = StorageService();
 
-  HotelBloc({
-    required this.hotelService,
-    required this.authService,
-  }) : super(hotel_state.HotelInitial()) {
+  HotelBloc({required this.hotelService, required this.authService})
+    : super(hotel_state.HotelInitial()) {
     on<HotelLoadRequested>(_onHotelLoadRequested);
     on<HotelCreateRequested>(_onHotelCreateRequested);
     on<HotelUpdateRequested>(_onHotelUpdateRequested);
@@ -29,7 +27,9 @@ class HotelBloc extends Bloc<HotelEvent, hotel_state.HotelState> {
     Emitter<hotel_state.HotelState> emit,
   ) async {
     try {
-      emit(hotel_state.HotelLoading());      // Get user information from token using AuthService, which has the correct claim fields
+      emit(
+        hotel_state.HotelLoading(),
+      ); // Get user information from token using AuthService, which has the correct claim fields
       String? userRole = await authService.getUserRole();
       int? userId = await authService.getUserId();
 
@@ -41,15 +41,19 @@ class HotelBloc extends Bloc<HotelEvent, hotel_state.HotelState> {
         hotels = await hotelService.getAllHotels();
       }
 
-      emit(hotel_state.HotelLoaded(
-        hotels: hotels,
-        userRole: userRole,
-        userId: userId,
-      ));
+      emit(
+        hotel_state.HotelLoaded(
+          hotels: hotels,
+          userRole: userRole,
+          userId: userId,
+        ),
+      );
     } catch (e) {
       emit(hotel_state.HotelError('Failed to load hotels: ${e.toString()}'));
     }
-  }  Future<void> _onHotelCreateRequested(
+  }
+
+  Future<void> _onHotelCreateRequested(
     HotelCreateRequested event,
     Emitter<hotel_state.HotelState> emit,
   ) async {
@@ -74,15 +78,19 @@ class HotelBloc extends Bloc<HotelEvent, hotel_state.HotelState> {
 
       // Reload hotels to get the updated list
       add(HotelLoadRequested());
-      
-      emit(hotel_state.HotelOperationSuccess(
-        message: 'Hotel created successfully',
-        hotels: [], // Will be updated by the reload
-      ));
+
+      emit(
+        hotel_state.HotelOperationSuccess(
+          message: 'Hotel created successfully',
+          hotels: [], // Will be updated by the reload
+        ),
+      );
     } catch (e) {
       emit(hotel_state.HotelError('Failed to create hotel: ${e.toString()}'));
     }
-  }  Future<void> _onHotelUpdateRequested(
+  }
+
+  Future<void> _onHotelUpdateRequested(
     HotelUpdateRequested event,
     Emitter<hotel_state.HotelState> emit,
   ) async {
@@ -104,14 +112,18 @@ class HotelBloc extends Bloc<HotelEvent, hotel_state.HotelState> {
       // Reload hotels to get the updated list
       add(HotelLoadRequested());
 
-      emit(hotel_state.HotelOperationSuccess(
-        message: 'Hotel updated successfully',
-        hotels: [], // Will be updated by the reload
-      ));
+      emit(
+        hotel_state.HotelOperationSuccess(
+          message: 'Hotel updated successfully',
+          hotels: [], // Will be updated by the reload
+        ),
+      );
     } catch (e) {
       emit(hotel_state.HotelError('Failed to update hotel: ${e.toString()}'));
     }
-  }  Future<void> _onHotelDeleteRequested(
+  }
+
+  Future<void> _onHotelDeleteRequested(
     HotelDeleteRequested event,
     Emitter<hotel_state.HotelState> emit,
   ) async {
@@ -121,32 +133,41 @@ class HotelBloc extends Bloc<HotelEvent, hotel_state.HotelState> {
       // The HotelService now handles all authentication and authorization checks
       // Only authenticated owners can delete their own hotels
       final success = await hotelService.deleteHotel(event.hotelId);
-      
+
       if (success) {
         // Reload hotels to get the updated list
         add(HotelLoadRequested());
-        
-        emit(hotel_state.HotelOperationSuccess(
-          message: 'Hotel deleted successfully',
-          hotels: [], // Will be updated by the reload
-        ));
+
+        emit(
+          hotel_state.HotelOperationSuccess(
+            message: 'Hotel deleted successfully',
+            hotels: [], // Will be updated by the reload
+          ),
+        );
       } else {
         emit(hotel_state.HotelError('Failed to delete hotel'));
       }
     } catch (e) {
       emit(hotel_state.HotelError('Failed to delete hotel: ${e.toString()}'));
     }
-  }Future<void> _onHotelSelected(
+  }
+
+  Future<void> _onHotelSelected(
     HotelSelected event,
     Emitter<hotel_state.HotelState> emit,
   ) async {
     try {
-      await _storageService.write(key: 'selected_hotel_id', value: event.hotelId.toString());
-      
-      emit(hotel_state.HotelSelectionState(
-        hotelId: event.hotelId,
-        message: 'Hotel selected: ID ${event.hotelId}',
-      ));
+      await _storageService.write(
+        key: 'selected_hotel_id',
+        value: event.hotelId.toString(),
+      );
+
+      emit(
+        hotel_state.HotelSelectionState(
+          hotelId: event.hotelId,
+          message: 'Hotel selected: ID ${event.hotelId}',
+        ),
+      );
     } catch (e) {
       emit(hotel_state.HotelError('Failed to select hotel: ${e.toString()}'));
     }
@@ -170,13 +191,19 @@ class HotelBloc extends Bloc<HotelEvent, hotel_state.HotelState> {
         userId = currentState.userId;
       }
 
-      emit(hotel_state.HotelLoaded(
-        hotels: hotels,
-        userRole: userRole,
-        userId: userId,
-      ));
+      emit(
+        hotel_state.HotelLoaded(
+          hotels: hotels,
+          userRole: userRole,
+          userId: userId,
+        ),
+      );
     } catch (e) {
-      emit(hotel_state.HotelError('Failed to filter hotels by owner: ${e.toString()}'));
+      emit(
+        hotel_state.HotelError(
+          'Failed to filter hotels by owner: ${e.toString()}',
+        ),
+      );
     }
   }
 }

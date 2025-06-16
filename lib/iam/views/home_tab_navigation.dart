@@ -12,7 +12,8 @@ class HomeTabNavigation extends StatefulWidget {
 }
 
 class _HomeTabNavigationState extends State<HomeTabNavigation>
-    with TickerProviderStateMixin {  int _selectedIndex = 0;
+    with TickerProviderStateMixin {
+  int _selectedIndex = 0;
   late PageController _pageController;
   late AnimationController _animationController;
 
@@ -21,33 +22,25 @@ class _HomeTabNavigationState extends State<HomeTabNavigation>
       title: 'Inicio',
       icon: Icons.home_rounded,
       activeIcon: Icons.home,
-      gradient: LinearGradient(
-        colors: [Color(0xFF2196F3), Color(0xFF21CBF3)],
-      ),
+      gradient: LinearGradient(colors: [Color(0xFF2196F3), Color(0xFF21CBF3)]),
     ),
     TabInfo(
       title: 'Hoteles',
       icon: Icons.hotel_rounded,
       activeIcon: Icons.hotel,
-      gradient: LinearGradient(
-        colors: [Color(0xFF4CAF50), Color(0xFF8BC34A)],
-      ),
+      gradient: LinearGradient(colors: [Color(0xFF4CAF50), Color(0xFF8BC34A)]),
     ),
     TabInfo(
       title: 'Reservas',
       icon: Icons.book_online_rounded,
       activeIcon: Icons.book_online,
-      gradient: LinearGradient(
-        colors: [Color(0xFFFF9800), Color(0xFFFFB74D)],
-      ),
+      gradient: LinearGradient(colors: [Color(0xFFFF9800), Color(0xFFFFB74D)]),
     ),
     TabInfo(
       title: 'Cuenta',
       icon: Icons.person_rounded,
       activeIcon: Icons.person,
-      gradient: LinearGradient(
-        colors: [Color(0xFFE91E63), Color(0xFFF48FB1)],
-      ),
+      gradient: LinearGradient(colors: [Color(0xFFE91E63), Color(0xFFF48FB1)]),
     ),
   ];
 
@@ -88,14 +81,16 @@ class _HomeTabNavigationState extends State<HomeTabNavigation>
     });
   }
 
-  @override  Widget build(BuildContext context) {
+  @override
+  Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     // Calculate bottom navigation bar height with margin
     // We use 16 for top and bottom margins, plus around 56-60 for the nav bar itself
     // Add extra padding (19px + safety margin) to prevent overflow
-    final bottomNavHeight = MediaQuery.of(context).padding.bottom + 16 + 16 + 60 + 20;
-    
+    final bottomNavHeight =
+        MediaQuery.of(context).padding.bottom + 16 + 16 + 60 + 20;
+
     return Scaffold(
       extendBody: true,
       appBar: _buildModernAppBar(context, isDark),
@@ -123,10 +118,7 @@ class _HomeTabNavigationState extends State<HomeTabNavigation>
         child: Text(
           _tabs[_selectedIndex].title,
           key: ValueKey(_selectedIndex),
-          style: const TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 20,
-          ),
+          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
         ),
       ),
       backgroundColor: isDark ? null : Colors.white,
@@ -134,9 +126,7 @@ class _HomeTabNavigationState extends State<HomeTabNavigation>
       elevation: 0,
       scrolledUnderElevation: 1,
       flexibleSpace: Container(
-        decoration: BoxDecoration(
-          gradient: _tabs[_selectedIndex].gradient,
-        ),
+        decoration: BoxDecoration(gradient: _tabs[_selectedIndex].gradient),
       ),
       actions: [
         IconButton(
@@ -167,7 +157,9 @@ class _HomeTabNavigationState extends State<HomeTabNavigation>
         const SizedBox(width: 8),
       ],
     );
-  }  Widget _buildModernBottomNavBar(BuildContext context, bool isDark) {
+  }
+
+  Widget _buildModernBottomNavBar(BuildContext context, bool isDark) {
     return Container(
       margin: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -195,7 +187,7 @@ class _HomeTabNavigationState extends State<HomeTabNavigation>
           items: _tabs.map((tab) {
             final index = _tabs.indexOf(tab);
             final isSelected = index == _selectedIndex;
-            
+
             return BottomNavigationBarItem(
               icon: AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
@@ -206,7 +198,9 @@ class _HomeTabNavigationState extends State<HomeTabNavigation>
                   boxShadow: isSelected
                       ? [
                           BoxShadow(
-                            color: tab.gradient.colors.first.withValues(alpha: 0.3),
+                            color: tab.gradient.colors.first.withValues(
+                              alpha: 0.3,
+                            ),
                             blurRadius: 8,
                             offset: const Offset(0, 4),
                           ),
@@ -239,7 +233,8 @@ class _HomeTabNavigationState extends State<HomeTabNavigation>
       elevation: 4,
       extendedPadding: const EdgeInsets.symmetric(horizontal: 20),
     );
-  }  // Build scrollable versions of each page
+  } // Build scrollable versions of each page
+
   List<Widget> _buildScrollablePages() {
     return const [
       HomePage(),

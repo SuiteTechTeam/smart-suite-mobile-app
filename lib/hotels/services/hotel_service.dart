@@ -38,7 +38,7 @@ class HotelService extends BaseService {
       } else if (response.statusCode == 404) {
         return null; // Hotel not found
       }
-      
+
       // BaseService handles other error codes automatically
       return null;
     } catch (e) {
@@ -60,7 +60,7 @@ class HotelService extends BaseService {
   Future<List<Hotel>> getAllHotels() async {
     try {
       final userRole = await _authService.getUserRole();
-      
+
       // If user is owner, only return their hotels
       if (userRole?.toLowerCase() == 'owner') {
         final userId = await _authService.getUserId();
@@ -68,7 +68,7 @@ class HotelService extends BaseService {
           return await getHotelsByOwnerId(userId);
         }
       }
-      
+
       // For admin and guest, or fallback
       final response = await authenticatedGet('hotels');
 
@@ -76,7 +76,7 @@ class HotelService extends BaseService {
         final List<dynamic> data = jsonDecode(response.body);
         return data.map((json) => Hotel.fromJson(json)).toList();
       }
-      
+
       // BaseService handles error codes automatically
       return [];
     } catch (e) {
@@ -93,19 +93,20 @@ class HotelService extends BaseService {
       rethrow;
     }
   }
+
   // Get hotels by owner ID - with access validation
   Future<List<Hotel>> getHotelsByOwnerId(int ownerId) async {
     try {
       // Validate that the requesting user can access this owner's hotels
       await HotelAuthValidator.validateOwnerHotelsAccess(ownerId);
-      
+
       final response = await authenticatedGet('hotels/owner/$ownerId');
 
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
         return data.map((json) => Hotel.fromJson(json)).toList();
       }
-      
+
       // BaseService handles error codes automatically
       return [];
     } catch (e) {
@@ -114,7 +115,9 @@ class HotelService extends BaseService {
   }
 
   // Get hotels by owner ID as Maps (for backwards compatibility)
-  Future<List<Map<String, dynamic>>> getHotelsByOwnerIdAsMaps(int ownerId) async {
+  Future<List<Map<String, dynamic>>> getHotelsByOwnerIdAsMaps(
+    int ownerId,
+  ) async {
     try {
       final hotels = await getHotelsByOwnerId(ownerId);
       return hotels.map((hotel) => hotel.toJson()).toList();
@@ -153,7 +156,7 @@ class HotelService extends BaseService {
         final data = jsonDecode(response.body);
         return Hotel.fromJson(data);
       }
-      
+
       // BaseService handles error codes automatically
       throw Exception('Failed to create hotel');
     } catch (e) {
@@ -174,10 +177,10 @@ class HotelService extends BaseService {
     try {
       // Validate access to this specific hotel
       await _validateHotelAccess(hotelId);
-      
+
       // Get the authenticated user's ID and validate they are an owner
       final authenticatedOwnerId = await _getAuthenticatedOwnerId();
-      
+
       // Always use the authenticated user's ID, ignore any passed ownerId
       final body = {
         'name': name,
@@ -194,7 +197,7 @@ class HotelService extends BaseService {
         final data = jsonDecode(response.body);
         return Hotel.fromJson(data);
       }
-      
+
       // BaseService handles error codes automatically
       throw Exception('Failed to update hotel');
     } catch (e) {
@@ -207,16 +210,16 @@ class HotelService extends BaseService {
     try {
       // Validate access to this specific hotel
       await _validateHotelAccess(hotelId);
-      
+
       // Ensure user is an owner
       await _validateOwnerAccess();
-      
+
       final response = await authenticatedDelete('hotels/$hotelId');
 
       if (response.statusCode == 200 || response.statusCode == 204) {
         return true;
       }
-      
+
       // BaseService handles error codes automatically
       return false;
     } catch (e) {
@@ -229,13 +232,13 @@ class HotelService extends BaseService {
     try {
       // Validate access to this specific hotel
       await _validateHotelAccess(hotelId);
-      
+
       final response = await authenticatedGet('hotels/$hotelId/statistics');
 
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
       }
-      
+
       // Return empty stats if not available
       return {
         'totalRooms': 0,
@@ -274,7 +277,8 @@ class HotelService extends BaseService {
   // Get current user's ID
   Future<int?> getCurrentUserId() async {
     return await _authService.getUserId();
-  }  // Check if current user is an owner
+  } // Check if current user is an owner
+
   Future<bool> isCurrentUserOwner() async {
     return await HotelAuthValidator.isCurrentUserOwner();
   }
@@ -312,7 +316,7 @@ class HotelService extends BaseService {
     }
   }
 
-  // Create hotel returning Map (for backwards compatibility)  
+  // Create hotel returning Map (for backwards compatibility)
   Future<Map<String, dynamic>> createHotelAsMap({
     required String name,
     required String address,

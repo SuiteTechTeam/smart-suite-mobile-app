@@ -3,12 +3,16 @@ import 'package:jwt_decoder/jwt_decoder.dart';
 
 class AuthService {
   final FlutterSecureStorage storage = const FlutterSecureStorage();
-  
+
   // Constantes para los nombres de claims
-  static const String sidClaimKey = 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/sid';
-  static const String roleClaimKey = 'http://schemas.microsoft.com/ws/2008/06/identity/claims/role';
-  static const String localityClaimKey = 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/locality';
-  static const String emailClaimKey = 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress';
+  static const String sidClaimKey =
+      'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/sid';
+  static const String roleClaimKey =
+      'http://schemas.microsoft.com/ws/2008/06/identity/claims/role';
+  static const String localityClaimKey =
+      'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/locality';
+  static const String emailClaimKey =
+      'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress';
   static const String emailSimpleKey = 'Email';
   static const String userIdSimpleKey = 'UserId';
 
@@ -24,13 +28,13 @@ class AuthService {
     final token = await getToken();
     if (token != null && !JwtDecoder.isExpired(token)) {
       final decoded = JwtDecoder.decode(token);
-      
+
       // Intentar con el claim completo primero
       var sid = decoded[sidClaimKey];
-      
+
       // Si no existe, probar con el claim simple
       sid ??= decoded[userIdSimpleKey] ?? decoded['sid'];
-      
+
       if (sid != null) return int.tryParse(sid.toString());
     }
     return null;
@@ -41,10 +45,10 @@ class AuthService {
     final token = await getToken();
     if (token != null && !JwtDecoder.isExpired(token)) {
       final decoded = JwtDecoder.decode(token);
-      
+
       // Intentar con el claim completo primero
       final role = decoded[roleClaimKey] ?? decoded['role'];
-      
+
       if (role != null) {
         final roleStr = role.toString();
         // If the role has a prefix like ROLE_, strip it off
@@ -62,10 +66,10 @@ class AuthService {
     final token = await getToken();
     if (token != null && !JwtDecoder.isExpired(token)) {
       final decoded = JwtDecoder.decode(token);
-      
+
       // Intentar con el claim completo primero
       final hotel = decoded[localityClaimKey] ?? decoded['locality'];
-      
+
       if (hotel != null && hotel.toString().isNotEmpty) {
         return int.tryParse(hotel.toString());
       }
@@ -78,10 +82,11 @@ class AuthService {
     final token = await getToken();
     if (token != null && !JwtDecoder.isExpired(token)) {
       final decoded = JwtDecoder.decode(token);
-      
+
       // Intentar con el claim completo primero, luego con claim simple, y finalmente con la versión abreviada
-      final email = decoded[emailClaimKey] ?? decoded[emailSimpleKey] ?? decoded['email'];
-      
+      final email =
+          decoded[emailClaimKey] ?? decoded[emailSimpleKey] ?? decoded['email'];
+
       return email?.toString();
     }
     return null;
@@ -91,13 +96,13 @@ class AuthService {
     try {
       final userInfo = await getUserInfo();
       if (userInfo == null) return null;
-      
+
       // Agregar roleId si está disponible
       final roleId = await getUserId();
       if (roleId != null) {
         userInfo['roleId'] = roleId;
       }
-      
+
       return userInfo;
     } catch (e) {
       return null;
@@ -109,18 +114,20 @@ class AuthService {
     final token = await getToken();
     if (token != null && !JwtDecoder.isExpired(token)) {
       final decoded = JwtDecoder.decode(token);
-      
+
       // Obtener claims usando nombres completos primero, luego versiones simplificadas como respaldo
-      final sidClaim = decoded[sidClaimKey] ?? decoded[userIdSimpleKey] ?? decoded['sid'];
+      final sidClaim =
+          decoded[sidClaimKey] ?? decoded[userIdSimpleKey] ?? decoded['sid'];
       final roleClaim = decoded[roleClaimKey] ?? decoded['role'];
       final localityClaim = decoded[localityClaimKey] ?? decoded['locality'];
-      final emailClaim = decoded[emailClaimKey] ?? decoded[emailSimpleKey] ?? decoded['email'];
-      
+      final emailClaim =
+          decoded[emailClaimKey] ?? decoded[emailSimpleKey] ?? decoded['email'];
+
       return {
         'id': sidClaim != null ? int.tryParse(sidClaim.toString()) : null,
         'role': roleClaim?.toString(),
-        'hotelId': localityClaim != null && localityClaim.toString().isNotEmpty 
-            ? int.tryParse(localityClaim.toString()) 
+        'hotelId': localityClaim != null && localityClaim.toString().isNotEmpty
+            ? int.tryParse(localityClaim.toString())
             : null,
         'email': emailClaim?.toString(),
       };

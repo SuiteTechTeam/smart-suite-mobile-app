@@ -15,10 +15,9 @@ class HotelManagementScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => HotelBloc(
-        hotelService: HotelService(),
-        authService: AuthService(),
-      )..add(HotelLoadRequested()),
+      create: (context) =>
+          HotelBloc(hotelService: HotelService(), authService: AuthService())
+            ..add(HotelLoadRequested()),
       child: const HotelManagementView(),
     );
   }
@@ -38,12 +37,16 @@ class HotelManagementView extends StatelessWidget {
       body: BlocListener<HotelBloc, hotel_state.HotelState>(
         listener: (context, state) {
           if (state is hotel_state.HotelOperationSuccess) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(state.message)));
+          } else if (state is hotel_state.HotelError) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message)),
-            );
-          } else if (state is hotel_state.HotelError) {            ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('Error: ${state.message}', style: const TextStyle(color: Colors.white)),
+                content: Text(
+                  'Error: ${state.message}',
+                  style: const TextStyle(color: Colors.white),
+                ),
                 backgroundColor: Colors.red,
               ),
             );
@@ -54,18 +57,15 @@ class HotelManagementView extends StatelessWidget {
             if (state is hotel_state.HotelLoading) {
               return const Center(child: CircularProgressIndicator());
             }
-            
+
             if (state is hotel_state.HotelError) {
               return Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(
-                      Icons.error_outline,
-                      size: 64,
-                      color: Colors.red[400],
-                    ),
-                    const SizedBox(height: 16),                    Text(
+                    Icon(Icons.error_outline, size: 64, color: Colors.red[400]),
+                    const SizedBox(height: 16),
+                    Text(
                       'Error: ${state.message}',
                       textAlign: TextAlign.center,
                       style: TextStyle(color: Colors.grey[800]),
@@ -81,7 +81,7 @@ class HotelManagementView extends StatelessWidget {
                 ),
               );
             }
-            
+
             if (state is hotel_state.HotelLoaded) {
               if (state.hotels.isEmpty) {
                 return Center(
@@ -110,7 +110,7 @@ class HotelManagementView extends StatelessWidget {
                   ),
                 );
               }
-              
+
               return ListView.builder(
                 padding: const EdgeInsets.all(16.0),
                 itemCount: state.hotels.length,
@@ -120,7 +120,7 @@ class HotelManagementView extends StatelessWidget {
                 },
               );
             }
-            
+
             return const Center(child: CircularProgressIndicator());
           },
         ),
@@ -128,7 +128,9 @@ class HotelManagementView extends StatelessWidget {
       floatingActionButton: FutureBuilder<bool>(
         future: HotelAuthValidator.isCurrentUserOwner(),
         builder: (context, snapshot) {
-          debugPrint('[HotelScreen] FAB Builder - isOwner: ${snapshot.data}, hasData: ${snapshot.hasData}, hasError: ${snapshot.hasError}');
+          debugPrint(
+            '[HotelScreen] FAB Builder - isOwner: ${snapshot.data}, hasData: ${snapshot.hasData}, hasError: ${snapshot.hasError}',
+          );
           if (snapshot.hasData && snapshot.data == true) {
             return FloatingActionButton.extended(
               onPressed: () => _showCreateHotelDialog(context),
@@ -151,7 +153,8 @@ class HotelManagementView extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [            Row(
+          children: [
+            Row(
               children: [
                 Icon(
                   Icons.hotel,
@@ -189,7 +192,8 @@ class HotelManagementView extends StatelessWidget {
             if (hotel.description != null && hotel.description!.isNotEmpty) ...[
               const SizedBox(height: 8),
               _buildInfoRow(Icons.description, hotel.description!),
-            ],            if (hotel.rating != null) ...[
+            ],
+            if (hotel.rating != null) ...[
               const SizedBox(height: 8),
               Row(
                 children: [
@@ -201,7 +205,8 @@ class HotelManagementView extends StatelessWidget {
                   ),
                 ],
               ),
-            ],const SizedBox(height: 16),
+            ],
+            const SizedBox(height: 16),
             // Hacemos los botones scrollables horizontalmente para prevenir desbordamiento
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
@@ -231,12 +236,13 @@ class HotelManagementView extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => RoomManagementScreen(hotelId: hotel.id),
+                          builder: (context) =>
+                              RoomManagementScreen(hotelId: hotel.id),
                         ),
                       );
                     },
                     icon: const Icon(Icons.meeting_room, size: 16),
-                    label: const Text('Rooms'),  // Texto más corto
+                    label: const Text('Rooms'), // Texto más corto
                   ),
                 ],
               ),
@@ -246,16 +252,21 @@ class HotelManagementView extends StatelessWidget {
       ),
     );
   }
+
   Widget _buildInfoRow(IconData icon, String text) {
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start, // Alinear al inicio para textos largos
+      crossAxisAlignment:
+          CrossAxisAlignment.start, // Alinear al inicio para textos largos
       children: [
         Icon(icon, size: 16, color: Colors.grey[600]),
         const SizedBox(width: 8),
         Expanded(
           child: Text(
             text,
-            style: TextStyle(color: Colors.grey[700], fontSize: 13), // Texto ligeramente más pequeño
+            style: TextStyle(
+              color: Colors.grey[700],
+              fontSize: 13,
+            ), // Texto ligeramente más pequeño
             overflow: TextOverflow.ellipsis,
             maxLines: 2, // Permitir hasta 2 líneas
           ),
@@ -266,9 +277,9 @@ class HotelManagementView extends StatelessWidget {
 
   void _selectHotel(BuildContext context, int hotelId) {
     context.read<HotelBloc>().add(HotelSelected(hotelId));
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Hotel selected: ID $hotelId')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('Hotel selected: ID $hotelId')));
     Navigator.pop(context, true);
   }
 
@@ -281,11 +292,21 @@ class HotelManagementView extends StatelessWidget {
   }
 
   void _showHotelDialog(BuildContext context, {Hotel? existingHotel}) {
-    final nameController = TextEditingController(text: existingHotel?.name ?? '');
-    final addressController = TextEditingController(text: existingHotel?.address ?? '');
-    final phoneController = TextEditingController(text: existingHotel?.phone ?? '');
-    final emailController = TextEditingController(text: existingHotel?.email ?? '');
-    final descriptionController = TextEditingController(text: existingHotel?.description ?? '');
+    final nameController = TextEditingController(
+      text: existingHotel?.name ?? '',
+    );
+    final addressController = TextEditingController(
+      text: existingHotel?.address ?? '',
+    );
+    final phoneController = TextEditingController(
+      text: existingHotel?.phone ?? '',
+    );
+    final emailController = TextEditingController(
+      text: existingHotel?.email ?? '',
+    );
+    final descriptionController = TextEditingController(
+      text: existingHotel?.description ?? '',
+    );
     final formKey = GlobalKey<FormState>();
 
     showDialog(
@@ -381,23 +402,25 @@ class HotelManagementView extends StatelessWidget {
             ElevatedButton(
               onPressed: () async {
                 if (formKey.currentState!.validate()) {
-                  Navigator.of(dialogContext).pop();                  final hotelData = {
+                  Navigator.of(dialogContext).pop();
+                  final hotelData = {
                     'name': nameController.text.trim(),
                     'address': addressController.text.trim(),
                     'phone': phoneController.text.trim(),
                     'email': emailController.text.trim(),
-                    'description': descriptionController.text.trim().isEmpty 
-                        ? null : descriptionController.text.trim(),
+                    'description': descriptionController.text.trim().isEmpty
+                        ? null
+                        : descriptionController.text.trim(),
                     // ownerId is no longer needed - HotelService now uses authenticated user's ID
                   };
 
                   if (existingHotel != null) {
                     context.read<HotelBloc>().add(
-                      HotelUpdateRequested(existingHotel.id, hotelData)
+                      HotelUpdateRequested(existingHotel.id, hotelData),
                     );
                   } else {
                     context.read<HotelBloc>().add(
-                      HotelCreateRequested(hotelData)
+                      HotelCreateRequested(hotelData),
                     );
                   }
                 }
