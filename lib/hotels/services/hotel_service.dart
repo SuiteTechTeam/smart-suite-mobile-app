@@ -175,8 +175,6 @@ class HotelService extends BaseService {
     int? ownerId, // This parameter is now ignored for security
   }) async {
     try {
-      // Validate access to this specific hotel
-      await _validateHotelAccess(hotelId);
 
       // Get the authenticated user's ID and validate they are an owner
       final authenticatedOwnerId = await _getAuthenticatedOwnerId();
