@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:smart_suite/hotels/views/rooms/room_management_screen.dart';
 import '../services/hotel_service.dart';
 import '../models/hotel.dart';
 import '../viewmodels/hotel_bloc.dart';
 import '../viewmodels/hotel_event.dart';
 import '../viewmodels/hotel_state.dart' as hotel_state;
 import '../../iam/services/auth_service.dart';
-import 'room_management_screen.dart';
 import '../utils/hotel_auth_validator.dart';
 
 class HotelManagementScreen extends StatelessWidget {
