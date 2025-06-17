@@ -11,7 +11,7 @@ import 'iam/views/login_page.dart';
 import 'iam/views/debug_auth_screen.dart';
 import 'booking/views/reservation_management_screen.dart';
 import 'booking/views/add_reservation_screen.dart';
-import 'hotels/views/hotel_management_screen.dart';
+import 'hotels/views/hotel/hotel_management_screen.dart';
 import 'booking/views/api_test_screen.dart';
 
 void main() async {
