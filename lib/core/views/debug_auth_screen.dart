@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../viewmodels/auth_bloc.dart';
-import '../viewmodels/auth_state.dart';
-import '../viewmodels/auth_event.dart';
-import '../models/user_role.dart';
-import '../services/auth_api_service.dart';
+import '../../iam/viewmodels/auth_bloc.dart';
+import '../../iam/viewmodels/auth_state.dart';
+import '../../iam/viewmodels/auth_event.dart';
+import '../../iam/models/user_role.dart';
+import '../../iam/services/auth_api_service.dart';
 
 class DebugAuthScreen extends StatefulWidget {
   const DebugAuthScreen({super.key});

@@ -8,7 +8,7 @@ import 'iam/viewmodels/auth_bloc.dart';
 import 'iam/viewmodels/auth_event.dart';
 import 'iam/views/auth_wrapper.dart';
 import 'iam/views/login_page.dart';
-import 'iam/views/debug_auth_screen.dart';
+import 'core/views/debug_auth_screen.dart';
 import 'booking/views/reservation_management_screen.dart';
 import 'booking/views/add_reservation_screen.dart';
 import 'hotels/views/hotel/hotel_management_screen.dart';
