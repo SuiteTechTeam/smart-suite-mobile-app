@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../views/home_page.dart';
+import '../../iam/views/home_page.dart';
 import '../../hotels/views/hotel/hotel_management_screen.dart';
 import '../../booking/views/reservation_management_screen.dart';
-import '../views/account/account_page.dart';
+import '../../iam/views/account/account_page.dart';
 
 class HomeTabNavigation extends StatefulWidget {
   const HomeTabNavigation({super.key});

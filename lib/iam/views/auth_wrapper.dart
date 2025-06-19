@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:smart_suite/core/views/home_tab_navigation.dart';
 import 'package:smart_suite/iam/viewmodels/auth_event.dart';
 import '../viewmodels/auth_bloc.dart';
 import '../viewmodels/auth_state.dart';
 import 'login_page.dart';
-import 'home_tab_navigation.dart';
 
 class AuthWrapper extends StatefulWidget {
   const AuthWrapper({super.key});

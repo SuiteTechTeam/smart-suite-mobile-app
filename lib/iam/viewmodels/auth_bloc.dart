@@ -26,8 +26,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(AuthLoading());
     try {
       final user = await _authRepository
-          .signIn(event.email, event.password, event.role)
-          .timeout(const Duration(seconds: 30));
+          .signIn(event.email, event.password, event.role);
       debugPrint('AuthBloc: Sign in successful for ${user.email}');
       emit(AuthAuthenticated(user));
     } on ApiException catch (e) {
@@ -53,8 +52,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             event.email,
             event.password,
             event.role,
-          )
-          .timeout(const Duration(seconds: 30));
+          );
       emit(AuthSignUpSuccess());
     } on ApiException catch (e) {
       emit(AuthError(e.message));
@@ -81,16 +79,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     debugPrint('AuthBloc: Starting auth status check...');
     try {
-      final isAuthenticated = await _authRepository.isAuthenticated().timeout(
-        const Duration(seconds: 10),
-      );
+      final isAuthenticated = await _authRepository.isAuthenticated();
       debugPrint('AuthBloc: isAuthenticated = $isAuthenticated');
 
       if (isAuthenticated) {
         debugPrint('AuthBloc: Getting current user...');
-        final user = await _authRepository.getCurrentUser().timeout(
-          const Duration(seconds: 10),
-        );
+        final user = await _authRepository.getCurrentUser();
         debugPrint('AuthBloc: Current user = ${user?.email}');
 
         if (user != null) {

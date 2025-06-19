@@ -64,8 +64,7 @@ class AuthApiService {
             Uri.parse(finalUrl),
             headers: {'Content-Type': 'application/json', 'accept': '*/*'},
             body: jsonEncode(request.toJson()),
-          )
-          .timeout(const Duration(seconds: 30));
+          );
 
       debugPrint(
         'AuthApiService: Response status code: ${response.statusCode}',
@@ -129,8 +128,7 @@ class AuthApiService {
                 'Connection': 'keep-alive',
               },
               body: jsonEncode(request.toJson()),
-            )
-            .timeout(const Duration(seconds: 60)); // Longer timeout
+            );
 
         if (response.statusCode == 200) {
           final jsonData = jsonDecode(response.body);
@@ -157,7 +155,7 @@ class AuthApiService {
       // Try DNS resolution first
       final addresses = await InternetAddress.lookup(
         'smart-suite-web-service.azurewebsites.net',
-      ).timeout(const Duration(seconds: 10));
+      );
       debugPrint(
         'AuthApiService: DNS resolved successfully: ${addresses.map((addr) => addr.address).join(', ')}',
       );
@@ -170,8 +168,7 @@ class AuthApiService {
               'Accept': '*/*',
               'User-Agent': 'Smart-Suite-Mobile-App/1.0',
             },
-          )
-          .timeout(const Duration(seconds: 15));
+          );
 
       debugPrint(
         'AuthApiService: Connectivity test response: ${response.statusCode}',
@@ -203,8 +200,7 @@ class AuthApiService {
             Uri.parse('$baseUrl/$apiVersion/authentication/$endpoint'),
             headers: {'Content-Type': 'application/json'},
             body: jsonEncode(request.toJson()),
-          )
-          .timeout(const Duration(seconds: 30));
+          );
 
       if (response.statusCode != 200 && response.statusCode != 201) {
         throw ApiException(

@@ -17,8 +17,7 @@ class StorageService {
   Future<String?> getToken() async {
     try {
       return await _storage
-          .read(key: _tokenKey)
-          .timeout(const Duration(seconds: 5));
+          .read(key: _tokenKey);
     } catch (e) {
       return null;
     }
@@ -27,8 +26,7 @@ class StorageService {
   Future<AuthenticatedUser?> getAuthenticatedUser() async {
     try {
       final userJson = await _storage
-          .read(key: _userKey)
-          .timeout(const Duration(seconds: 5));
+          .read(key: _userKey);
 
       if (userJson != null) {
         try {
