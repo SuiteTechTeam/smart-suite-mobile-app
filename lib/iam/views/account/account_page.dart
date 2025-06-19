@@ -39,33 +39,39 @@ class _AccountPageState extends State<AccountPage>
 
   Future<void> _fetchUserInfo() async {
     debugPrint('[AccountPage] Starting _fetchUserInfo');
-    setState(() {
-      isLoading = true;
-    });
+    if (mounted) {
+      setState(() {
+        isLoading = true;
+      });
+    }
 
     try {
       debugPrint('[AccountPage] Calling getUserInfoFromApi');
       final info = await _userService.getUserInfoFromApi();
       debugPrint(
-        '[AccountPage] User info response: ${info != null ? "Success" : "Null"}',
+        '[AccountPage] User info response: \\${info != null ? "Success" : "Null"}',
       );
 
-      setState(() {
-        userInfo = info;
-        isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          userInfo = info;
+          isLoading = false;
+        });
+      }
 
       if (info != null) {
-        debugPrint('[AccountPage] User data received: ${info.keys.join(', ')}');
-        _animationController.forward();
+        debugPrint('[AccountPage] User data received: \\${info.keys.join(', ')}');
+        if (mounted) _animationController.forward();
       } else {
         debugPrint('[AccountPage] No user data received');
       }
     } catch (e) {
       debugPrint('[AccountPage] Error fetching user info: $e');
-      setState(() {
-        isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
     }
   }
 
