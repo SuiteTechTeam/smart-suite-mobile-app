@@ -57,10 +57,7 @@ class HotelCardItem extends StatelessWidget {
                   const SizedBox(width: 4),
                   Text(
                     'ID: ${hotel.id}',
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 11,
-                    ),
+                    style: TextStyle(color: Colors.grey[600], fontSize: 11),
                   ),
                 ],
               ),
@@ -70,7 +67,8 @@ class HotelCardItem extends StatelessWidget {
               _buildInfoRow(Icons.phone, hotel.phone),
               const SizedBox(height: 8),
               _buildInfoRow(Icons.email, hotel.email),
-              if (hotel.description != null && hotel.description!.isNotEmpty) ...[
+              if (hotel.description != null &&
+                  hotel.description!.isNotEmpty) ...[
                 const SizedBox(height: 8),
                 _buildInfoRow(Icons.description, hotel.description!),
               ],
@@ -88,44 +86,31 @@ class HotelCardItem extends StatelessWidget {
                 ),
               ],
               const SizedBox(height: 16),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    if (userRole?.toLowerCase() == 'owner') ...[
-                      TextButton.icon(
-                        onPressed: () => onUpdate(context, hotel),
-                        icon: const Icon(Icons.edit, size: 16),
-                        label: const Text('Edit'),
-                      ),
-                      const SizedBox(width: 8),
-                    ],
-                    ElevatedButton.icon(
-                      onPressed: () => onSelect(context, hotel.id),
-                      icon: const Icon(Icons.check, size: 16),
-                      label: const Text('Select'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Theme.of(context).primaryColor,
-                        foregroundColor: Colors.white,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    OutlinedButton.icon(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                RoomManagementScreen(hotelId: hotel.id),
-                          ),
-                        );
-                      },
-                      icon: const Icon(Icons.meeting_room, size: 16),
-                      label: const Text('Rooms'),
-                    ),
-                  ],
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  if (userRole?.toLowerCase() == 'owner')
+                    TextButton.icon(
+                      onPressed: () => onUpdate(context, hotel),
+                      icon: const Icon(Icons.edit, size: 16),
+                      label: const Text('Edit'),
+                    )
+                  else
+                    const SizedBox.shrink(),
+                  OutlinedButton.icon(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              RoomManagementScreen(hotelId: hotel.id),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.meeting_room, size: 16),
+                    label: const Text('Rooms'),
+                  ),
+                ],
               ),
             ],
           ),
@@ -143,10 +128,7 @@ class HotelCardItem extends StatelessWidget {
         Expanded(
           child: Text(
             text,
-            style: TextStyle(
-              color: Colors.grey[700],
-              fontSize: 13,
-            ),
+            style: TextStyle(color: Colors.grey[700], fontSize: 13),
             overflow: TextOverflow.ellipsis,
             maxLines: 2,
           ),
