@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../services/user_service.dart';
 import '../../utils/auth_utils.dart';
-import '../../../booking/views/api_test_screen.dart';
+import '../../../core/views/api_test_screen.dart';
 
 class AccountPage extends StatefulWidget {
   const AccountPage({super.key});

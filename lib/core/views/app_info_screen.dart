@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:intl/intl.dart'; // For date formatting
-import '../../core/config/app_config.dart';
+import '../config/app_config.dart';
 import '../../iam/services/auth_service.dart';
 
 class AppInfoScreen extends StatefulWidget {

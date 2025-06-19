@@ -3,11 +3,11 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:smart_suite/hotels/utils/hotel_utils.dart';
 import '../../hotels/services/hotel_service.dart';
-import '../services/reservation_service.dart';
-import '../utils/error_handler.dart';
+import '../../booking/services/reservation_service.dart';
+import '../../booking/utils/error_handler.dart';
 import '../../iam/services/storage_service.dart';
 import 'dart:io';
-import '../models/reservation.dart';
+import '../../booking/models/reservation.dart';
 
 class ApiTestScreen extends StatefulWidget {
   const ApiTestScreen({super.key});
