@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../iam/views/home_page.dart';
 import '../../hotels/views/hotel/hotel_management_screen.dart';
-import '../../booking/views/reservation_management_screen.dart';
 import '../../iam/views/account/account_page.dart';
 
 class HomeTabNavigation extends StatefulWidget {
@@ -29,12 +28,6 @@ class _HomeTabNavigationState extends State<HomeTabNavigation>
       icon: Icons.hotel_rounded,
       activeIcon: Icons.hotel,
       gradient: LinearGradient(colors: [Color(0xFF4CAF50), Color(0xFF8BC34A)]),
-    ),
-    TabInfo(
-      title: 'Reservas',
-      icon: Icons.book_online_rounded,
-      activeIcon: Icons.book_online,
-      gradient: LinearGradient(colors: [Color(0xFFFF9800), Color(0xFFFFB74D)]),
     ),
     TabInfo(
       title: 'Cuenta',
@@ -106,8 +99,6 @@ class _HomeTabNavigationState extends State<HomeTabNavigation>
         ),
       ),
       bottomNavigationBar: _buildModernBottomNavBar(context, isDark),
-      floatingActionButton: _selectedIndex == 2 ? _buildFAB(context) : null,
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 
@@ -221,25 +212,11 @@ class _HomeTabNavigationState extends State<HomeTabNavigation>
     );
   }
 
-  Widget? _buildFAB(BuildContext context) {
-    return FloatingActionButton.extended(
-      onPressed: () {
-        Navigator.pushNamed(context, '/add-reservation');
-      },
-      icon: const Icon(Icons.add_rounded),
-      label: const Text('Nueva Reserva'),
-      backgroundColor: const Color(0xFFFF9800),
-      foregroundColor: Colors.white,
-      elevation: 4,
-      extendedPadding: const EdgeInsets.symmetric(horizontal: 20),
-    );
-  } // Build scrollable versions of each page
-
+  // Build scrollable versions of each page
   List<Widget> _buildScrollablePages() {
     return const [
       HomePage(),
       HotelManagementScreen(),
-      ReservationManagementScreen(),
       AccountPage(),
     ];
   }

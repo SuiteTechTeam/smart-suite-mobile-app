@@ -51,7 +51,6 @@ class SmartSuiteApp extends StatelessWidget {
         routes: {
           '/login': (context) => const LoginPage(),
           '/home': (context) => const HomeTabNavigation(),
-          '/reservations': (context) => const ReservationManagementScreen(),
           '/add-reservation': (context) => const AddReservationScreen(),
           '/reservations/add': (context) => const AddReservationScreen(),
           '/hotels': (context) => const HotelManagementScreen(),
@@ -59,6 +58,13 @@ class SmartSuiteApp extends StatelessWidget {
           '/debug-auth': (context) => const DebugAuthScreen(),
         },
         onGenerateRoute: (settings) {
+          if (settings.name == '/reservations') {
+            final args = settings.arguments as Map<String, dynamic>?;
+            final hotelId = args != null ? args['hotelId'] as int? : null;
+            return MaterialPageRoute(
+              builder: (context) => ReservationManagementScreen(hotelId: hotelId),
+            );
+          }
           if (settings.name == '/reservations/add') {
             return MaterialPageRoute(
               builder: (context) => const AddReservationScreen(),

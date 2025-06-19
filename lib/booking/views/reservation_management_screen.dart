@@ -8,7 +8,8 @@ import 'add_reservation_screen.dart';
 import 'reservation_detail_screen.dart';
 
 class ReservationManagementScreen extends StatefulWidget {
-  const ReservationManagementScreen({super.key});
+  final int? hotelId;
+  const ReservationManagementScreen({super.key, this.hotelId});
 
   @override
   State<ReservationManagementScreen> createState() =>
@@ -35,6 +36,7 @@ class _ReservationManagementScreenState
     _reservationService = ReservationService();
     _hotelService = HotelService();
     _authService = AuthService();
+    hotelId = widget.hotelId; // Usar el hotelId recibido si existe
     _loadHotelId();
   }
 
@@ -47,6 +49,13 @@ class _ReservationManagementScreenState
   }
 
   Future<void> _loadHotelId() async {
+    if (hotelId != null) {
+      // Si ya tenemos hotelId (por navegación), cargar nombre y reservas
+      await _loadHotelName();
+      await _fetchReservations();
+      return;
+    }
+
     // First try to get hotel ID from JWT token
     int? tokenHotelId = await _getHotelId();
     if (tokenHotelId != null) {
