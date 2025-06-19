@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:smart_suite/iot/views/dashboard_iot_screen.dart';
 import '../../iam/views/home_page.dart';
 import '../../hotels/views/hotel/hotel_management_screen.dart';
 import '../../iam/views/account/account_page.dart';
@@ -28,6 +29,12 @@ class _HomeTabNavigationState extends State<HomeTabNavigation>
       icon: Icons.hotel_rounded,
       activeIcon: Icons.hotel,
       gradient: LinearGradient(colors: [Color(0xFF4CAF50), Color(0xFF8BC34A)]),
+    ),
+    TabInfo(
+      title: 'IoT',
+      icon: Icons.device_hub_rounded,
+      activeIcon: Icons.device_hub,
+      gradient: LinearGradient(colors: [Color(0xFF3F51B5), Color(0xFF5C6BC0)]),
     ),
     TabInfo(
       title: 'Cuenta',
@@ -217,6 +224,7 @@ class _HomeTabNavigationState extends State<HomeTabNavigation>
     return const [
       HomePage(),
       HotelManagementScreen(),
+      DashboardIotScreen(),
       AccountPage(),
     ];
   }
