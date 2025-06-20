@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import '../services/iot_service.dart';
 import '../models/iot_device/iot_device.dart';
-import '../models/iot_device/update_iot_device_resource.dart';
 import '../models/room_device/room_device.dart';
 import '../widgets/room_device_list_tile.dart';
-import '../widgets/notification_history_list_tile.dart';
 
 class IotDeviceDetailScreen extends StatefulWidget {
   final int deviceId;
