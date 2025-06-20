@@ -1,12 +1,19 @@
+// TODO: Refactor in widgets
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import '../models/reservation.dart';
 import '../models/reservation_resource.dart';
 import '../services/reservation_service.dart';
+import '../widgets/section_title.dart';
+import '../widgets/custom_text_field.dart';
+import '../widgets/resource_type_dropdown.dart';
+import '../widgets/date_time_selection.dart';
+import '../widgets/resource_selection.dart';
 
 class AddReservationScreen extends StatefulWidget {
-  const AddReservationScreen({super.key});
+  final int? hotelId;
+  const AddReservationScreen({super.key, this.hotelId});
 
   @override
   State<AddReservationScreen> createState() => _AddReservationScreenState();
@@ -47,9 +54,29 @@ class _AddReservationScreenState extends State<AddReservationScreen> {
   void initState() {
     super.initState();
     _reservationService = ReservationService();
-    _loadHotelId();
+    _initHotelId();
     _loadUserInfo();
     _guestCountController.text = '1';
+  }
+
+  Future<void> _initHotelId() async {
+    // 1. Try to get hotelId from widget (navigation argument)
+    if (widget.hotelId != null) {
+      setState(() {
+        hotelId = widget.hotelId;
+      });
+      return;
+    }
+    // 2. Try to get hotelId from ModalRoute arguments (if pushed via Navigator)
+    final args = ModalRoute.of(context)?.settings.arguments;
+    if (args is Map && args['hotelId'] is int) {
+      setState(() {
+        hotelId = args['hotelId'] as int;
+      });
+      return;
+    }
+    // 3. Fallback to previous logic (token or secure storage)
+    await _loadHotelId();
   }
 
   Future<void> _loadUserInfo() async {
@@ -387,48 +414,72 @@ class _AddReservationScreenState extends State<AddReservationScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildSectionTitle('Basic Information'),
-              _buildTextField(
+              SectionTitle('Basic Information'),
+              CustomTextField(
                 controller: _titleController,
                 label: 'Reservation Title',
                 validator: (value) =>
                     value?.isEmpty == true ? 'Please enter a title' : null,
               ),
-              _buildTextField(
+              CustomTextField(
                 controller: _descriptionController,
                 label: 'Description',
                 maxLines: 3,
               ),
-              _buildTextField(
+              CustomTextField(
                 controller: _customerIdController,
                 label: 'Customer ID',
                 keyboardType: TextInputType.number,
                 validator: (value) =>
                     value?.isEmpty == true ? 'Please enter customer ID' : null,
-                enabled: _userRole != 'guest', // Solo editable para owner/admin
+                enabled: _userRole != 'guest',
               ),
-
               const SizedBox(height: 24),
-              _buildSectionTitle('Resource & Time'),
-              _buildResourceTypeDropdown(),
-              _buildDateTimeSelection(),
-              _buildResourceSelection(),
-
+              SectionTitle('Resource & Time'),
+              ResourceTypeDropdown(
+                selectedResourceType: selectedResourceType,
+                resourceTypes: resourceTypes,
+                onChanged: (value) {
+                  setState(() {
+                    selectedResourceType = value!;
+                    availableResources.clear();
+                    selectedResourceId = null;
+                  });
+                  _loadAvailableResources();
+                },
+              ),
+              DateTimeSelection(
+                selectedDate: selectedDate,
+                startTime: startTime,
+                endTime: endTime,
+                onSelectDate: _selectDate,
+                onSelectStartTime: () => _selectTime(true),
+                onSelectEndTime: () => _selectTime(false),
+              ),
+              ResourceSelection(
+                isLoadingResources: isLoadingResources,
+                availableResources: availableResources,
+                selectedResourceId: selectedResourceId,
+                onChanged: (value) {
+                  setState(() {
+                    selectedResourceId = value;
+                  });
+                },
+              ),
               const SizedBox(height: 24),
-              _buildSectionTitle('Additional Details'),
-              _buildTextField(
+              SectionTitle('Additional Details'),
+              CustomTextField(
                 controller: _guestCountController,
                 label: 'Number of Guests',
                 keyboardType: TextInputType.number,
                 validator: (value) =>
                     value?.isEmpty == true ? 'Please enter guest count' : null,
               ),
-              _buildTextField(
+              CustomTextField(
                 controller: _specialRequestsController,
                 label: 'Special Requests (Optional)',
                 maxLines: 2,
               ),
-
               const SizedBox(height: 32),
               SizedBox(
                 width: double.infinity,
@@ -451,198 +502,6 @@ class _AddReservationScreenState extends State<AddReservationScreen> {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildSectionTitle(String title) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16.0),
-      child: Text(
-        title,
-        style: const TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-          color: Color(0xFF474C74),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String label,
-    String? Function(String?)? validator,
-    TextInputType? keyboardType,
-    int maxLines = 1,
-    bool enabled = true,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16.0),
-      child: TextFormField(
-        controller: controller,
-        decoration: InputDecoration(
-          labelText: label,
-          border: const OutlineInputBorder(),
-        ),
-        validator: validator,
-        keyboardType: keyboardType,
-        maxLines: maxLines,
-        enabled: enabled,
-      ),
-    );
-  }
-
-  Widget _buildResourceTypeDropdown() {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16.0),
-      child: DropdownButtonFormField<String>(
-        value: selectedResourceType,
-        decoration: const InputDecoration(
-          labelText: 'Resource Type',
-          border: OutlineInputBorder(),
-        ),
-        items: resourceTypes.map((type) {
-          return DropdownMenuItem(
-            value: type,
-            child: Text(type.replaceAll('_', ' ').toUpperCase()),
-          );
-        }).toList(),
-        onChanged: (value) {
-          setState(() {
-            selectedResourceType = value!;
-            availableResources.clear();
-            selectedResourceId = null;
-          });
-          _loadAvailableResources();
-        },
-      ),
-    );
-  }
-
-  Widget _buildDateTimeSelection() {
-    return Column(
-      children: [
-        // Date selection
-        InkWell(
-          onTap: _selectDate,
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  selectedDate == null
-                      ? 'Select Date'
-                      : '${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}',
-                ),
-                const Icon(Icons.calendar_today),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
-
-        // Time selection
-        Row(
-          children: [
-            Expanded(
-              child: InkWell(
-                onTap: () => _selectTime(true),
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        startTime == null
-                            ? 'Start Time'
-                            : '${startTime!.hour}:${startTime!.minute.toString().padLeft(2, '0')}',
-                      ),
-                      const Icon(Icons.access_time),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: InkWell(
-                onTap: () => _selectTime(false),
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        endTime == null
-                            ? 'End Time'
-                            : '${endTime!.hour}:${endTime!.minute.toString().padLeft(2, '0')}',
-                      ),
-                      const Icon(Icons.access_time),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-      ],
-    );
-  }
-
-  Widget _buildResourceSelection() {
-    if (isLoadingResources) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    if (availableResources.isEmpty) {
-      return Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey),
-          borderRadius: BorderRadius.circular(4),
-        ),
-        child: const Text('No available resources for selected time'),
-      );
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Available Resources:',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 8),
-        ...availableResources.map(
-          (resource) => RadioListTile<int>(
-            title: Text(resource.name),
-            subtitle: Text(
-              'Capacity: ${resource.capacity} • \$${resource.pricePerHour}/hour',
-            ),
-            value: resource.id,
-            groupValue: selectedResourceId,
-            onChanged: (value) {
-              setState(() {
-                selectedResourceId = value;
-              });
-            },
-          ),
-        ),
-      ],
     );
   }
 
