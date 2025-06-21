@@ -10,7 +10,6 @@ class IotDeviceListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       title: Text(device.name),
-      subtitle: Text('Tipo: ${device.type}'),
       onTap: onTap,
       trailing: const Icon(Icons.chevron_right),
     );

@@ -38,9 +38,8 @@ class _IotDeviceDetailScreenState extends State<IotDeviceDetailScreen> {
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              Text('ID: [34m${device.id}[0m', style: Theme.of(context).textTheme.titleLarge),
+              Text('ID: ${device.id}', style: Theme.of(context).textTheme.titleLarge),
               Text('Nombre: ${device.name}'),
-              Text('Tipo: ${device.type}'),
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () async {

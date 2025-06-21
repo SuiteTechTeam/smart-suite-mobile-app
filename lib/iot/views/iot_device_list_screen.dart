@@ -38,7 +38,7 @@ class _IotDeviceListScreenState extends State<IotDeviceListScreen> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
-            return Center(child: Text('Error: [31m${snapshot.error}[0m'));
+            return Center(child: Text('Error: [31m${snapshot.error}[0m'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(child: Text('No hay dispositivos.'));
           }
