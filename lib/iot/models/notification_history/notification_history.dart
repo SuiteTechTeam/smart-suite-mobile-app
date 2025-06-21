@@ -1,18 +1,18 @@
 class NotificationHistory {
   final int id;
   final int roomDeviceId;
-  final String message;
-  final DateTime createdAt;
+  final String metric;
+  final DateTime registrationDate;
   // Add other properties as needed
 
-  NotificationHistory({required this.id, required this.roomDeviceId, required this.message, required this.createdAt});
+  NotificationHistory({required this.id, required this.roomDeviceId, required this.metric, required this.registrationDate});
 
   factory NotificationHistory.fromJson(Map<String, dynamic> json) {
     return NotificationHistory(
       id: json['id'],
       roomDeviceId: json['roomDeviceId'],
-      message: json['message'],
-      createdAt: DateTime.parse(json['createdAt']),
+      metric: json['metric'],
+      registrationDate: DateTime.parse(json['registrationDate']),
     );
   }
 }

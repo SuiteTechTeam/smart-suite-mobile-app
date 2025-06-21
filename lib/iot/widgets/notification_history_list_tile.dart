@@ -8,8 +8,8 @@ class NotificationHistoryListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      title: Text(notification.message),
-      subtitle: Text('Fecha: ${notification.createdAt}'),
+      title: Text(notification.metric),
+      subtitle: Text('Fecha: ${notification.registrationDate}'),
     );
   }
 }
