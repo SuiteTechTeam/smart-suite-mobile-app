@@ -13,14 +13,12 @@ class IotDeviceFormScreen extends StatefulWidget {
 class _IotDeviceFormScreenState extends State<IotDeviceFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
-  final _typeController = TextEditingController();
   final IotService _service = IotService();
   bool _isLoading = false;
 
   @override
   void dispose() {
     _nameController.dispose();
-    _typeController.dispose();
     super.dispose();
   }
 
@@ -29,7 +27,6 @@ class _IotDeviceFormScreenState extends State<IotDeviceFormScreen> {
     setState(() => _isLoading = true);
     final resource = CreateIoTDeviceResource(
       name: _nameController.text,
-      type: _typeController.text,
     );
     try {
       await _service.createIotDevice(resource);
@@ -58,11 +55,6 @@ class _IotDeviceFormScreenState extends State<IotDeviceFormScreen> {
                 controller: _nameController,
                 decoration: const InputDecoration(labelText: 'Nombre'),
                 validator: (v) => v == null || v.isEmpty ? 'Ingrese un nombre' : null,
-              ),
-              TextFormField(
-                controller: _typeController,
-                decoration: const InputDecoration(labelText: 'Tipo'),
-                validator: (v) => v == null || v.isEmpty ? 'Ingrese un tipo' : null,
               ),
               const SizedBox(height: 20),
               _isLoading
