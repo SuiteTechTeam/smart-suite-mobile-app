@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:smart_suite/core/core.dart';
 
 import '../models/iot_device/create_iot_device_resource.dart';
@@ -15,12 +16,12 @@ class IotService extends BaseService {
       '/io-t/iot-devices',
       body: resource.toJson(),
     );
-    return IoTDevice.fromJson(response.body as Map<String, dynamic>);
+    return IoTDevice.fromJson(jsonDecode(response.body));
   }
 
   Future<List<IoTDevice>> getAllIotDevices() async {
     final response = await authenticatedGet('/io-t/iot-devices');
-    final List<dynamic> data = response.body as List<dynamic>;
+    final List<dynamic> data = jsonDecode(response.body);
     return data.map((item) => IoTDevice.fromJson(item)).toList();
   }
 
@@ -30,12 +31,12 @@ class IotService extends BaseService {
       '/io-t/iot-devices/$id',
       body: resource.toJson(),
     );
-    return IoTDevice.fromJson(response.body as Map<String, dynamic>);
+    return IoTDevice.fromJson(jsonDecode(response.body));
   }
 
   Future<IoTDevice> getIotDeviceByID(int id) async {
     final response = await authenticatedGet('/io-t/iot-devices/$id');
-    return IoTDevice.fromJson(response.body as Map<String, dynamic>);
+    return IoTDevice.fromJson(jsonDecode(response.body));
   }
 
   Future<RoomDevice> createRoomDevice(
@@ -44,7 +45,7 @@ class IotService extends BaseService {
       '/io-t/room-devices',
       body: resource.toJson(),
     );
-    return RoomDevice.fromJson(response.body as Map<String, dynamic>);
+    return RoomDevice.fromJson(jsonDecode(response.body));
   }
 
   Future<RoomDevice> updateRoomDevice(
@@ -53,7 +54,7 @@ class IotService extends BaseService {
       '/io-t/room-devices/$id',
       body: resource.toJson(),
     );
-    return RoomDevice.fromJson(response.body as Map<String, dynamic>);
+    return RoomDevice.fromJson(jsonDecode(response.body));
   }
 
   Future<NotificationHistory> createNotificationHistory(
@@ -62,24 +63,24 @@ class IotService extends BaseService {
       '/io-t/notification-history',
       body: resource.toJson(),
     );
-    return NotificationHistory.fromJson(response.body as Map<String, dynamic>);
+    return NotificationHistory.fromJson(jsonDecode(response.body));
   }
 
   Future<List<RoomDevice>> getRoomDeviceById(int id) async {
     final response = await authenticatedGet('/io-t/room-devices/by-iot-device/$id');
-    final List<dynamic> data = response.body as List<dynamic>;
+    final List<dynamic> data = jsonDecode(response.body);
     return data.map((item) => RoomDevice.fromJson(item)).toList();
   }
 
   Future<List<NotificationHistory>> getRoomDevicesByRoomId(int roomId) async {
     final response = await authenticatedGet('/io-t/notification-history/by-room/$roomId');
-    final List<dynamic> data = response.body as List<dynamic>;
+    final List<dynamic> data = jsonDecode(response.body);
     return data.map((item) => NotificationHistory.fromJson(item)).toList();
   }
 
   Future<List<NotificationHistory>> getNotificationhistoryByRoom(int roomId) async {
     final response = await authenticatedGet('/io-t/notification-history/by-room/$roomId');
-    final List<dynamic> data = response.body as List<dynamic>;
+    final List<dynamic> data = jsonDecode(response.body);
     return data.map((item) => NotificationHistory.fromJson(item)).toList();
   }
 }

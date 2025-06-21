@@ -31,9 +31,17 @@ class _IotDeviceFormScreenState extends State<IotDeviceFormScreen> {
       name: _nameController.text,
       type: _typeController.text,
     );
-    await _service.createIotDevice(resource);
+    try {
+      await _service.createIotDevice(resource);
+      if (mounted) Navigator.pop(context);
+    } catch (e) {
+      setState(() => _isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al crear el dispositivo: \\${e.toString()}')),
+      );
+      return;
+    }
     setState(() => _isLoading = false);
-    if (mounted) Navigator.pop(context);
   }
 
   @override
