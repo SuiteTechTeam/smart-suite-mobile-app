@@ -11,12 +11,23 @@ import '../models/iot_device/update_iot_device_resource.dart';
 import '../models/room_device/update_room_device_resource.dart';
 
 class IotService extends BaseService {
-  Future<IoTDevice> createIotDevice(CreateIoTDeviceResource resource) async {
+  Future<IoTDevice?> createIotDevice(CreateIoTDeviceResource resource) async {
     final response = await authenticatedPost(
       '/io-t/iot-devices',
       body: resource.toJson(),
     );
-    return IoTDevice.fromJson(jsonDecode(response.body));
+    try {
+      final decoded = jsonDecode(response.body);
+      if (decoded is Map<String, dynamic>) {
+        return IoTDevice.fromJson(decoded);
+      } else {
+        // Si el backend responde con true/false, simplemente retorna null
+        return null;
+      }
+    } catch (e) {
+      // Si la respuesta no es JSON, ignora el parseo y retorna null
+      return null;
+    }
   }
 
   Future<List<IoTDevice>> getAllIotDevices() async {
