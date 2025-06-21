@@ -14,11 +14,6 @@ class HotelManagementView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Hotel Management'),
-        backgroundColor: Theme.of(context).primaryColor,
-        foregroundColor: Colors.white,
-      ),
       body: BlocListener<HotelBloc, hotel_state.HotelState>(
         listener: (context, state) {
           if (state is hotel_state.HotelOperationSuccess) {

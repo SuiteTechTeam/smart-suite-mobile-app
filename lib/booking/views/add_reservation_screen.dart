@@ -53,9 +53,14 @@ class _AddReservationScreenState extends State<AddReservationScreen> {
   void initState() {
     super.initState();
     _reservationService = ReservationService();
-    _initHotelId();
     _loadUserInfo();
     _guestCountController.text = '1';
+  }
+  
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _initHotelId();
   }
 
   Future<void> _initHotelId() async {
