@@ -141,7 +141,7 @@ class HotelManagementView extends StatelessWidget {
   void _showCreateHotelDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => HotelDialog(
+      builder: (_) => HotelDialog(
         existingHotel: null,
         onSave: (hotelData) {
           context.read<HotelBloc>().add(HotelCreateRequested(hotelData));
@@ -153,7 +153,7 @@ class HotelManagementView extends StatelessWidget {
   void _showUpdateHotelDialog(BuildContext context, Hotel hotel) {
     showDialog(
       context: context,
-      builder: (context) => HotelDialog(
+      builder: (_) => HotelDialog(
         existingHotel: hotel,
         onSave: (hotelData) {
           context.read<HotelBloc>().add(
