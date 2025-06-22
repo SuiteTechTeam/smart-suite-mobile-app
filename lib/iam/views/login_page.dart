@@ -193,22 +193,19 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
           width: 100,
           height: 100,
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Theme.of(context).primaryColor,
-                Theme.of(context).primaryColor.withValues(alpha: 0.7),
-              ],
-            ),
             borderRadius: BorderRadius.circular(25),
             boxShadow: [
               BoxShadow(
-                color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
+                color: Theme.of(context).primaryColor.withAlpha(76),
                 blurRadius: 20,
                 offset: const Offset(0, 10),
               ),
             ],
+            image: const DecorationImage(
+              image: AssetImage('assets/images/smart-suite-logo.png'),
+              fit: BoxFit.cover,
+            ),
           ),
-          child: const Icon(Icons.hotel, size: 50, color: Colors.white),
         ),
         const SizedBox(height: 24),
         Text(

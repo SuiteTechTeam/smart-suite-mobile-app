@@ -10,9 +10,6 @@ class AppConfig {
   AppConfig._();
 
   // === API ENDPOINTS ===
-
-  /// Smart Suite Web Service - Used for IAM authentication.
-  /// This URL is dynamically set based on the build mode (debug/production).
   static String get smartSuiteBaseUrl {
     return 'https://smart-suite-web-service.azurewebsites.net';
   }
