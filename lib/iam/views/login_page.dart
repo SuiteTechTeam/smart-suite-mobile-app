@@ -14,8 +14,8 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
-  final _emailController = TextEditingController(text: 'itx.darkx@gmail.com');
-  final _passwordController = TextEditingController(text: 'Yj?9khiu');
+  final _emailController = TextEditingController(text: '');
+  final _passwordController = TextEditingController(text: '');
   final _formKey = GlobalKey<FormState>();
   UserRole _selectedRole = UserRole.owner;
   bool _isPasswordVisible = false;
