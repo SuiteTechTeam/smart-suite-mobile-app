@@ -1,4 +1,4 @@
-# sweetmanager
+# smart_suite
 
 A new Flutter project.
 

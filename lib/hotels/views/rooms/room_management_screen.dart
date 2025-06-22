@@ -1,0 +1,86 @@
+import 'package:flutter/material.dart';
+import '../../models/room.dart';
+import '../../services/room_service.dart';
+import './widgets/create_room_dialog.dart';
+import './widgets/room_list_item.dart';
+
+class RoomManagementScreen extends StatefulWidget {
+  final int hotelId;
+  const RoomManagementScreen({super.key, required this.hotelId});
+
+  @override
+  State<RoomManagementScreen> createState() => _RoomManagementScreenState();
+}
+
+class _RoomManagementScreenState extends State<RoomManagementScreen> {
+  final RoomService _roomService = RoomService();
+  List<Room> _rooms = [];
+  bool _isLoading = true;
+  String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchRooms();
+  }
+
+  Future<void> _fetchRooms() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+    try {
+      final rooms = await _roomService.getRoomsByHotelId(widget.hotelId);
+      setState(() {
+        _rooms = rooms;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Error al cargar habitaciones';
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _showCreateRoomDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => CreateRoomDialog(
+        hotelId: widget.hotelId,
+        onRoomCreated: (room) {
+          Navigator.pop(context);
+          _fetchRooms();
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Habitación creada exitosamente')),
+          );
+        },
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Gestión de Habitaciones')),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : _errorMessage != null
+          ? Center(child: Text(_errorMessage!))
+          : _rooms.isEmpty
+          ? const Center(child: Text('No hay habitaciones registradas'))
+          : ListView.builder(
+              itemCount: _rooms.length,
+              itemBuilder: (context, index) {
+                final room = _rooms[index];
+                return RoomListItem(room: room);
+              },
+            ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _showCreateRoomDialog,
+        tooltip: 'Crear habitación',
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
+}

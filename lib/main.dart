@@ -1,83 +1,170 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:sweetmanager/Commerce/views/current_subscription.dart';
-import 'package:sweetmanager/Commerce/views/dashboard.dart';
-import 'package:sweetmanager/Commerce/views/worker_areas.dart';
-import 'package:sweetmanager/Communication/views/messageScreen.dart';
-import 'package:sweetmanager/Communication/views/notificationScreen.dart';
-import 'package:sweetmanager/IAM/views/home.dart';
-import 'package:sweetmanager/IAM/views/login.dart';
-import 'package:sweetmanager/Monitoring/views/tablebooking.dart';
-import 'package:sweetmanager/Monitoring/views/tableroom.dart';
-import 'package:sweetmanager/Profiles/admins/views/management_admin_page.dart';
-import 'package:sweetmanager/Profiles/customers/views/management_customer_page.dart';
-import 'package:sweetmanager/Profiles/providers/views/management_provider_page.dart';
-import 'package:sweetmanager/Profiles/views/profile.dart';
-import 'package:sweetmanager/Profiles/workers/views/management_worker_page.dart';
-import 'package:sweetmanager/ResourceManagement/pages/reportlist.dart';
-import 'package:sweetmanager/supply-management/views/inventorymanagement.dart';
-import 'package:sweetmanager/Communication/views/writeMessage.dart';
-import 'package:sweetmanager/Communication/views/alertScreen.dart';
-import 'package:sweetmanager/Communication/views/writeAlert.dart';
-import 'firebase_options.dart'; // Import the generated options
-
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:smart_suite/core/views/home_tab_navigation.dart';
+import 'iam/services/auth_api_service.dart';
+import 'iam/services/storage_service.dart';
+import 'iam/services/auth_repository.dart';
+import 'iam/viewmodels/auth_bloc.dart';
+import 'iam/viewmodels/auth_event.dart';
+import 'iam/views/auth_wrapper.dart';
+import 'iam/views/login_page.dart';
+import 'core/views/debug_auth_screen.dart';
+import 'booking/views/reservation_management_screen.dart';
+import 'booking/views/add_reservation_screen.dart';
+import 'hotels/views/hotel/hotel_management_screen.dart';
+import 'core/views/api_test_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-  // Inicializa Firebase con la configuración correcta para la web
-  /*await Firebase.initializeApp(
-    options: const FirebaseOptions(
-      apiKey: "AIzaSyBTGEj8JZrWvn62ZtofnaGr-LluqliNXMc",
-      authDomain: "sweet-solutions.firebaseapp.com",
-      projectId: "sweet-solutions",
-      storageBucket: "sweet-solutions.appspot.com",
-      messagingSenderId: "180154492305",
-      appId: "1:180154492305:web:b156d317f56c1d4f34a630",
-    ),
-  );*/
 
-  runApp(const MyHomePage());
-
+  // Add error handling for initialization
+  try {
+    runApp(const SmartSuiteApp());
+  } catch (e, stackTrace) {
+    debugPrint('Error starting app: $e');
+    debugPrint('Stack trace: $stackTrace');
+    // You could show a fallback error screen here if needed
+    runApp(const SmartSuiteApp());
+  }
 }
 
-class MyHomePage extends StatelessWidget {
-  const MyHomePage({super.key});
+class SmartSuiteApp extends StatelessWidget {
+  const SmartSuiteApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Sweet Manager',
-      theme: ThemeData(primarySwatch: Colors.blue),
-      home: const HomeView(), 
-      initialRoute: '/home',
-      routes: {
-        '/home': (context) => const HomeView(), // the default app's entry point 
-        '/login': (context) => const LogInScreen(),
-        '/dashboard': (context) => const DashboardScreen(),
-        // '/subscription': (context) => const SubscriptionPlansView(),
-        '/rooms': (context) => const TableRoom(),
-        '/providers': (context) => const ProvidersManagement(),
-        // ignore: prefer_const_constructors
-        '/supplies': (context) => InventoryManagement() ,
-        '/messages': (context) => MessagesScreen(),
-        // ignore: prefer_const_constructors
-        '/reports': (context) => ReportList(),
-        '/profiles': (context) => ProfilePage(),
-        '/writemessage': (context) => WriteMessage(),
-        '/alerts': (context) => const AlertsScreen(),
-        '/writealert': (context) => WriteAlertScreen(),
-        '/notifications': (context) => NotificationsScreen(),
-        '/worker-areas-selection': (context) => const WorkerAreasSelection(),
-        '/bookings': (context) => const TableBooking(),
-        '/admins-management': (context) => const AdminManagement(),
-        '/workers-management': (context) => const WorkerManagement(),
-        '/customers-management': (context) => const CustomersManagement(),
-        '/current-subscription': (context) => const CurrentSubscription(),
-      },
+    final storageService = StorageService();
+    final apiService = AuthApiService();
+    final authRepository = AuthRepository(
+      apiService: apiService,
+      storageService: storageService,
+    );
+
+    return BlocProvider(
+      create: (context) =>
+          AuthBloc(authRepository: authRepository)..add(AuthStatusChecked()),
+      child: MaterialApp(
+        theme: _buildLightTheme(),
+        darkTheme: _buildDarkTheme(),
+        themeMode: ThemeMode.system,
+        home: const AuthWrapper(),
+        routes: {
+          '/login': (context) => const LoginPage(),
+          '/home': (context) => const HomeTabNavigation(),
+          '/add-reservation': (context) => const AddReservationScreen(),
+          '/reservations/add': (context) => const AddReservationScreen(),
+          '/hotels': (context) => const HotelManagementScreen(),
+          '/api-test': (context) => const ApiTestScreen(),
+          '/debug-auth': (context) => const DebugAuthScreen(),
+        },
+        onGenerateRoute: (settings) {
+          if (settings.name == '/reservations') {
+            final args = settings.arguments as Map<String, dynamic>?;
+            final hotelId = args != null ? args['hotelId'] as int? : null;
+            return MaterialPageRoute(
+              builder: (context) => ReservationManagementScreen(hotelId: hotelId),
+            );
+          }
+          if (settings.name == '/reservations/add') {
+            return MaterialPageRoute(
+              builder: (context) => const AddReservationScreen(),
+            );
+          }
+          return null;
+        },
+        onUnknownRoute: (settings) {
+          return MaterialPageRoute(
+            builder: (context) => const HomeTabNavigation(),
+          );
+        },
+        debugShowCheckedModeBanner: false,
+      ),
+    );
+  }
+
+  ThemeData _buildLightTheme() {
+    return ThemeData(
+      useMaterial3: true,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: const Color(0xFF2196F3),
+        brightness: Brightness.light,
+      ),
+      appBarTheme: const AppBarTheme(
+        centerTitle: true,
+        elevation: 0,
+        scrolledUnderElevation: 1,
+        surfaceTintColor: Colors.transparent,
+      ),
+      cardTheme: CardThemeData(
+        elevation: 2,
+        shadowColor: Colors.black12,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          elevation: 2,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey.shade300),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF2196F3), width: 2),
+        ),
+        filled: true,
+        fillColor: Colors.grey.shade50,
+      ),
+    );
+  }
+
+  ThemeData _buildDarkTheme() {
+    return ThemeData(
+      useMaterial3: true,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: const Color(0xFF2196F3),
+        brightness: Brightness.dark,
+      ),
+      appBarTheme: const AppBarTheme(
+        centerTitle: true,
+        elevation: 0,
+        scrolledUnderElevation: 1,
+        surfaceTintColor: Colors.transparent,
+      ),
+      cardTheme: CardThemeData(
+        elevation: 2,
+        shadowColor: Colors.black26,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          elevation: 2,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey.shade600),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF2196F3), width: 2),
+        ),
+        filled: true,
+        fillColor: Colors.grey.shade900,
+      ),
     );
   }
 }
