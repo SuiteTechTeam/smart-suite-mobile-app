@@ -39,7 +39,7 @@ class DeviceStatusCard extends StatelessWidget {
   final bool isConnected;
   final DeviceType deviceType;
   final VoidCallback? onTap;
-  
+
   const DeviceStatusCard({
     super.key,
     required this.deviceName,
@@ -47,6 +47,7 @@ class DeviceStatusCard extends StatelessWidget {
     this.deviceType = DeviceType.other,
     this.onTap,
   });
+
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
@@ -62,54 +63,62 @@ class DeviceStatusCard extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: deviceType.color.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(
-                      deviceType.icon,
-                      color: deviceType.color,
-                      size: 20,
-                    ),
+          padding: const EdgeInsets.all(8), // Reduced padding
+          child: SizedBox(
+            height: 70, // Adjusted height
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Flexible(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(6), // Reduced padding
+                        decoration: BoxDecoration(
+                          color: deviceType.color.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Icon(
+                          deviceType.icon,
+                          color: deviceType.color,
+                          size: 18, // Reduced icon size
+                        ),
+                      ),
+                      Container(
+                        width: 10,
+                        height: 10,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: isConnected ? Colors.green : Colors.red,
+                        ),
+                      ),
+                    ],
                   ),
-                  Container(
-                    width: 10,
-                    height: 10,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
+                ),
+                const SizedBox(height: 4), // Reduced height
+                Flexible(
+                  child: Text(
+                    deviceName,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 12, // Reduced font size
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                Flexible(
+                  child: Text(
+                    isConnected ? 'Conectado' : 'Desconectado',
+                    style: TextStyle(
                       color: isConnected ? Colors.green : Colors.red,
+                      fontSize: 10, // Reduced font size
                     ),
                   ),
-                ],
-              ),
-              const Spacer(),
-              Text(
-                deviceName,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w500,
-                  fontSize: 14,
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 4),
-              Text(
-                isConnected ? 'Conectado' : 'Desconectado',
-                style: TextStyle(
-                  color: isConnected ? Colors.green : Colors.red,
-                  fontSize: 12,
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
