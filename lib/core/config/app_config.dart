@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 /// Application configuration constants
 ///
 /// This file contains all the global configuration values used throughout the app.
@@ -8,17 +10,16 @@ class AppConfig {
   AppConfig._();
 
   // === API ENDPOINTS ===
-
-  /// Smart Suite Web Service - Used for IAM authentication
-  static const String smartSuiteBaseUrl =
-      'https://smart-suite-web-service.azurewebsites.net';
+  static String get smartSuiteBaseUrl {
+    return 'https://smart-suite-web-service.azurewebsites.net';
+  }
 
   /// API version used in all requests
   static const String apiVersion = 'api/v1';
 
   // === COMPUTED API URLS ===
 
-  /// Smart Suite API base URL for IAM operations
+  /// Smart Suite API base URL for all operations, combining base URL and API version.
   static String get smartSuiteApiBaseUrl => '$smartSuiteBaseUrl/$apiVersion';
 
   /// Legacy support - maintains backward compatibility
@@ -28,40 +29,38 @@ class AppConfig {
   // === API SPECIFIC ENDPOINTS ===
 
   /// Authentication endpoints
-  static String get authenticationUrl =>
-      '$smartSuiteBaseUrl/$apiVersion/authentication';
+  static String get authenticationUrl => '$smartSuiteApiBaseUrl/authentication';
 
   /// Hotel management endpoints
-  static String get hotelApiUrl => '$smartSuiteBaseUrl/$apiVersion/hotel';
+  static String get hotelApiUrl => '$smartSuiteApiBaseUrl/hotel';
 
   /// Room management endpoints
-  static String get roomApiUrl => '$smartSuiteBaseUrl/$apiVersion/rooms';
+  static String get roomApiUrl => '$smartSuiteApiBaseUrl/rooms';
 
   /// Booking management endpoints
-  static String get bookingApiUrl => '$smartSuiteBaseUrl/$apiVersion/bookings';
+  static String get bookingApiUrl => '$smartSuiteApiBaseUrl/bookings';
 
   /// User management endpoints
-  static String get userApiUrl => '$smartSuiteBaseUrl/$apiVersion/user';
+  static String get userApiUrl => '$smartSuiteApiBaseUrl/user';
 
   /// Provider management endpoints
-  static String get providerApiUrl => '$smartSuiteBaseUrl/$apiVersion/provider';
+  static String get providerApiUrl => '$smartSuiteApiBaseUrl/provider';
 
   /// Supply management endpoints
-  static String get supplyApiUrl => '$smartSuiteBaseUrl/$apiVersion/supply';
+  static String get supplyApiUrl => '$smartSuiteApiBaseUrl/supply';
 
   /// Customer management endpoints
-  static String get customerApiUrl => '$smartSuiteBaseUrl/$apiVersion/customer';
+  static String get customerApiUrl => '$smartSuiteApiBaseUrl/customer';
 
   /// Worker area management endpoints
-  static String get workerAreaApiUrl =>
-      '$smartSuiteBaseUrl/$apiVersion/worker-area';
+  static String get workerAreaApiUrl => '$smartSuiteApiBaseUrl/worker-area';
 
   /// Assignment worker endpoints
   static String get assignmentWorkerApiUrl =>
-      '$smartSuiteBaseUrl/$apiVersion/assignment-worker';
+      '$smartSuiteApiBaseUrl/assignment-worker';
 
   /// Reports endpoints
-  static String get reportsApiUrl => '$smartSuiteBaseUrl/$apiVersion/reports';
+  static String get reportsApiUrl => '$smartSuiteApiBaseUrl/reports';
 
   // === APPLICATION INFO ===
 
@@ -74,11 +73,9 @@ class AppConfig {
   /// Timeout for HTTP requests (in seconds)
   static const int httpTimeoutSeconds = 30;
 
-  /// Environment configuration
-  static const String environment =
-      'production'; // TODO: Make this configurable
+  /// Environment configuration, dynamically set based on build mode.
+  static String get environment => kDebugMode ? 'development' : 'production';
 
-  /// Debug mode flag
-  static const bool isDebugMode =
-      false; // TODO: Make this configurable based on build mode
+  /// Debug mode flag, reflects the current build mode.
+  static const bool isDebugMode = kDebugMode;
 }
