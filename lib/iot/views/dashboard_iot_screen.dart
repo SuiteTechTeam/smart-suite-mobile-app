@@ -709,24 +709,24 @@ class _DashboardIotScreenState extends State<DashboardIotScreen> {
                   });
                 },
                 style: ButtonStyle(
-                  backgroundColor: MaterialStateProperty.resolveWith<Color>((
+                  backgroundColor: WidgetStateProperty.resolveWith<Color>((
                     states,
                   ) {
                     final isDarkMode =
                         Theme.of(context).brightness == Brightness.dark;
-                    if (states.contains(MaterialState.selected)) {
+                    if (states.contains(WidgetState.selected)) {
                       return isDarkMode
                           ? Colors.blue.shade700
                           : Colors.lightBlue;
                     }
                     return isDarkMode ? Colors.grey.shade800 : Colors.white;
                   }),
-                  foregroundColor: MaterialStateProperty.resolveWith<Color>((
+                  foregroundColor: WidgetStateProperty.resolveWith<Color>((
                     states,
                   ) {
                     final isDarkMode =
                         Theme.of(context).brightness == Brightness.dark;
-                    if (states.contains(MaterialState.selected)) {
+                    if (states.contains(WidgetState.selected)) {
                       return Colors.white;
                     }
                     return isDarkMode ? Colors.white70 : Colors.black87;
