@@ -32,13 +32,17 @@ class _IotDeviceFormScreenState extends State<IotDeviceFormScreen> {
       await _service.createIotDevice(resource);
       if (mounted) Navigator.pop(context);
     } catch (e) {
-      setState(() => _isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error al crear el dispositivo: \\${e.toString()}')),
-      );
+      if (mounted) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al crear el dispositivo: ${e.toString()}')),
+        );
+      }
       return;
     }
-    setState(() => _isLoading = false);
+    if (mounted) {
+      setState(() => _isLoading = false);
+    }
   }
 
   @override

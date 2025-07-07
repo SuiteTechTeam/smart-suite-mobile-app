@@ -126,15 +126,21 @@ class _CreateRoomDialogState extends State<CreateRoomDialog> {
                               price: price,
                             );
                             
-                            Navigator.of(context).pop();
-                            if (typeRoom != null) {
-                              _fetchTypeRooms();
+                            // Verificar si el diálogo sigue montado antes de usar el contexto
+                            if (context.mounted) {
+                              Navigator.of(context).pop();
+                              if (typeRoom != null) {
+                                _fetchTypeRooms();
+                              }
                             }
                           } catch (e) {
-                            setStateDialog(() {
-                              creating = false;
-                              error = 'Error al crear tipo de habitación';
-                            });
+                            // Verificar si el diálogo sigue montado antes de usar setStateDialog
+                            if (context.mounted) {
+                              setStateDialog(() {
+                                creating = false;
+                                error = 'Error al crear tipo de habitación';
+                              });
+                            }
                           }
                         },
                   child: creating
