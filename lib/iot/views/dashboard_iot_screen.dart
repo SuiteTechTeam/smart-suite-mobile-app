@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:intl/intl.dart';
 
 import '../models/room_summary.dart';
 import '../models/temperature/temperature_data.dart';
@@ -10,8 +8,6 @@ import '../widgets/room_status_card.dart';
 import '../widgets/temperature_chart.dart';
 import '../widgets/device_status_card.dart';
 import 'iot_device_list_screen.dart';
-import 'iot_device_detail_screen.dart';
-import '../../hotels/models/room.dart';
 import '../../hotels/models/hotel.dart';
 import '../../hotels/services/room_service.dart';
 import '../../hotels/services/hotel_service.dart';
