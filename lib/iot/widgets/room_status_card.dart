@@ -33,18 +33,14 @@ class RoomStatusCard extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.all(12),
-          // Using ConstrainedBox to limit the height
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              minHeight: 50, 
-              maxHeight: 150
-            ),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+          child: SizedBox(
+            height: 90,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [                Row(
-                  // Use mainAxisSize.min to prevent horizontal overflow
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Expanded(

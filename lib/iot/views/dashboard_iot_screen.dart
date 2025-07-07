@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 
 import '../models/room_summary.dart';
 import '../models/temperature/temperature_data.dart';
+import '../models/notification_history/notification_history.dart';
 import '../services/iot_service.dart';
 import '../widgets/room_overview_card.dart';
 import '../widgets/room_status_card.dart';
 import '../widgets/temperature_chart.dart';
 import '../widgets/device_status_card.dart';
+import '../widgets/notification_history_list_tile.dart';
+import '../widgets/latest_metrics_summary.dart';
 import 'iot_device_list_screen.dart';
 import '../../hotels/models/hotel.dart';
 import '../../hotels/services/room_service.dart';
@@ -122,6 +125,9 @@ class _DashboardIotScreenState extends State<DashboardIotScreen> {
       if (rooms.isNotEmpty) {
         _rooms = rooms.map((room) => RoomSummary.fromRoom(room)).toList();
 
+        // Load IoT metrics for each room to get real temperature data
+        await _loadRoomTemperatures();
+
         // Set the first room as selected
         if (_rooms.isNotEmpty) {
           _selectedRoomId = _rooms[0].id;
@@ -131,10 +137,12 @@ class _DashboardIotScreenState extends State<DashboardIotScreen> {
       } else {
         // Create mock rooms for demonstration
         _rooms = _createMockRooms();
+        await _loadRoomTemperatures();
       }
     } catch (e) {
       // Create mock rooms for demonstration in case of an error
       _rooms = _createMockRooms();
+      await _loadRoomTemperatures();
       debugPrint('Error loading rooms: $e');
     }
 
@@ -143,6 +151,44 @@ class _DashboardIotScreenState extends State<DashboardIotScreen> {
         _isLoading = false;
       });
     }
+  }
+
+  Future<void> _loadRoomTemperatures() async {
+    // Load temperature data for each room from IoT metrics
+    for (int i = 0; i < _rooms.length; i++) {
+      try {
+        final notifications = await _iotService.getNotificationhistoryByRoom(_rooms[i].id);
+        if (notifications.isNotEmpty) {
+          // Get the most recent notification
+          final latestNotification = notifications.first;
+          final temperature = _extractTemperatureFromMetrics(latestNotification.metric);
+          if (temperature != null) {
+            // Create a new RoomSummary with the real temperature
+            _rooms[i] = RoomSummary(
+              id: _rooms[i].id,
+              number: _rooms[i].number,
+              name: _rooms[i].name,
+              floor: _rooms[i].floor,
+              status: _rooms[i].status,
+              currentTemperature: temperature,
+            );
+          }
+        }
+      } catch (e) {
+        debugPrint('Error loading temperature for room ${_rooms[i].id}: $e');
+      }
+    }
+  }
+
+  double? _extractTemperatureFromMetrics(String metricString) {
+    final parts = metricString.split(';');
+    for (final part in parts) {
+      final keyValue = part.split(':');
+      if (keyValue.length == 2 && keyValue[0] == 'temp') {
+        return double.tryParse(keyValue[1]);
+      }
+    }
+    return null;
   }
 
   List<RoomSummary> _createMockRooms() {
@@ -262,6 +308,28 @@ class _DashboardIotScreenState extends State<DashboardIotScreen> {
           ],
         ),
         actions: [
+          // Refresh IoT data button
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () async {
+              setState(() {
+                _isLoading = true;
+              });
+              await _loadRoomTemperatures();
+              setState(() {
+                _isLoading = false;
+              });
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Datos IoT actualizados'),
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+              }
+            },
+            tooltip: 'Actualizar datos IoT',
+          ),
           // Theme toggle button
           IconButton(
             icon: Icon(
@@ -461,7 +529,7 @@ class _DashboardIotScreenState extends State<DashboardIotScreen> {
 
   Widget _buildRoomDetailTabs(RoomSummary selectedRoom) {
     return DefaultTabController(
-      length: 3,
+      length: 4,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -469,6 +537,7 @@ class _DashboardIotScreenState extends State<DashboardIotScreen> {
             tabs: [
               Tab(icon: Icon(Icons.devices), text: 'Dispositivos'),
               Tab(icon: Icon(Icons.thermostat_outlined), text: 'Temperatura'),
+              Tab(icon: Icon(Icons.history), text: 'Historial'),
               Tab(icon: Icon(Icons.settings_outlined), text: 'Configuración'),
             ],
             labelColor: Colors.lightBlue,
@@ -477,7 +546,7 @@ class _DashboardIotScreenState extends State<DashboardIotScreen> {
           ),
           const SizedBox(height: 8),
           SizedBox(
-            height: 280, // Fixed height to prevent overflow
+            height: 350, // Increased height to prevent overflow
             child: TabBarView(
               children: [
                 // Devices Tab
@@ -485,6 +554,9 @@ class _DashboardIotScreenState extends State<DashboardIotScreen> {
 
                 // Temperature Tab
                 _buildTemperatureTab(selectedRoom),
+
+                // History Tab
+                _buildHistoryTab(selectedRoom),
 
                 // Configuration Tab
                 _buildConfigurationTab(selectedRoom),
@@ -498,7 +570,7 @@ class _DashboardIotScreenState extends State<DashboardIotScreen> {
 
   Widget _buildDevicesTab(RoomSummary room) {
     return ListView(
-      padding: const EdgeInsets.symmetric(vertical: 16),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -530,63 +602,292 @@ class _DashboardIotScreenState extends State<DashboardIotScreen> {
             ),
           ],
         ),
+        
         const SizedBox(height: 16),
+        
+        // Latest metrics summary
+        FutureBuilder<List<NotificationHistory>>(
+          future: _iotService.getNotificationhistoryByRoom(room.id),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const SizedBox(
+                height: 100,
+                child: Center(child: CircularProgressIndicator()),
+              );
+            }
+            
+            final notifications = snapshot.data ?? [];
+            return LatestMetricsSummary(
+              notifications: notifications,
+              roomName: room.name,
+            );
+          },
+        ),
+        
+        const SizedBox(height: 16),
+        
         // Mock device grid for demonstration
-        GridView.count(
-          crossAxisCount: 2,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          mainAxisSpacing: 10,
-          crossAxisSpacing: 10,
-          childAspectRatio: 1.8,
-          children: [
-            DeviceStatusCard(
-              deviceName: 'Sensor de temperatura',
-              isConnected: true,
-              deviceType: DeviceType.temperature,
-            ),
-            DeviceStatusCard(
-              deviceName: 'Sensor de humedad',
-              isConnected: true,
-              deviceType: DeviceType.humidity,
-            ),
-            DeviceStatusCard(
-              deviceName: 'Control de AC',
-              isConnected: false,
-              deviceType: DeviceType.ac,
-            ),
-            DeviceStatusCard(
-              deviceName: 'Iluminación',
-              isConnected: true,
-              deviceType: DeviceType.lighting,
-            ),
-          ],
+        SizedBox(
+          height: 200,
+          child: GridView.count(
+            crossAxisCount: 2,
+            mainAxisSpacing: 10,
+            crossAxisSpacing: 10,
+            childAspectRatio: 1.8,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            children: [
+              DeviceStatusCard(
+                deviceName: 'Sensor de temperatura',
+                isConnected: true,
+                deviceType: DeviceType.temperature,
+              ),
+              DeviceStatusCard(
+                deviceName: 'Sensor de humedad',
+                isConnected: true,
+                deviceType: DeviceType.humidity,
+              ),
+              DeviceStatusCard(
+                deviceName: 'Control de AC',
+                isConnected: false,
+                deviceType: DeviceType.ac,
+              ),
+              DeviceStatusCard(
+                deviceName: 'Iluminación',
+                isConnected: true,
+                deviceType: DeviceType.lighting,
+              ),
+            ],
+          ),
         ),
       ],
     );
   }
 
   Widget _buildTemperatureTab(RoomSummary room) {
-    return ListView(
-      padding: const EdgeInsets.symmetric(vertical: 16),
-      children: [
-        SizedBox(
-          height: 300,
-          child: FutureBuilder<List<TemperatureData>>(
-            future: _iotService.getRoomTemperatureHistory(room.id),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              }
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: SizedBox(
+        height: 300,
+        child: FutureBuilder<List<NotificationHistory>>(
+          future: _iotService.getNotificationhistoryByRoom(room.id),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-              final data = snapshot.data ?? [];
-              return TemperatureChart(
-                temperatureData: data,
-                title: 'Histórico de Temperatura (24h)',
-                subtitle: 'Temperatura registrada en °C para ${room.name}',
+            if (snapshot.hasError) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.error_outline,
+                      size: 48,
+                      color: Colors.grey[400],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Error al cargar datos de temperatura',
+                      style: TextStyle(
+                        color: Colors.grey[400],
+                      ),
+                    ),
+                  ],
+                ),
               );
-            },
-          ),
+            }
+
+            final notifications = snapshot.data ?? [];
+            
+            if (notifications.isEmpty) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.thermostat,
+                      size: 48,
+                      color: Colors.grey[400],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'No hay datos de temperatura',
+                      style: TextStyle(
+                        color: Colors.grey[400],
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Los datos aparecerán cuando los dispositivos IoT envíen información',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey[500],
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              );
+            }
+
+            // Convert notifications to TemperatureData
+            final temperatureData = _convertNotificationsToTemperatureData(notifications, room.name);
+            
+            return TemperatureChart(
+              temperatureData: temperatureData,
+              title: 'Histórico de Temperatura IoT',
+              subtitle: 'Temperatura registrada por dispositivos IoT en ${room.name}',
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  List<TemperatureData> _convertNotificationsToTemperatureData(List<NotificationHistory> notifications, String roomName) {
+    final List<TemperatureData> temperatureData = [];
+    
+    for (final notification in notifications) {
+      final temperature = _extractTemperatureFromMetrics(notification.metric);
+      if (temperature != null) {
+        temperatureData.add(TemperatureData(
+          roomId: notification.roomDeviceId,
+          value: temperature,
+          timestamp: notification.registrationDate,
+        ));
+      }
+    }
+    
+    // Sort by timestamp (most recent first)
+    temperatureData.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+    
+    // Limit to last 24 entries for better visualization
+    if (temperatureData.length > 24) {
+      return temperatureData.take(24).toList();
+    }
+    
+    return temperatureData;
+  }
+
+  Widget _buildHistoryTab(RoomSummary room) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    return ListView(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Historial de Notificaciones',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: isDarkMode ? Colors.white : Colors.black87,
+              ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.refresh),
+              onPressed: () {
+                setState(() {
+                  // Trigger rebuild to refresh data
+                });
+              },
+              tooltip: 'Actualizar',
+            ),
+          ],
+        ),
+        
+        const SizedBox(height: 16),
+        
+        FutureBuilder<List<NotificationHistory>>(
+          future: _iotService.getNotificationhistoryByRoom(room.id),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const SizedBox(
+                height: 200,
+                child: Center(child: CircularProgressIndicator()),
+              );
+            }
+
+            if (snapshot.hasError) {
+              return SizedBox(
+                height: 200,
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.error_outline,
+                        size: 48,
+                        color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Error al cargar el historial',
+                        style: TextStyle(
+                          color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        '${snapshot.error}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: isDarkMode ? Colors.grey[500] : Colors.grey[500],
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }
+
+            final notifications = snapshot.data ?? [];
+            
+            if (notifications.isEmpty) {
+              return SizedBox(
+                height: 200,
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.history,
+                        size: 48,
+                        color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'No hay notificaciones',
+                        style: TextStyle(
+                          color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Los datos aparecerán cuando los dispositivos IoT envíen información',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: isDarkMode ? Colors.grey[500] : Colors.grey[500],
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }
+
+            return Column(
+              children: notifications.map((notification) {
+                return NotificationHistoryListTile(
+                  notification: notification,
+                );
+              }).toList(),
+            );
+          },
         ),
       ],
     );
@@ -594,66 +895,69 @@ class _DashboardIotScreenState extends State<DashboardIotScreen> {
 
   Widget _buildConfigurationTab(RoomSummary room) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    return ListView(
-      padding: const EdgeInsets.symmetric(vertical: 16),
-      children: [
-        Text(
-          'Ajustes de la habitación',
-          style: TextStyle(
-            fontWeight: FontWeight.w500,
-            fontSize: 16,
-            color: isDarkMode ? Colors.white : Colors.black87,
-          ),
-        ),
-        const SizedBox(height: 16),
-        Card(
-          elevation: 0,
-          margin: EdgeInsets.zero,
-          color: isDarkMode ? Colors.grey[850] : Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-            side: BorderSide(
-              color: isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300,
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Ajustes de la habitación',
+            style: TextStyle(
+              fontWeight: FontWeight.w500,
+              fontSize: 16,
+              color: isDarkMode ? Colors.white : Colors.black87,
             ),
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: const Icon(Icons.thermostat_outlined),
-                title: const Text('Temperatura predeterminada'),
-                subtitle: const Text('23°C'),
-                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                iconColor: isDarkMode ? Colors.white70 : null,
-                textColor: isDarkMode ? Colors.white : null,
-              ),
-              Divider(
-                height: 1,
+          const SizedBox(height: 16),
+          Card(
+            elevation: 0,
+            margin: EdgeInsets.zero,
+            color: isDarkMode ? Colors.grey[850] : Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+              side: BorderSide(
                 color: isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300,
               ),
-              ListTile(
-                leading: const Icon(Icons.schedule_outlined),
-                title: const Text('Horario de limpieza'),
-                subtitle: const Text('9:00 AM - 11:00 AM'),
-                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                iconColor: isDarkMode ? Colors.white70 : null,
-                textColor: isDarkMode ? Colors.white : null,
-              ),
-              Divider(
-                height: 1,
-                color: isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300,
-              ),
-              ListTile(
-                leading: const Icon(Icons.notifications_outlined),
-                title: const Text('Alertas y notificaciones'),
-                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                iconColor: isDarkMode ? Colors.white70 : null,
-                textColor: isDarkMode ? Colors.white : null,
-              ),
-            ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.thermostat_outlined),
+                  title: const Text('Temperatura predeterminada'),
+                  subtitle: const Text('23°C'),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                  iconColor: isDarkMode ? Colors.white70 : null,
+                  textColor: isDarkMode ? Colors.white : null,
+                ),
+                Divider(
+                  height: 1,
+                  color: isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300,
+                ),
+                ListTile(
+                  leading: const Icon(Icons.schedule_outlined),
+                  title: const Text('Horario de limpieza'),
+                  subtitle: const Text('9:00 AM - 11:00 AM'),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                  iconColor: isDarkMode ? Colors.white70 : null,
+                  textColor: isDarkMode ? Colors.white : null,
+                ),
+                Divider(
+                  height: 1,
+                  color: isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300,
+                ),
+                ListTile(
+                  leading: const Icon(Icons.notifications_outlined),
+                  title: const Text('Alertas y notificaciones'),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                  iconColor: isDarkMode ? Colors.white70 : null,
+                  textColor: isDarkMode ? Colors.white : null,
+                ),
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
