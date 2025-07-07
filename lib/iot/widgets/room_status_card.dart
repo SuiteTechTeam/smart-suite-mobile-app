@@ -64,7 +64,7 @@ class RoomStatusCard extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(12),
-                        color: room.status.color.withOpacity(0.2),
+                        color: room.status.color.withValues( alpha: 0.2),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,

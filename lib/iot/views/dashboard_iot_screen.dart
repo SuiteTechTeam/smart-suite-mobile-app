@@ -328,8 +328,8 @@ class _DashboardIotScreenState extends State<DashboardIotScreen> {
             boxShadow: [
               BoxShadow(
                 color: isDarkMode
-                    ? Colors.black.withOpacity(0.2)
-                    : Colors.grey.withOpacity(0.1),
+                    ? Colors.black.withValues( alpha: 0.2)
+                    : Colors.grey.withValues( alpha: 0.1),
                 spreadRadius: 1,
                 blurRadius: 2,
                 offset: const Offset(0, 1),
@@ -369,7 +369,7 @@ class _DashboardIotScreenState extends State<DashboardIotScreen> {
                     ),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(16),
-                      color: selectedRoom.status.color.withOpacity(0.2),
+                      color: selectedRoom.status.color.withValues( alpha: 0.2),
                     ),
                     child: Row(
                       children: [
@@ -421,8 +421,8 @@ class _DashboardIotScreenState extends State<DashboardIotScreen> {
         boxShadow: [
           BoxShadow(
             color: isDarkMode
-                ? Colors.black.withOpacity(0.2)
-                : Colors.grey.withOpacity(0.1),
+                ? Colors.black.withValues( alpha: 0.2)
+                : Colors.grey.withValues( alpha: 0.1),
             spreadRadius: 1,
             blurRadius: 2,
             offset: const Offset(0, 1),
@@ -667,8 +667,8 @@ class _DashboardIotScreenState extends State<DashboardIotScreen> {
         boxShadow: [
           BoxShadow(
             color: isDarkMode
-                ? Colors.black.withOpacity(0.2)
-                : Colors.grey.withOpacity(0.1),
+                ? Colors.black.withValues( alpha: 0.2)
+                : Colors.grey.withValues( alpha: 0.1),
             spreadRadius: 1,
             blurRadius: 2,
             offset: const Offset(0, 1),

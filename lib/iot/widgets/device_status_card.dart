@@ -76,7 +76,7 @@ class DeviceStatusCard extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(6), // Reduced padding
                         decoration: BoxDecoration(
-                          color: deviceType.color.withOpacity(0.2),
+                          color: deviceType.color.withValues( alpha: 0.2),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Icon(

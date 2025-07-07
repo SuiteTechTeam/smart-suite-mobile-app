@@ -68,8 +68,8 @@ class TemperatureChart extends StatelessWidget {
                             drawVerticalLine: false,
                             getDrawingHorizontalLine: (value) => FlLine(
                               color: isDarkMode 
-                                  ? Colors.grey[700]!.withOpacity(0.3)
-                                  : Colors.grey.withOpacity(0.2),
+                                  ? Colors.grey[700]!.withAlpha(30)
+                                  : Colors.grey.withAlpha(20),
                               strokeWidth: 1,
                             ),
                           ),
@@ -148,7 +148,7 @@ class TemperatureChart extends StatelessWidget {
                               ),
                               belowBarData: BarAreaData(
                                 show: true,
-                                color: Colors.red.withOpacity(0.1),
+                                color: Colors.red.withValues( alpha: 0.1),
                               ),
                             ),
                           ],

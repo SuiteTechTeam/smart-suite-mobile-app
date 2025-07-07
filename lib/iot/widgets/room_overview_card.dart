@@ -51,8 +51,8 @@ class RoomOverviewCard extends StatelessWidget {
         boxShadow: [
           BoxShadow(
             color: isDarkMode 
-                ? Colors.black.withOpacity(0.2) 
-                : Colors.grey.withOpacity(0.1),
+                ? Colors.black.withValues( alpha: 0.2) 
+                : Colors.grey.withValues( alpha: 0.1),
             spreadRadius: 1,
             blurRadius: 2,
             offset: const Offset(0, 1),
