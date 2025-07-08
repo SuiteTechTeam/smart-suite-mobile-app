@@ -102,4 +102,71 @@ class RoomService extends BaseService {
       );
     }
   }
+
+  // Get available rooms for booking based on date range and hotel
+  Future<List<Room>> getAvailableRoomsForBooking({
+    required DateTime startDate,
+    required DateTime finalDate,
+    required int hotelId,
+  }) async {
+    try {
+      final response = await authenticatedGet(
+        'room/get-room-by-booking-availability?'
+        'startDate=${startDate.toIso8601String()}&'
+        'finalDate=${finalDate.toIso8601String()}&'
+        'hotelId=$hotelId',
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> jsonData = json.decode(response.body);
+        return jsonData.map((json) => Room.fromJson(json)).toList();
+      } else {
+        throw Exception(
+          'Failed to get available rooms: ${response.statusCode} ${response.body}',
+        );
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // Get rooms by state
+  Future<List<Room>> getRoomsByState(String state) async {
+    try {
+      final response = await authenticatedGet(
+        'room/get-room-by-state?state=$state',
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> jsonData = json.decode(response.body);
+        return jsonData.map((json) => Room.fromJson(json)).toList();
+      } else {
+        throw Exception(
+          'Failed to get rooms by state: ${response.statusCode} ${response.body}',
+        );
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // Get rooms by type room
+  Future<List<Room>> getRoomsByTypeRoom(int typeRoomId) async {
+    try {
+      final response = await authenticatedGet(
+        'room/get-room-by-type-room?typeRoomId=$typeRoomId',
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> jsonData = json.decode(response.body);
+        return jsonData.map((json) => Room.fromJson(json)).toList();
+      } else {
+        throw Exception(
+          'Failed to get rooms by type room: ${response.statusCode} ${response.body}',
+        );
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

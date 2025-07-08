@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
-import '../models/reservation.dart';
-import '../models/reservation_resource.dart';
-import '../services/reservation_service.dart';
+import 'package:intl/intl.dart';
+import '../models/available_room.dart';
+import '../services/booking_flow_service.dart';
 import '../widgets/section_title.dart';
 import '../widgets/custom_text_field.dart';
-import '../widgets/resource_type_dropdown.dart';
-import '../widgets/date_time_selection.dart';
-import '../widgets/resource_selection.dart';
+import '../widgets/available_room_selection.dart';
+import '../widgets/booking_summary_card.dart';
+import '../widgets/guest_selection.dart';
+import '../../iam/services/guest_service.dart';
 
 class AddReservationScreen extends StatefulWidget {
   final int? hotelId;
@@ -20,39 +21,31 @@ class AddReservationScreen extends StatefulWidget {
 
 class _AddReservationScreenState extends State<AddReservationScreen> {
   final _formKey = GlobalKey<FormState>();
-  late ReservationService _reservationService;
+  late BookingFlowService _bookingFlowService;
   final storage = const FlutterSecureStorage();
 
   // Form controllers
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
-  final _customerIdController = TextEditingController();
   final _guestCountController = TextEditingController();
   final _specialRequestsController = TextEditingController();
 
-  // Form state
-  String selectedResourceType = 'restaurant';
-  int? selectedResourceId;
-  DateTime? selectedDate;
-  TimeOfDay? startTime;
-  TimeOfDay? endTime;
-  int? hotelId;
-  List<ReservationResource> availableResources = [];
-  bool isLoadingResources = false;
-  String? _userRole; // Rol del usuario autenticado
+  // Guest selection
+  Guest? _selectedGuest;
 
-  final List<String> resourceTypes = [
-    'restaurant',
-    'spa',
-    'conference_room',
-    'gym',
-    'pool',
-    'equipment',
-  ];
+  // Form state
+  DateTime? selectedStartDate;
+  DateTime? selectedEndDate;
+  int? hotelId;
+  List<AvailableRoom> availableRooms = [];
+  AvailableRoom? selectedRoom;
+  bool isLoadingRooms = false;
+  bool _isCreatingReservation = false;
+
   @override
   void initState() {
     super.initState();
-    _reservationService = ReservationService();
+    _bookingFlowService = BookingFlowService();
     _loadUserInfo();
     _guestCountController.text = '1';
   }
@@ -84,36 +77,22 @@ class _AddReservationScreenState extends State<AddReservationScreen> {
   }
 
   Future<void> _loadUserInfo() async {
-    String? token = await storage.read(key: 'token');
-    if (token != null) {
-      try {
-        Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
-        // Usar claims estándar
-        String? userId = decodedToken['sid']?.toString();
-        if (userId != null && _customerIdController.text.isEmpty) {
-          _customerIdController.text = userId;
-        }
-        // Set default title based on user email if available
-        String? userEmail = decodedToken['email'];
-        if (userEmail != null && _titleController.text.isEmpty) {
-          _titleController.text = 'Reservation for $userEmail';
-        }
-        // Guardar el rol para uso posterior si es necesario
-        setState(() {
-          _userRole = decodedToken['role']?.toString().toLowerCase();
-        });
-      } catch (e) {
-        // Token parsing failed, continue without pre-filling
-      }
+    // Set default title
+    if (_titleController.text.isEmpty) {
+      _titleController.text = 'Nueva Reservación';
     }
   }
 
   Future<int?> _getHotelId() async {
     String? token = await storage.read(key: 'token');
     if (token != null) {
-      Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
-      String? locality = decodedToken['locality'];
-      return locality != null ? int.tryParse(locality) : null;
+      try {
+        Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
+        String? locality = decodedToken['locality'];
+        return locality != null ? int.tryParse(locality) : null;
+      } catch (e) {
+        return null;
+      }
     }
     return null;
   }
@@ -152,9 +131,9 @@ class _AddReservationScreenState extends State<AddReservationScreen> {
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Hotel ID Required'),
+          title: const Text('Hotel ID Requerido'),
           content: const Text(
-            'No hotel ID was found. Please enter a hotel ID to continue.',
+            'No se encontró un hotel ID. Por favor ingrese un hotel ID para continuar.',
           ),
           actions: [
             TextButton(
@@ -162,14 +141,14 @@ class _AddReservationScreenState extends State<AddReservationScreen> {
                 Navigator.of(context).pop();
                 _showHotelIdInputDialog();
               },
-              child: const Text('Enter Hotel ID'),
+              child: const Text('Ingresar Hotel ID'),
             ),
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
                 _useDefaultHotelId();
               },
-              child: const Text('Use Default (1)'),
+              child: const Text('Usar Default (1)'),
             ),
           ],
         );
@@ -184,13 +163,13 @@ class _AddReservationScreenState extends State<AddReservationScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Enter Hotel ID'),
+          title: const Text('Ingresar Hotel ID'),
           content: TextField(
             controller: hotelIdController,
             keyboardType: TextInputType.number,
             decoration: const InputDecoration(
               labelText: 'Hotel ID',
-              hintText: 'Enter your hotel ID (e.g., 1)',
+              hintText: 'Ingrese su hotel ID (ej: 1)',
               border: OutlineInputBorder(),
             ),
           ),
@@ -199,7 +178,7 @@ class _AddReservationScreenState extends State<AddReservationScreen> {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: const Text('Cancel'),
+              child: const Text('Cancelar'),
             ),
             TextButton(
               onPressed: () {
@@ -210,13 +189,13 @@ class _AddReservationScreenState extends State<AddReservationScreen> {
                     Navigator.of(context).pop();
                     _setHotelId(inputHotelId);
                   } else {
-                    _showSnackBar('Please enter a valid hotel ID');
+                    _showSnackBar('Por favor ingrese un hotel ID válido');
                   }
                 } else {
-                  _showSnackBar('Please enter a hotel ID');
+                  _showSnackBar('Por favor ingrese un hotel ID');
                 }
               },
-              child: const Text('Confirm'),
+              child: const Text('Confirmar'),
             ),
           ],
         );
@@ -236,71 +215,16 @@ class _AddReservationScreenState extends State<AddReservationScreen> {
     // Store the hotel ID in secure storage for future use
     await storage.write(key: 'selected_hotel_id', value: newHotelId.toString());
 
-    _showSnackBar('Hotel ID set to $newHotelId');
+    _showSnackBar('Hotel ID establecido en $newHotelId');
   }
 
-  Future<void> _loadAvailableResources() async {
-    if (hotelId == null ||
-        selectedDate == null ||
-        startTime == null ||
-        endTime == null) {
-      return;
-    }
-
+  void _onGuestSelected(Guest guest) {
     setState(() {
-      isLoadingResources = true;
+      _selectedGuest = guest;
     });
-
-    try {
-      // Since getAvailableResources doesn't exist in the API, we'll create mock resources
-      // In a real implementation, you would call an API to get available rooms
-      await Future.delayed(const Duration(seconds: 1)); // Simulate API call
-
-      setState(() {
-        availableResources = [
-          ReservationResource(
-            id: 1,
-            name: 'Standard Room',
-            type: 'room',
-            description: 'Standard hotel room',
-            capacity: 2,
-            pricePerHour: 50.0,
-            status: 'available',
-            hotelId: hotelId!,
-          ),
-          ReservationResource(
-            id: 2,
-            name: 'Deluxe Room',
-            type: 'room',
-            description: 'Deluxe hotel room',
-            capacity: 3,
-            pricePerHour: 80.0,
-            status: 'available',
-            hotelId: hotelId!,
-          ),
-          ReservationResource(
-            id: 3,
-            name: 'Suite',
-            type: 'room',
-            description: 'Luxury suite',
-            capacity: 4,
-            pricePerHour: 120.0,
-            status: 'available',
-            hotelId: hotelId!,
-          ),
-        ];
-        selectedResourceId = null; // Reset selection
-        isLoadingResources = false;
-      });
-    } catch (e) {
-      setState(() {
-        isLoadingResources = false;
-      });
-      _showSnackBar('Failed to load available resources: $e');
-    }
   }
 
-  Future<void> _selectDate() async {
+  Future<void> _selectStartDate() async {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
@@ -310,104 +234,161 @@ class _AddReservationScreenState extends State<AddReservationScreen> {
 
     if (picked != null) {
       setState(() {
-        selectedDate = picked;
+        selectedStartDate = picked;
+        // Reset end date if it's before start date
+        if (selectedEndDate != null && selectedEndDate!.isBefore(picked)) {
+          selectedEndDate = null;
+        }
       });
-      _loadAvailableResources();
+      _loadAvailableRooms();
     }
   }
 
-  Future<void> _selectTime(bool isStartTime) async {
-    final TimeOfDay? picked = await showTimePicker(
+  Future<void> _selectEndDate() async {
+    if (selectedStartDate == null) {
+      _showSnackBar('Por favor seleccione primero la fecha de llegada');
+      return;
+    }
+
+    final DateTime? picked = await showDatePicker(
       context: context,
-      initialTime: TimeOfDay.now(),
+      initialDate: selectedStartDate!.add(const Duration(days: 1)),
+      firstDate: selectedStartDate!.add(const Duration(days: 1)),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
     );
 
     if (picked != null) {
       setState(() {
-        if (isStartTime) {
-          startTime = picked;
-        } else {
-          endTime = picked;
-        }
+        selectedEndDate = picked;
       });
-      _loadAvailableResources();
+      _loadAvailableRooms();
     }
   }
 
-  Future<void> _saveReservation() async {
+  Future<void> _loadAvailableRooms() async {
+    if (hotelId == null || selectedStartDate == null || selectedEndDate == null) {
+      return;
+    }
+
+    setState(() {
+      isLoadingRooms = true;
+      selectedRoom = null;
+    });
+
+    try {
+      List<AvailableRoom> rooms = await _bookingFlowService.getAvailableRooms(
+        hotelId: hotelId!,
+        startDate: selectedStartDate!,
+        finalDate: selectedEndDate!,
+      );
+
+      setState(() {
+        availableRooms = rooms;
+        isLoadingRooms = false;
+      });
+    } catch (e) {
+      setState(() {
+        isLoadingRooms = false;
+      });
+      _showSnackBar('Error al cargar habitaciones disponibles: $e');
+    }
+  }
+
+  void _onRoomSelected(AvailableRoom room) {
+    setState(() {
+      selectedRoom = room;
+    });
+  }
+
+  Future<void> _createReservation() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
 
-    if (selectedDate == null ||
-        startTime == null ||
-        endTime == null ||
-        selectedResourceId == null) {
-      _showSnackBar('Please complete all required fields');
+    // Validar que se haya seleccionado un huésped
+    if (_selectedGuest == null || _selectedGuest!.id == 0) {
+      _showSnackBar('Por favor seleccione un huésped');
       return;
     }
 
+    // Validar que se haya seleccionado una habitación
+    if (selectedRoom == null) {
+      _showSnackBar('Por favor seleccione una habitación');
+      return;
+    }
+
+    // Validar fechas
+    if (selectedStartDate == null || selectedEndDate == null) {
+      _showSnackBar('Por favor seleccione las fechas de llegada y salida');
+      return;
+    }
+
+    // Validar hotel ID
+    if (hotelId == null) {
+      _showSnackBar('Error: No se encontró el hotel ID');
+      return;
+    }
+
+    setState(() {
+      _isCreatingReservation = true;
+    });
+
     try {
-      final startDateTime = DateTime(
-        selectedDate!.year,
-        selectedDate!.month,
-        selectedDate!.day,
-        startTime!.hour,
-        startTime!.minute,
-      );
+      print('Debug - Creando reservación con datos:');
+      print('  hotelId: $hotelId');
+      print('  roomId: ${selectedRoom!.room.id}');
+      print('  guestId: ${_selectedGuest!.id}');
+      print('  startDate: $selectedStartDate');
+      print('  endDate: $selectedEndDate');
+      print('  title: ${_titleController.text}');
+      print('  description: ${_descriptionController.text}');
+      print('  guestCount: ${_guestCountController.text}');
+      print('  specialRequests: ${_specialRequestsController.text}');
 
-      final endDateTime = DateTime(
-        selectedDate!.year,
-        selectedDate!.month,
-        selectedDate!.day,
-        endTime!.hour,
-        endTime!.minute,
-      );
-
-      // Calculate total amount (simplified calculation)
-      final duration = endDateTime.difference(startDateTime).inHours;
-      final selectedResource = availableResources.firstWhere(
-        (r) => r.id == selectedResourceId,
-      );
-      final totalAmount = duration * selectedResource.pricePerHour;
-      final reservation = Reservation(
-        paymentCustomerId: int.parse(_customerIdController.text),
-        roomId: selectedResourceId!,
+      // Crear la reservación usando el BookingFlowService
+      final reservation = await _bookingFlowService.createBooking(
+        guestId: _selectedGuest!.id,
+        roomId: selectedRoom!.room.id,
         description: _descriptionController.text,
-        startDate: selectedDate!,
-        finalDate: endDateTime,
-        priceRoom:
-            selectedResource.pricePerHour, // Using this as room price for now
-        nightCount: duration > 0 ? duration : 1,
-        amount: totalAmount,
-        state: 'pending',
-        preferenceId: 0, // Default preference ID
+        startDate: selectedStartDate!,
+        finalDate: selectedEndDate!,
+        pricePerNight: selectedRoom!.pricePerNight,
       );
 
-      await _reservationService.createReservation(reservation);
+      setState(() {
+        _isCreatingReservation = false;
+      });
 
+      _showSnackBar('Reservación creada exitosamente');
+      
+      // Navegar de vuelta o mostrar detalles
       if (mounted) {
-        _showSnackBar('Reservation created successfully');
-        Navigator.of(context).pop(true);
+        Navigator.of(context).pop(reservation);
       }
     } catch (e) {
-      if (mounted) {
-        _showSnackBar('Failed to create reservation: $e');
-      }
+      setState(() {
+        _isCreatingReservation = false;
+      });
+      _showSnackBar('Error al crear la reservación: $e');
     }
   }
 
   void _showSnackBar(String message) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: message.contains('Error') ? Colors.red : Colors.green,
+        ),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('New Reservation'),
+        title: const Text('Nueva Reservación'),
         backgroundColor: const Color(0xFF474C74),
         foregroundColor: Colors.white,
       ),
@@ -418,90 +399,169 @@ class _AddReservationScreenState extends State<AddReservationScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SectionTitle('Basic Information'),
+              // Guest Selection Section
+              GuestSelection(
+                onGuestSelected: _onGuestSelected,
+                selectedGuestId: _selectedGuest?.id,
+                hotelId: hotelId,
+              ),
+              
+              const SizedBox(height: 24),
+              
+              // Basic Information Section
+              SectionTitle('Información Básica'),
               CustomTextField(
                 controller: _titleController,
-                label: 'Reservation Title',
+                label: 'Título de la Reservación',
                 validator: (value) =>
-                    value?.isEmpty == true ? 'Please enter a title' : null,
+                    value?.isEmpty == true ? 'Por favor ingrese un título' : null,
               ),
               CustomTextField(
                 controller: _descriptionController,
-                label: 'Description',
+                label: 'Descripción',
                 maxLines: 3,
               ),
               CustomTextField(
-                controller: _customerIdController,
-                label: 'Customer ID',
-                keyboardType: TextInputType.number,
-                validator: (value) =>
-                    value?.isEmpty == true ? 'Please enter customer ID' : null,
-                enabled: _userRole != 'guest',
-              ),
-              const SizedBox(height: 24),
-              SectionTitle('Resource & Time'),
-              ResourceTypeDropdown(
-                selectedResourceType: selectedResourceType,
-                resourceTypes: resourceTypes,
-                onChanged: (value) {
-                  setState(() {
-                    selectedResourceType = value!;
-                    availableResources.clear();
-                    selectedResourceId = null;
-                  });
-                  _loadAvailableResources();
-                },
-              ),
-              DateTimeSelection(
-                selectedDate: selectedDate,
-                startTime: startTime,
-                endTime: endTime,
-                onSelectDate: _selectDate,
-                onSelectStartTime: () => _selectTime(true),
-                onSelectEndTime: () => _selectTime(false),
-              ),
-              ResourceSelection(
-                isLoadingResources: isLoadingResources,
-                availableResources: availableResources,
-                selectedResourceId: selectedResourceId,
-                onChanged: (value) {
-                  setState(() {
-                    selectedResourceId = value;
-                  });
-                },
-              ),
-              const SizedBox(height: 24),
-              SectionTitle('Additional Details'),
-              CustomTextField(
                 controller: _guestCountController,
-                label: 'Number of Guests',
+                label: 'Número de Huéspedes',
                 keyboardType: TextInputType.number,
                 validator: (value) =>
-                    value?.isEmpty == true ? 'Please enter guest count' : null,
+                    value?.isEmpty == true ? 'Por favor ingrese el número de huéspedes' : null,
               ),
               CustomTextField(
                 controller: _specialRequestsController,
-                label: 'Special Requests (Optional)',
+                label: 'Solicitudes Especiales (Opcional)',
                 maxLines: 2,
               ),
-              const SizedBox(height: 32),
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: _saveReservation,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF474C74),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: const Text(
-                    'Create Reservation',
-                    style: TextStyle(color: Colors.white, fontSize: 16),
+              
+              const SizedBox(height: 24),
+              
+              // Date Selection Section
+              SectionTitle('Fechas de Estancia'),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Seleccione las fechas:',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      
+                      // Start Date
+                      ListTile(
+                        leading: const Icon(Icons.calendar_today, color: Color(0xFF474C74)),
+                        title: const Text('Fecha de Llegada'),
+                        subtitle: Text(
+                          selectedStartDate != null
+                              ? DateFormat('dd/MM/yyyy').format(selectedStartDate!)
+                              : 'Seleccionar fecha',
+                        ),
+                        onTap: _selectStartDate,
+                        trailing: const Icon(Icons.arrow_forward_ios),
+                      ),
+                      
+                      // End Date
+                      ListTile(
+                        leading: const Icon(Icons.calendar_today, color: Color(0xFF474C74)),
+                        title: const Text('Fecha de Salida'),
+                        subtitle: Text(
+                          selectedEndDate != null
+                              ? DateFormat('dd/MM/yyyy').format(selectedEndDate!)
+                              : 'Seleccionar fecha',
+                        ),
+                        onTap: _selectEndDate,
+                        trailing: const Icon(Icons.arrow_forward_ios),
+                      ),
+                    ],
                   ),
                 ),
               ),
+              
+              const SizedBox(height: 24),
+              
+              // Available Rooms Section
+              if (selectedStartDate != null && selectedEndDate != null)
+                AvailableRoomSelection(
+                  availableRooms: availableRooms,
+                  selectedRoomId: selectedRoom?.room.id,
+                  onRoomSelected: (roomId) {
+                    if (roomId != null) {
+                      AvailableRoom? room = availableRooms.firstWhere(
+                        (r) => r.room.id == roomId,
+                        orElse: () => availableRooms.first,
+                      );
+                      _onRoomSelected(room);
+                    } else {
+                      setState(() {
+                        selectedRoom = null;
+                      });
+                    }
+                  },
+                  isLoading: isLoadingRooms,
+                ),
+              
+              const SizedBox(height: 24),
+              
+              // Booking Summary Section
+              if (selectedRoom != null && selectedStartDate != null && selectedEndDate != null)
+                BookingSummaryCard(
+                  selectedRoom: selectedRoom!,
+                  startDate: selectedStartDate!,
+                  finalDate: selectedEndDate!,
+                  description: _descriptionController.text,
+                  guestCount: int.tryParse(_guestCountController.text) ?? 1,
+                  specialRequests: _specialRequestsController.text.isNotEmpty 
+                      ? _specialRequestsController.text 
+                      : null,
+                ),
+              
+              const SizedBox(height: 32),
+              
+              // Create Reservation Button
+              if (_selectedGuest != null && _selectedGuest!.id > 0 && 
+                  selectedRoom != null && selectedStartDate != null && selectedEndDate != null)
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton(
+                    onPressed: _isCreatingReservation ? null : _createReservation,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF474C74),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: _isCreatingReservation
+                        ? const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                ),
+                              ),
+                              SizedBox(width: 8),
+                              Text(
+                                'Creando...',
+                                style: TextStyle(color: Colors.white, fontSize: 16),
+                              ),
+                            ],
+                          )
+                        : const Text(
+                            'Crear Reservación',
+                            style: TextStyle(color: Colors.white, fontSize: 16),
+                          ),
+                  ),
+                ),
             ],
           ),
         ),
@@ -513,9 +573,10 @@ class _AddReservationScreenState extends State<AddReservationScreen> {
   void dispose() {
     _titleController.dispose();
     _descriptionController.dispose();
-    _customerIdController.dispose();
     _guestCountController.dispose();
     _specialRequestsController.dispose();
     super.dispose();
   }
 }
+
+

@@ -33,25 +33,35 @@ class Reservation {
   });
 
   factory Reservation.fromJson(Map<String, dynamic> json) {
-    return Reservation(
-      id: json['id'],
-      paymentCustomerId: json['paymentCustomerId'] ?? 0,
-      roomId: json['roomId'] ?? 0,
-      description: json['description'] ?? '',
-      startDate: DateTime.parse(json['startDate']),
-      finalDate: DateTime.parse(json['finalDate']),
-      priceRoom: (json['priceRoom'] ?? 0.0).toDouble(),
-      nightCount: json['nightCount'] ?? 0,
-      amount: (json['amount'] ?? 0.0).toDouble(),
-      state: json['state'] ?? 'pending',
-      preferenceId: json['preferenceId'] ?? 0,
-      createdAt: json['createdAt'] != null
-          ? DateTime.parse(json['createdAt'])
-          : null,
-      updatedAt: json['updatedAt'] != null
-          ? DateTime.parse(json['updatedAt'])
-          : null,
-    );
+    try {
+      return Reservation(
+        id: json['id'],
+        paymentCustomerId: json['paymentCustomerId'] ?? 0,
+        roomId: json['roomId'] ?? 0,
+        description: json['description'] ?? '',
+        startDate: json['startDate'] != null 
+            ? DateTime.parse(json['startDate'].toString())
+            : DateTime.now(),
+        finalDate: json['finalDate'] != null 
+            ? DateTime.parse(json['finalDate'].toString())
+            : DateTime.now().add(const Duration(days: 1)),
+        priceRoom: (json['priceRoom'] ?? 0.0).toDouble(),
+        nightCount: json['nightCount'] ?? 0,
+        amount: (json['amount'] ?? 0.0).toDouble(),
+        state: json['state'] ?? 'pending',
+        preferenceId: json['preferenceId'] ?? 0,
+        createdAt: json['createdAt'] != null
+            ? DateTime.parse(json['createdAt'].toString())
+            : null,
+        updatedAt: json['updatedAt'] != null
+            ? DateTime.parse(json['updatedAt'].toString())
+            : null,
+      );
+    } catch (e) {
+      print('Debug - Reservation.fromJson parsing error: $e');
+      print('Debug - JSON data: $json');
+      rethrow;
+    }
   }
 
   Map<String, dynamic> toJson() {
