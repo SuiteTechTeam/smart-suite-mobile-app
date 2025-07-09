@@ -334,16 +334,16 @@ class _AddReservationScreenState extends State<AddReservationScreen> {
     });
 
     try {
-      print('Debug - Creando reservación con datos:');
-      print('  hotelId: $hotelId');
-      print('  roomId: ${selectedRoom!.room.id}');
-      print('  guestId: ${_selectedGuest!.id}');
-      print('  startDate: $selectedStartDate');
-      print('  endDate: $selectedEndDate');
-      print('  title: ${_titleController.text}');
-      print('  description: ${_descriptionController.text}');
-      print('  guestCount: ${_guestCountController.text}');
-      print('  specialRequests: ${_specialRequestsController.text}');
+      debugPrint('Debug - Creando reservación con datos:');
+      debugPrint('  hotelId: $hotelId');
+      debugPrint('  roomId: ${selectedRoom!.room.id}');
+      debugPrint('  guestId: ${_selectedGuest!.id}');
+      debugPrint('  startDate: $selectedStartDate');
+      debugPrint('  endDate: $selectedEndDate');
+      debugPrint('  title: ${_titleController.text}');
+      debugPrint('  description: ${_descriptionController.text}');
+      debugPrint('  guestCount: ${_guestCountController.text}');
+      debugPrint('  specialRequests: ${_specialRequestsController.text}');
 
       // Crear la reservación usando el BookingFlowService
       final reservation = await _bookingFlowService.createBooking(

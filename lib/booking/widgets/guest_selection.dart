@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../iam/services/guest_service.dart';
-import 'custom_text_field.dart';
 
 class GuestSelection extends StatefulWidget {
   final Function(Guest) onGuestSelected;
@@ -8,11 +7,11 @@ class GuestSelection extends StatefulWidget {
   final int? hotelId;
 
   const GuestSelection({
-    Key? key,
+    super.key,
     required this.onGuestSelected,
     this.selectedGuestId,
     this.hotelId,
-  }) : super(key: key);
+  });
 
   @override
   State<GuestSelection> createState() => _GuestSelectionState();

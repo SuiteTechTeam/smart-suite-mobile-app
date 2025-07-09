@@ -123,7 +123,7 @@ class BookingSummaryCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: const Color(0xFF474C74).withOpacity(0.1),
+                color: const Color(0xFF474C74).withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Column(

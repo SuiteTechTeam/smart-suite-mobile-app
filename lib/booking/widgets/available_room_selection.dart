@@ -62,7 +62,7 @@ class AvailableRoomSelection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        ...availableRooms.map((room) => _buildRoomCard(room)).toList(),
+        ...availableRooms.map((room) => _buildRoomCard(room)),
       ],
     );
   }

@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 class Reservation {
   // NOTE: In Smart Suite, 'booking' and 'reservation' are the same concept.
   // This model is used for both creating and displaying bookings/reservations.
@@ -58,8 +59,8 @@ class Reservation {
             : null,
       );
     } catch (e) {
-      print('Debug - Reservation.fromJson parsing error: $e');
-      print('Debug - JSON data: $json');
+      debugPrint('Debug - Reservation.fromJson parsing error: $e');
+      debugPrint('Debug - JSON data: $json');
       rethrow;
     }
   }

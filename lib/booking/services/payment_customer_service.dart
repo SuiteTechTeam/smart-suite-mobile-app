@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'dart:convert';
 import '../../core/services/base_service.dart';
 
@@ -34,8 +35,8 @@ class PaymentCustomer {
             : null,
       );
     } catch (e) {
-      print('Debug - PaymentCustomer.fromJson parsing error: $e');
-      print('Debug - JSON data: $json');
+      debugPrint('Debug - PaymentCustomer.fromJson parsing error: $e');
+      debugPrint('Debug - JSON data: $json');
       rethrow;
     }
   }
@@ -62,29 +63,29 @@ class PaymentCustomerService extends BaseService {
   Map<String, dynamic>? _parseJsonResponse(dynamic jsonData, String methodName) {
     try {
       if (jsonData is List) {
-        print('Debug - $methodName: API returned List with ${jsonData.length} items');
+        debugPrint('Debug - $methodName: API returned List with ${jsonData.length} items');
         if (jsonData.isNotEmpty) {
           final firstItem = jsonData.first;
           if (firstItem is Map<String, dynamic>) {
-            print('Debug - $methodName: Using first item from list');
+            debugPrint('Debug - $methodName: Using first item from list');
             return firstItem;
           } else {
-            print('Debug - $methodName: First item in list is not a Map: ${firstItem.runtimeType}');
+            debugPrint('Debug - $methodName: First item in list is not a Map: ${firstItem.runtimeType}');
             return null;
           }
         } else {
-          print('Debug - $methodName: API returned empty list');
+          debugPrint('Debug - $methodName: API returned empty list');
           return null;
         }
       } else if (jsonData is Map<String, dynamic>) {
-        print('Debug - $methodName: API returned Map directly');
+        debugPrint('Debug - $methodName: API returned Map directly');
         return jsonData;
       } else {
-        print('Debug - $methodName: Unexpected data type: ${jsonData.runtimeType}');
+        debugPrint('Debug - $methodName: Unexpected data type: ${jsonData.runtimeType}');
         return null;
       }
     } catch (e) {
-      print('Debug - $methodName: Error parsing JSON response: $e');
+      debugPrint('Debug - $methodName: Error parsing JSON response: $e');
       return null;
     }
   }
@@ -92,20 +93,20 @@ class PaymentCustomerService extends BaseService {
   // Create a new payment customer
   Future<PaymentCustomer> createPaymentCustomer(PaymentCustomer paymentCustomer) async {
     try {
-      print('Debug - createPaymentCustomer: Sending data: ${paymentCustomer.toCreateJson()}');
+      debugPrint('Debug - createPaymentCustomer: Sending data: ${paymentCustomer.toCreateJson()}');
       
       final response = await authenticatedPost(
         'payment-customer',
         body: paymentCustomer.toCreateJson(),
       );
 
-      print('Debug - createPaymentCustomer: Response status: ${response.statusCode}');
-      print('Debug - createPaymentCustomer: Response body: ${response.body}');
+      debugPrint('Debug - createPaymentCustomer: Response status: ${response.statusCode}');
+      debugPrint('Debug - createPaymentCustomer: Response body: ${response.body}');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         // If response body is empty or just a success message, return the original payment customer
         if (response.body.isEmpty || response.body.trim() == 'true' || response.body.trim() == 'false') {
-          print('Debug - createPaymentCustomer: API returned simple success response, returning original payment customer');
+          debugPrint('Debug - createPaymentCustomer: API returned simple success response, returning original payment customer');
           return paymentCustomer;
         }
 
@@ -114,39 +115,39 @@ class PaymentCustomerService extends BaseService {
         try {
           jsonData = json.decode(response.body);
         } catch (parseError) {
-          print('Debug - createPaymentCustomer: JSON Parse Error: $parseError');
-          print('Debug - createPaymentCustomer: Response body that failed to parse: "${response.body}"');
+          debugPrint('Debug - createPaymentCustomer: JSON Parse Error: $parseError');
+          debugPrint('Debug - createPaymentCustomer: Response body that failed to parse: "${response.body}"');
           // If we can't parse JSON but got success status, return original payment customer
           return paymentCustomer;
         }
 
-        print('Debug - createPaymentCustomer: Parsed JSON Type: ${jsonData.runtimeType}');
-        print('Debug - createPaymentCustomer: Parsed JSON Data: $jsonData');
+        debugPrint('Debug - createPaymentCustomer: Parsed JSON Type: ${jsonData.runtimeType}');
+        debugPrint('Debug - createPaymentCustomer: Parsed JSON Data: $jsonData');
 
         // Handle different response formats using helper method
         final paymentCustomerData = _parseJsonResponse(jsonData, 'createPaymentCustomer');
         
         if (paymentCustomerData == null) {
-          print('Debug - createPaymentCustomer: Could not parse response, returning original payment customer');
+          debugPrint('Debug - createPaymentCustomer: Could not parse response, returning original payment customer');
           return paymentCustomer;
         }
 
         try {
           return PaymentCustomer.fromJson(paymentCustomerData);
         } catch (parseError) {
-          print('Debug - createPaymentCustomer: PaymentCustomer.fromJson Error: $parseError');
-          print('Debug - createPaymentCustomer: PaymentCustomer Data: $paymentCustomerData');
+          debugPrint('Debug - createPaymentCustomer: PaymentCustomer.fromJson Error: $parseError');
+          debugPrint('Debug - createPaymentCustomer: PaymentCustomer Data: $paymentCustomerData');
           return paymentCustomer;
         }
       } else {
-        print('Debug - createPaymentCustomer: API Error Status: ${response.statusCode}');
-        print('Debug - createPaymentCustomer: API Error Body: ${response.body}');
+        debugPrint('Debug - createPaymentCustomer: API Error Status: ${response.statusCode}');
+        debugPrint('Debug - createPaymentCustomer: API Error Body: ${response.body}');
         throw Exception(
           'Failed to create payment customer: ${response.statusCode} - ${response.body}',
         );
       }
     } catch (e) {
-      print('Debug - createPaymentCustomer Error: $e');
+      debugPrint('Debug - createPaymentCustomer Error: $e');
       rethrow;
     }
   }
@@ -165,15 +166,15 @@ class PaymentCustomerService extends BaseService {
         final paymentCustomerData = _parseJsonResponse(jsonData, 'getPaymentCustomerById');
         
         if (paymentCustomerData == null) {
-          print('Debug - getPaymentCustomerById: Could not parse response');
+          debugPrint('Debug - getPaymentCustomerById: Could not parse response');
           return null;
         }
 
         try {
           return PaymentCustomer.fromJson(paymentCustomerData);
         } catch (parseError) {
-          print('Debug - getPaymentCustomerById: PaymentCustomer.fromJson Error: $parseError');
-          print('Debug - getPaymentCustomerById: PaymentCustomer Data: $paymentCustomerData');
+          debugPrint('Debug - getPaymentCustomerById: PaymentCustomer.fromJson Error: $parseError');
+          debugPrint('Debug - getPaymentCustomerById: PaymentCustomer Data: $paymentCustomerData');
           return null;
         }
       } else if (response.statusCode == 404) {
@@ -184,7 +185,7 @@ class PaymentCustomerService extends BaseService {
         );
       }
     } catch (e) {
-      print('Debug - getPaymentCustomerById Error: $e');
+      debugPrint('Debug - getPaymentCustomerById Error: $e');
       rethrow;
     }
   }
@@ -203,15 +204,15 @@ class PaymentCustomerService extends BaseService {
         final paymentCustomerData = _parseJsonResponse(jsonData, 'getPaymentCustomerByGuestId');
         
         if (paymentCustomerData == null) {
-          print('Debug - getPaymentCustomerByGuestId: Could not parse response');
+          debugPrint('Debug - getPaymentCustomerByGuestId: Could not parse response');
           return null;
         }
 
         try {
           return PaymentCustomer.fromJson(paymentCustomerData);
         } catch (parseError) {
-          print('Debug - getPaymentCustomerByGuestId: PaymentCustomer.fromJson Error: $parseError');
-          print('Debug - getPaymentCustomerByGuestId: PaymentCustomer Data: $paymentCustomerData');
+          debugPrint('Debug - getPaymentCustomerByGuestId: PaymentCustomer.fromJson Error: $parseError');
+          debugPrint('Debug - getPaymentCustomerByGuestId: PaymentCustomer Data: $paymentCustomerData');
           return null;
         }
       } else if (response.statusCode == 404) {
@@ -222,7 +223,7 @@ class PaymentCustomerService extends BaseService {
         );
       }
     } catch (e) {
-      print('Debug - getPaymentCustomerByGuestId Error: $e');
+      debugPrint('Debug - getPaymentCustomerByGuestId Error: $e');
       rethrow;
     }
   }
@@ -233,20 +234,20 @@ class PaymentCustomerService extends BaseService {
       final updateData = paymentCustomer.toJson();
       updateData['id'] = paymentCustomerId;
 
-      print('Debug - updatePaymentCustomer: Sending data: $updateData');
+      debugPrint('Debug - updatePaymentCustomer: Sending data: $updateData');
 
       final response = await authenticatedPut(
         'payment-customer/$paymentCustomerId',
         body: updateData,
       );
 
-      print('Debug - updatePaymentCustomer: Response status: ${response.statusCode}');
-      print('Debug - updatePaymentCustomer: Response body: ${response.body}');
+      debugPrint('Debug - updatePaymentCustomer: Response status: ${response.statusCode}');
+      debugPrint('Debug - updatePaymentCustomer: Response body: ${response.body}');
 
       if (response.statusCode == 200) {
         // If response body is empty or just a success message, return the original payment customer
         if (response.body.isEmpty || response.body.trim() == 'true' || response.body.trim() == 'false') {
-          print('Debug - updatePaymentCustomer: API returned simple success response, returning original payment customer');
+          debugPrint('Debug - updatePaymentCustomer: API returned simple success response, returning original payment customer');
           return paymentCustomer;
         }
 
@@ -255,39 +256,39 @@ class PaymentCustomerService extends BaseService {
         try {
           jsonData = json.decode(response.body);
         } catch (parseError) {
-          print('Debug - updatePaymentCustomer: JSON Parse Error: $parseError');
-          print('Debug - updatePaymentCustomer: Response body that failed to parse: "${response.body}"');
+          debugPrint('Debug - updatePaymentCustomer: JSON Parse Error: $parseError');
+          debugPrint('Debug - updatePaymentCustomer: Response body that failed to parse: "${response.body}"');
           // If we can't parse JSON but got success status, return original payment customer
           return paymentCustomer;
         }
 
-        print('Debug - updatePaymentCustomer: Parsed JSON Type: ${jsonData.runtimeType}');
-        print('Debug - updatePaymentCustomer: Parsed JSON Data: $jsonData');
+        debugPrint('Debug - updatePaymentCustomer: Parsed JSON Type: ${jsonData.runtimeType}');
+        debugPrint('Debug - updatePaymentCustomer: Parsed JSON Data: $jsonData');
 
         // Handle different response formats using helper method
         final paymentCustomerData = _parseJsonResponse(jsonData, 'updatePaymentCustomer');
         
         if (paymentCustomerData == null) {
-          print('Debug - updatePaymentCustomer: Could not parse response, returning original payment customer');
+          debugPrint('Debug - updatePaymentCustomer: Could not parse response, returning original payment customer');
           return paymentCustomer;
         }
 
         try {
           return PaymentCustomer.fromJson(paymentCustomerData);
         } catch (parseError) {
-          print('Debug - updatePaymentCustomer: PaymentCustomer.fromJson Error: $parseError');
-          print('Debug - updatePaymentCustomer: PaymentCustomer Data: $paymentCustomerData');
+          debugPrint('Debug - updatePaymentCustomer: PaymentCustomer.fromJson Error: $parseError');
+          debugPrint('Debug - updatePaymentCustomer: PaymentCustomer Data: $paymentCustomerData');
           return paymentCustomer;
         }
       } else {
-        print('Debug - updatePaymentCustomer: API Error Status: ${response.statusCode}');
-        print('Debug - updatePaymentCustomer: API Error Body: ${response.body}');
+        debugPrint('Debug - updatePaymentCustomer: API Error Status: ${response.statusCode}');
+        debugPrint('Debug - updatePaymentCustomer: API Error Body: ${response.body}');
         throw Exception(
           'Failed to update payment customer: ${response.statusCode} - ${response.body}',
         );
       }
     } catch (e) {
-      print('Debug - updatePaymentCustomer Error: $e');
+      debugPrint('Debug - updatePaymentCustomer Error: $e');
       rethrow;
     }
   }

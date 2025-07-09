@@ -316,10 +316,12 @@ class _DashboardIotScreenState extends State<DashboardIotScreen> {
                 _isLoading = true;
               });
               await _loadRoomTemperatures();
-              setState(() {
-                _isLoading = false;
-              });
               if (mounted) {
+                setState(() {
+                  _isLoading = false;
+                });
+              }
+              if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text('Datos IoT actualizados'),

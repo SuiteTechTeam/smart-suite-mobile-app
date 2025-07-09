@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import '../models/available_room.dart';
 import '../models/reservation.dart';
 import 'payment_customer_service.dart';
@@ -96,12 +97,12 @@ class BookingFlowService {
       );
 
       // Step 4: Save reservation to API and get the created reservation
-      print('Debug - createBooking: Creating reservation...');
+      debugPrint('Debug - createBooking: Creating reservation...');
       Reservation createdReservation = await _reservationService.createReservationAndReturn(reservation);
-      print('Debug - createBooking: Reservation created successfully');
+      debugPrint('Debug - createBooking: Reservation created successfully');
 
       // Step 5: Update payment customer with final amount
-      print('Debug - createBooking: Updating payment customer...');
+      debugPrint('Debug - createBooking: Updating payment customer...');
       PaymentCustomer updatedPaymentCustomer = PaymentCustomer(
         guestId: paymentCustomer.guestId,
         finalAmount: totalAmount,
@@ -111,13 +112,13 @@ class BookingFlowService {
         paymentCustomer.id!,
         updatedPaymentCustomer,
       );
-      print('Debug - createBooking: Payment customer updated successfully');
+      debugPrint('Debug - createBooking: Payment customer updated successfully');
 
       return createdReservation;
     } catch (e) {
-      print('Debug - createBooking Error: $e');
+      debugPrint('Debug - createBooking Error: $e');
       if (e.toString().contains('type List<dynamic> is not a subtype of type Map<String, dynamic>')) {
-        print('Debug - createBooking: Detected List/Map type mismatch error');
+        debugPrint('Debug - createBooking: Detected List/Map type mismatch error');
         // If we can't parse the response, throw a more specific error
         throw Exception('Error al procesar la respuesta del servidor. Por favor, inténtelo de nuevo.');
       }
