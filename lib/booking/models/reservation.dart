@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 class Reservation {
   // NOTE: In Smart Suite, 'booking' and 'reservation' are the same concept.
   // This model is used for both creating and displaying bookings/reservations.
@@ -33,6 +34,11 @@ class Reservation {
     this.updatedAt,
   });
 
+  // Utility function to format date as YYYY-MM-DD
+  static String _formatDate(DateTime date) {
+    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+  }
+
   factory Reservation.fromJson(Map<String, dynamic> json) {
     try {
       return Reservation(
@@ -49,7 +55,7 @@ class Reservation {
         priceRoom: (json['priceRoom'] ?? 0.0).toDouble(),
         nightCount: json['nightCount'] ?? 0,
         amount: (json['amount'] ?? 0.0).toDouble(),
-        state: json['state'] ?? 'pending',
+        state: json['state'] ?? 'CONFIRMED',
         preferenceId: json['preferenceId'] ?? 0,
         createdAt: json['createdAt'] != null
             ? DateTime.parse(json['createdAt'].toString())
@@ -70,8 +76,8 @@ class Reservation {
       'paymentCustomerId': paymentCustomerId,
       'roomId': roomId,
       'description': description,
-      'startDate': startDate.toIso8601String(),
-      'finalDate': finalDate.toIso8601String(),
+      'startDate': _formatDate(startDate),
+      'finalDate': _formatDate(finalDate),
       'priceRoom': priceRoom,
       'nightCount': nightCount,
       'amount': amount,

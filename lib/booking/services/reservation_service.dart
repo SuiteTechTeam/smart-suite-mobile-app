@@ -115,9 +115,21 @@ class ReservationService extends BaseService {
       } else {
         debugPrint('Debug - API Error Status: ${response.statusCode}');
         debugPrint('Debug - API Error Body: ${response.body}');
-        throw Exception(
-          'Failed to create reservation: ${response.statusCode} - ${response.body}',
-        );
+        
+        // Parse error message from response if possible
+        String errorMessage = 'Error del servidor';
+        try {
+          final errorData = json.decode(response.body);
+          if (errorData is Map<String, dynamic>) {
+            errorMessage = errorData['message'] ?? errorData['error'] ?? errorData['detail'] ?? errorMessage;
+          } else if (errorData is String) {
+            errorMessage = errorData;
+          }
+        } catch (e) {
+          errorMessage = response.body.isNotEmpty ? response.body : errorMessage;
+        }
+        
+        throw Exception('Error al crear la reservación: $errorMessage');
       }
     } catch (e) {
       debugPrint('Debug - createReservationAndReturn Error: $e');
